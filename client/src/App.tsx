@@ -17,6 +17,11 @@ import { useHashLocation } from "wouter/use-hash-location";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Home from "./pages/Home";
 
+/** Cobalt Workshop routing reminder: static GitHub Pages routes remain direct and predictable, while tool filters stay as compact hash query state. */
+function usePathOnlyHashLocation() {
+  const [location, navigate] = useHashLocation();
+  return [location.split("?")[0] || "/", navigate] as [string, typeof navigate];
+}
 
 function AppRoutes() {
   return (
@@ -51,7 +56,7 @@ function App() {
       <AppSettingsProvider>
         <TooltipProvider>
           <Toaster />
-          <Router hook={useHashLocation}><SiteShell><AppRoutes /></SiteShell></Router>
+          <Router hook={usePathOnlyHashLocation}><SiteShell><AppRoutes /></SiteShell></Router>
         </TooltipProvider>
       </AppSettingsProvider>
     </ErrorBoundary>
