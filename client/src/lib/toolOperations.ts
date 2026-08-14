@@ -1,0 +1,96 @@
+/** Cobalt Workshop design reminder: results are immediate, useful, and soberly formatted; never simulate a server or collect an input. */
+import CryptoJS from "crypto-js";
+import { v4 as uuidv4 } from "uuid";
+import { ulid } from "ulid";
+import { nanoid } from "nanoid";
+import { format as formatSql } from "sql-formatter";
+import * as yaml from "js-yaml";
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
+import toml from "toml";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+
+const morse: Record<string, string> = { a: ".-", b: "-...", c: "-.-.", d: "-..", e: ".", f: "..-.", g: "--.", h: "....", i: "..", j: ".---", k: "-.-", l: ".-..", m: "--", n: "-.", o: "---", p: ".--.", q: "--.-", r: ".-.", s: "...", t: "-", u: "..-", v: "...-", w: ".--", x: "-..-", y: "-.--", z: "--..", "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...", "8": "---..", "9": "----.", ".": ".-.-.-", ",": "--..--", "?": "..--..", "!": "-.-.--" };
+const nato: Record<string, string> = { a: "Alfa", b: "Bravo", c: "Charlie", d: "Delta", e: "Echo", f: "Foxtrot", g: "Golf", h: "Hotel", i: "India", j: "Juliett", k: "Kilo", l: "Lima", m: "Mike", n: "November", o: "Oscar", p: "Papa", q: "Quebec", r: "Romeo", s: "Sierra", t: "Tango", u: "Uniform", v: "Victor", w: "Whiskey", x: "X-ray", y: "Yankee", z: "Zulu" };
+
+const textToSlug = (input: string) => input.toLowerCase().trim().replace(/[’'"`]/g, "").replace(/[^a-z0-9\u0980-\u09ff]+/g, "-").replace(/(^-|-$)/g, "");
+const toCamel = (input: string) => input.toLowerCase().replace(/(?:^|[\s_-]+)(\w)/g, (_m, letter) => letter.toUpperCase()).replace(/^\w/, (letter) => letter.toLowerCase());
+const words = (input: string) => input.match(/[A-Za-z0-9\u0980-\u09ff']+/g) ?? [];
+const escapeHtml = (input: string) => input.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char] ?? char);
+const reverseMorse = Object.fromEntries(Object.entries(morse).map(([key, value]) => [value, key]));
+
+export type ToolResult = { text: string; html?: string; label?: string };
+export function toolPlaceholder(slug: string) {
+  if (slug.includes("json")) return '{\n  "hello": "world",\n  "tool": "Tools & Games BD"\n}';
+  if (slug.includes("csv")) return "name,city\nAmina,Dhaka\nRahim,Chattogram";
+  if (slug.includes("url")) return "https://example.com/path?source=tools#demo";
+  if (slug.includes("markdown")) return "# Hello\n\nWrite **Markdown** and see the result.";
+  if (slug.includes("sql")) return "select id,name from users where active=1 order by name;";
+  if (slug.includes("color")) return "#3264FF";
+  if (slug.includes("calculator") || slug.includes("math")) return "(12.5 * 4) / 2";
+  if (slug.includes("email")) return "hello.name+news@gmail.com";
+  return "Paste or type something here…";
+}
+
+export function runTool(slug: string, input: string, option = "default"): ToolResult {
+  const clean = input.trim();
+  try {
+    if (slug === "word-counter") {
+      const tokens = words(input); const frequency = Object.entries(tokens.reduce<Record<string, number>>((memo, word) => { const key = word.toLowerCase(); memo[key] = (memo[key] ?? 0) + 1; return memo; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 12);
+      return { text: JSON.stringify({ words: tokens.length, characters: input.length, charactersNoSpace: input.replace(/\s/g, "").length, lines: input ? input.split(/\r?\n/).length : 0, bytes: new TextEncoder().encode(input).length, readingMinutes: Number((tokens.length / 200).toFixed(2)), speakingMinutes: Number((tokens.length / 130).toFixed(2)), topWords: Object.fromEntries(frequency) }, null, 2), label: "Live statistics" };
+    }
+    if (slug === "case-converter") {
+      const title = input.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+      return { text: JSON.stringify({ UPPERCASE: input.toUpperCase(), lowercase: input.toLowerCase(), "Title Case": title, camelCase: toCamel(input), snake_case: textToSlug(input).replace(/-/g, "_"), "kebab-case": textToSlug(input), "Alternating cAsE": input.split("").map((char, index) => index % 2 ? char.toLowerCase() : char.toUpperCase()).join("") }, null, 2) };
+    }
+    if (slug === "reverse-text") return { text: option === "words" ? input.split(/(\s+)/).reverse().join("") : option === "lines" ? input.split("\n").reverse().join("\n") : input.split("").reverse().join("") };
+    if (slug === "remove-extra-whitespaces") return { text: input.replace(/[ \t]+/g, " ").replace(/ *\n */g, "\n").trim() };
+    if (slug === "remove-empty-lines") return { text: input.split("\n").filter((line) => line.trim()).join("\n") };
+    if (slug === "remove-line-breaks") return { text: input.replace(/\s*\n\s*/g, " ") };
+    if (slug === "remove-duplicate-lines") return { text: input.split("\n").filter((line, index, lines) => lines.indexOf(line) === index).join("\n") };
+    if (slug === "sort-list") return { text: input.split("\n").filter(Boolean).sort((a, b) => option === "desc" ? b.localeCompare(a) : a.localeCompare(b, undefined, { numeric: true })).join("\n") };
+    if (slug === "list-randomizer" || slug === "string-shuffler") return { text: input.split("\n").sort(() => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32 - .5).join("\n") };
+    if (slug === "slug-generator") return { text: textToSlug(input) };
+    if (slug === "text-to-nato-alphabet") return { text: input.split("").map((char) => nato[char.toLowerCase()] ?? char).join(" ") };
+    if (slug === "text-to-ascii") return { text: input.split("").map((char) => char.charCodeAt(0)).join(" ") };
+    if (slug === "text-to-binary") return { text: input.split("").map((char) => char.charCodeAt(0).toString(2).padStart(8, "0")).join(" ") };
+    if (slug === "text-to-hex") return { text: input.split("").map((char) => char.charCodeAt(0).toString(16).padStart(2, "0")).join(" ") };
+    if (slug === "morse-code") {
+      const isMorse = /^[.\-/\s]+$/.test(clean);
+      return { text: isMorse ? input.split(" / ").map((word) => word.split(" ").map((code) => reverseMorse[code] ?? "?").join("")).join(" ") : input.toLowerCase().split(" ").map((word) => word.split("").map((char) => morse[char] ?? char).join(" ")).join(" / ") };
+    }
+    if (slug === "rot13-caesar-cipher") return { text: input.replace(/[a-z]/gi, (char) => String.fromCharCode((char <= "Z" ? 65 : 97) + (char.charCodeAt(0) - (char <= "Z" ? 65 : 97) + 13) % 26)) };
+    if (slug === "base64-text") return { text: option === "decode" ? new TextDecoder().decode(Uint8Array.from(atob(input), (char) => char.charCodeAt(0))) : btoa(unescape(encodeURIComponent(input))) };
+    if (slug === "url-encode-decode") return { text: option === "decode" ? decodeURIComponent(input) : encodeURIComponent(input) };
+    if (slug === "html-entities") return { text: option === "unescape" ? new DOMParser().parseFromString(input, "text/html").documentElement.textContent ?? "" : escapeHtml(input) };
+    if (slug === "email-normalizer") { const [local, domain] = clean.toLowerCase().split("@"); return { text: domain === "gmail.com" ? `${local.split("+")[0].replace(/\./g, "")}@gmail.com` : `${local ?? ""}@${domain ?? ""}` }; }
+    if (slug === "html-to-plain-text") return { text: new DOMParser().parseFromString(input, "text/html").body.textContent ?? "" };
+    if (slug === "markdown-to-html" || slug === "markdown-editor") { const html = DOMPurify.sanitize(marked.parse(input) as string); return { text: html, html, label: "Sanitized preview HTML" }; }
+    if (slug === "hash-generator" || slug === "file-hash-calculator") return { text: JSON.stringify({ MD5: CryptoJS.MD5(input).toString(), SHA1: CryptoJS.SHA1(input).toString(), SHA256: CryptoJS.SHA256(input).toString(), SHA3: CryptoJS.SHA3(input).toString(), RIPEMD160: CryptoJS.RIPEMD160(input).toString() }, null, 2) };
+    if (slug === "hmac-generator") return { text: CryptoJS.HmacSHA256(input, option === "default" ? "your-secret-key" : option).toString() };
+    if (slug === "uuid-generator") return { text: Array.from({ length: option === "bulk" ? 10 : 1 }, () => uuidv4()).join("\n") };
+    if (slug === "ulid-generator") return { text: ulid() };
+    if (slug === "nanoid-generator") return { text: nanoid() };
+    if (slug === "secure-token-generator") { const bytes = crypto.getRandomValues(new Uint8Array(32)); return { text: Array.from(bytes).map((value) => value.toString(16).padStart(2, "0")).join("") }; }
+    if (slug === "jwt-decoder-debugger" || slug === "jwt-parser") { const [header, payload, signature] = input.split("."); const decode = (section: string) => JSON.parse(decodeURIComponent(escape(atob(section.replace(/-/g, "+").replace(/_/g, "/"))))); return { text: JSON.stringify({ header: decode(header), payload: decode(payload), signature: signature ? "Present — not verified locally" : "Missing" }, null, 2) }; }
+    if (slug === "json-formatter-validator") return { text: JSON.stringify(JSON.parse(input), null, 2) };
+    if (slug === "json-minifier") return { text: JSON.stringify(JSON.parse(input)) };
+    if (slug === "yaml-formatter") return { text: yaml.dump(yaml.load(input)) };
+    if (slug === "toml-formatter") return { text: JSON.stringify(toml.parse(input), null, 2) };
+    if (slug === "xml-formatter") { const parsed = new XMLParser({ ignoreAttributes: false }).parse(input); return { text: new XMLBuilder({ format: true, ignoreAttributes: false }).build(parsed) }; }
+    if (slug === "yaml-json-toml-xml-converter") { const parsed = input.trim().startsWith("{") ? JSON.parse(input) : yaml.load(input); return { text: option === "xml" ? new XMLBuilder({ format: true }).build(parsed) : option === "yaml" ? yaml.dump(parsed) : JSON.stringify(parsed, null, 2) }; }
+    if (slug === "sql-formatter") return { text: formatSql(input) };
+    if (slug === "url-parser") { const url = new URL(input); return { text: JSON.stringify({ protocol: url.protocol, host: url.host, hostname: url.hostname, port: url.port, pathname: url.pathname, parameters: Object.fromEntries(url.searchParams), hash: url.hash }, null, 2) }; }
+    if (slug === "keyword-density-analyzer") { const counts = words(input).reduce<Record<string, number>>((memo, word) => { const key = word.toLowerCase(); memo[key] = (memo[key] ?? 0) + 1; return memo; }, {}); return { text: JSON.stringify(Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([word, count]) => ({ word, count, percentage: `${((count / Math.max(words(input).length, 1)) * 100).toFixed(1)}%` })), null, 2) }; }
+    if (slug === "chmod-calculator") { const value = Number.parseInt(input, 8); if (!/^[0-7]{3,4}$/.test(input)) throw new Error("Enter a valid octal mode e.g. 755"); const parts = input.slice(-3).split("").map((digit) => [Number(digit) & 4 ? "r" : "-", Number(digit) & 2 ? "w" : "-", Number(digit) & 1 ? "x" : "-"].join("")); return { text: JSON.stringify({ octal: input, symbolic: `${parts[0]}${parts[1]}${parts[2]}`, decimal: value }, null, 2) }; }
+    if (slug === "math-evaluator" || slug === "basic-calculator" || slug === "scientific-calculator") { if (!/^[0-9+\-*/().,%\s^sqrtincoaslogpie]+$/i.test(input)) throw new Error("Use numerical expressions only"); const expression = input.replace(/\^/g, "**").replace(/\bpi\b/gi, "Math.PI").replace(/\bsqrt\b/gi, "Math.sqrt").replace(/\bsin\b/gi, "Math.sin").replace(/\bcos\b/gi, "Math.cos").replace(/\btan\b/gi, "Math.tan").replace(/\blog\b/gi, "Math.log"); const answer = Function(`"use strict"; return (${expression})`)(); return { text: String(answer) }; }
+    if (slug === "percentage-calculator") { const [x, y] = input.split(/[ ,]+/).map(Number); return { text: JSON.stringify({ [`${x}% of ${y}`]: (x / 100) * y, [`${x} is what % of ${y}`]: y ? (x / y) * 100 : null, change: y ? ((x - y) / y) * 100 : null }, null, 2) }; }
+    if (slug === "bmi-calculator") { const [weight, height] = input.split(/[ ,]+/).map(Number); const bmi = weight / (height / 100) ** 2; return { text: JSON.stringify({ bmi: Number(bmi.toFixed(1)), status: bmi < 18.5 ? "Underweight" : bmi < 25 ? "Healthy range" : bmi < 30 ? "Overweight" : "Obesity range" }, null, 2) }; }
+    if (slug === "random-number-generator") { const [low = 1, high = 100] = input.split(/[ ,]+/).map(Number); const values = Array.from({ length: option === "bulk" ? 10 : 1 }, () => Math.floor(Math.random() * (high - low + 1)) + low); return { text: values.join("\n") }; }
+    if (slug === "random-string-generator") { const length = Number(input) || 16; const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"; return { text: Array.from(crypto.getRandomValues(new Uint32Array(length)), (value) => chars[value % chars.length]).join("") }; }
+    if (slug === "email-validator") return { text: JSON.stringify({ email: clean, valid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean) }, null, 2) };
+    if (slug === "hex-rgb-hsl-hsv-converter" || slug === "color-picker") { const hex = clean.replace("#", ""); if (!/^[0-9a-f]{6}$/i.test(hex)) throw new Error("Use a 6-digit HEX color"); const [r, g, b] = [0, 2, 4].map((index) => Number.parseInt(hex.slice(index, index + 2), 16)); return { text: JSON.stringify({ hex: `#${hex.toUpperCase()}`, rgb: `rgb(${r}, ${g}, ${b})`, decimal: { r, g, b } }, null, 2) }; }
+    if (slug === "notes-pad") return { text: input || "Your notes are stored locally in this browser." };
+    return { text: input || "Ready. Add an input to get an immediate browser-only result." };
+  } catch (error) { return { text: `Input error: ${error instanceof Error ? error.message : "Please check your input and try again."}` }; }
+}

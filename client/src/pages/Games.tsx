@@ -1,0 +1,11 @@
+/** Cobalt Workshop design reminder: game selection is playful but never noisy—each card feels like a game cartridge waiting on a workshop shelf. */
+import { useMemo, useState } from "react";
+import { Gamepad2, Search } from "lucide-react";
+import { Link } from "wouter";
+import { gameGenres, gameRegistry } from "@/data/games";
+import { useTranslation } from "@/contexts/AppSettingsContext";
+
+export default function Games() {
+  const { t, language } = useTranslation(); const [genre, setGenre] = useState("all"); const [query, setQuery] = useState(""); const games = useMemo(() => gameRegistry.filter((game) => (genre === "all" || game.genre === genre) && `${game.name} ${game.genre}`.toLowerCase().includes(query.toLowerCase())), [genre, query]);
+  return <div className="site-frame page-space"><div className="page-intro"><p className="eyebrow">{t("games.eyebrow")}</p><h1>{t("games.title")}</h1><p>{t("games.copy")}</p></div><div className="directory-bar"><div className="search-field"><Search className="size-4" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search.placeholder")} /></div><span className="directory-count"><Gamepad2 className="size-4" />{t("games.count", { count: games.length })}</span></div><div className="filter-rail"><button className={genre === "all" ? "filter-chip active" : "filter-chip"} onClick={() => setGenre("all")}>{t("games.all")}</button>{gameGenres.map((item) => <button key={item} className={genre === item ? "filter-chip active" : "filter-chip"} onClick={() => setGenre(item)}>{language === "bn" ? gameRegistry.find((game) => game.genre === item)?.genreBn : item}</button>)}</div>{games.length ? <div className="game-grid">{games.map((game, index) => { const Icon = game.icon; return <Link key={game.slug} href={`/games/${game.slug}`} className={`game-card game-card-${index % 5}`}><div className="game-card-top"><span className="game-icon"><Icon className="size-5" /></span><span>{language === "bn" ? game.genreBn : game.genre}</span></div><div><h2>{game.name}</h2><p>{game.description[language]}</p><span className="game-play-label">{t("common.play")} →</span></div></Link>; })}</div> : <div className="empty-state">{t("games.empty")}</div>}</div>;
+}

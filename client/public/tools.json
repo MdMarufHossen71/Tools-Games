@@ -1,0 +1,4 @@
+[
+  { "note": "The full client-side registry is exported from client/src/data/tools.ts for type-safe route rendering.", "format": "name, slug, bilingual description, icon group, category, keywords" },
+  { "source": "client/src/data/tools.ts", "privacy": "All tools execute inside the browser." }
+]

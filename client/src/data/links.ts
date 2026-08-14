@@ -1,0 +1,26 @@
+export type UsefulLink = { name: string; url: string; category: string; categoryBn: string; description: { bn: string; en: string }; note: string };
+const make = (category: string, categoryBn: string, name: string, url: string, bn: string): UsefulLink => ({ name, url, category, categoryBn, note: "Official or widely-used free resource", description: { bn, en: bn } });
+export const usefulLinks: UsefulLink[] = [
+  make("Education", "শিক্ষা", "Khan Academy", "https://www.khanacademy.org", "বিনামূল্যে বিষয়ভিত্তিক শেখার প্ল্যাটফর্ম।"),
+  make("Education", "শিক্ষা", "freeCodeCamp", "https://www.freecodecamp.org", "কোডিং শেখা ও প্র্যাকটিসের ফ্রি প্ল্যাটফর্ম।"),
+  make("Education", "শিক্ষা", "MDN Web Docs", "https://developer.mozilla.org", "ওয়েব প্রযুক্তির নির্ভরযোগ্য ডকুমেন্টেশন।"),
+  make("Design", "ডিজাইন", "Figma", "https://www.figma.com", "ইন্টারফেস ডিজাইন ও সহযোগিতার টুল।"),
+  make("Design", "ডিজাইন", "Canva", "https://www.canva.com", "সহজ গ্রাফিক ডিজাইনের ওয়েব অ্যাপ।"),
+  make("Design", "ডিজাইন", "Photopea", "https://www.photopea.com", "ব্রাউজারেই শক্তিশালী ইমেজ এডিটর।"),
+  make("Developer", "ডেভেলপার", "GitHub", "https://github.com", "কোড হোস্টিং ও ওপেন-সোর্স সহযোগিতা।"),
+  make("Developer", "ডেভেলপার", "Stack Overflow", "https://stackoverflow.com", "ডেভেলপার প্রশ্নোত্তরের কমিউনিটি।"),
+  make("Developer", "ডেভেলপার", "DevDocs", "https://devdocs.io", "দ্রুত API ডকুমেন্টেশন সার্চ।"),
+  make("Productivity", "প্রোডাক্টিভিটি", "Google Drive", "https://drive.google.com", "ফাইল ও ডকুমেন্ট ব্যবস্থাপনা।"),
+  make("Productivity", "প্রোডাক্টিভিটি", "Notion", "https://www.notion.so", "নোট ও প্রজেক্ট সংগঠনের ওয়ার্কস্পেস।"),
+  make("AI", "AI সাইট", "ChatGPT", "https://chatgpt.com", "জেনারেল-purpose AI সহকারী।"),
+  make("AI", "AI সাইট", "Google Gemini", "https://gemini.google.com", "Google-এর AI সহকারী।"),
+  make("AI", "AI সাইট", "Hugging Face", "https://huggingface.co", "ওপেন AI মডেল ও কমিউনিটি।"),
+  make("Bangladesh", "বাংলাদেশ", "Education Board Results", "https://eboardresults.gov.bd", "শিক্ষা বোর্ডের ফলাফল দেখুন।"),
+  make("Bangladesh", "বাংলাদেশ", "Bangladesh Railway", "https://railway.gov.bd", "বাংলাদেশ রেলওয়ের অফিসিয়াল তথ্য।"),
+  make("Bangladesh", "বাংলাদেশ", "bKash", "https://www.bkash.com", "বিকাশের অফিসিয়াল ওয়েবসাইট।"),
+  make("Bangladesh", "বাংলাদেশ", "NBR", "https://nbr.gov.bd", "জাতীয় রাজস্ব বোর্ডের অফিসিয়াল পোর্টাল।"),
+  make("Bangladesh", "বাংলাদেশ", "BDjobs", "https://bdjobs.com", "বাংলাদেশের চাকরির পোর্টাল।"),
+  make("Career", "ক্যারিয়ার", "LinkedIn", "https://www.linkedin.com", "পেশাদার নেটওয়ার্ক ও ক্যারিয়ারের সুযোগ।"),
+  make("Media", "মিডিয়া", "Internet Archive", "https://archive.org", "ফ্রি বই, অডিও, ভিডিও ও ওয়েব আর্কাইভ।"),
+  make("Media", "মিডিয়া", "Pexels", "https://www.pexels.com", "ফ্রি ছবি ও ভিডিও।"),
+];
