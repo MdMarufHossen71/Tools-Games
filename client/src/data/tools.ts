@@ -1,10 +1,10 @@
 import {
   Binary, Braces, Calculator, Camera, ChartNoAxesCombined, Clock3, Code2, FileArchive,
   FileText, Gamepad2, Image, KeyRound, Palette, QrCode, RefreshCw, ShieldCheck,
-  Sparkles, TextCursorInput, WandSparkles,
+  Share2, Sparkles, TextCursorInput, WandSparkles,
 } from "lucide-react";
 
-export type ToolGroup = "text" | "crypto" | "data" | "image" | "color" | "math" | "time" | "random" | "file" | "seo" | "misc" | "ai";
+export type ToolGroup = "text" | "crypto" | "data" | "image" | "color" | "math" | "time" | "random" | "file" | "sharing" | "seo" | "misc" | "ai";
 
 export type Tool = {
   name: string;
@@ -20,7 +20,7 @@ export type Tool = {
 const iconMap = {
   text: TextCursorInput, crypto: ShieldCheck, data: Braces, image: Image, color: Palette,
   math: Calculator, time: Clock3, random: Sparkles, file: FileArchive, seo: ChartNoAxesCombined,
-  misc: WandSparkles, ai: Sparkles,
+  sharing: Share2, misc: WandSparkles, ai: Sparkles,
 };
 
 export const groupMeta: Record<ToolGroup, { label: string; bn: string; icon: typeof Code2; tone: string }> = {
@@ -33,6 +33,7 @@ export const groupMeta: Record<ToolGroup, { label: string; bn: string; icon: typ
   time: { label: "Date & Time", bn: "তারিখ ও সময়", icon: Clock3, tone: "text-sky-600 bg-sky-500/10" },
   random: { label: "Random & Generators", bn: "র‍্যান্ডম ও জেনারেটর", icon: Sparkles, tone: "text-fuchsia-600 bg-fuchsia-500/10" },
   file: { label: "File & PDF", bn: "ফাইল ও পিডিএফ", icon: FileText, tone: "text-amber-700 bg-amber-500/10" },
+  sharing: { label: "Sharing", bn: "শেয়ারিং", icon: Share2, tone: "text-cyan-700 bg-cyan-500/10" },
   seo: { label: "SEO & Web", bn: "SEO ও ওয়েব", icon: ChartNoAxesCombined, tone: "text-lime-700 bg-lime-500/10" },
   misc: { label: "Fun & Misc", bn: "মজার ও অন্যান্য", icon: Gamepad2, tone: "text-pink-600 bg-pink-500/10" },
   ai: { label: "AI Tools", bn: "AI টুলস", icon: WandSparkles, tone: "text-indigo-600 bg-indigo-500/10" },
@@ -66,7 +67,7 @@ function describeTool(name: string, group: ToolGroup) {
   };
 }
 
-export const toolRegistry: Tool[] = seeds.flatMap((seed) => seed.names.split("|").map((name) => ({
+const seededTools: Tool[] = seeds.flatMap((seed) => seed.names.split("|").map((name) => ({
   name,
   slug: titleToSlug(name),
   category: seed.category,
@@ -76,6 +77,23 @@ export const toolRegistry: Tool[] = seeds.flatMap((seed) => seed.names.split("|"
   description: describeTool(name, seed.group),
   keywords: `${name} ${seed.category} ${seed.categoryBn}`.toLowerCase().split(/\s+/),
 })));
+
+export const toolRegistry: Tool[] = [
+  {
+    name: "File Share — Nearby Device Transfer",
+    slug: "file-share",
+    category: "Sharing",
+    categoryBn: "শেয়ারিং",
+    group: "sharing",
+    featured: true,
+    description: {
+      en: "Send files, folders, text and one-time encrypted passwords directly between connected browsers—no account or file server.",
+      bn: "সংযুক্ত browser-এর মধ্যে সরাসরি file, folder, text ও একবারের encrypted password পাঠান—কোনো account বা file server ছাড়াই।",
+    },
+    keywords: ["file", "share", "nearby", "device", "transfer", "webRTC", "peer to peer", "QR", "password share", "text share", "শেয়ার", "পাসওয়ার্ড"],
+  },
+  ...seededTools,
+];
 
 export const findTool = (slug: string) => toolRegistry.find((tool) => tool.slug === slug);
 export const getToolIcon = (group: ToolGroup) => iconMap[group] ?? RefreshCw;

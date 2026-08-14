@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteShell } from "@/components/SiteShell";
 import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
 import AI from "@/pages/AI";
+import FileShare from "@/pages/FileShare";
 import GamePage from "@/pages/GamePage";
 import Games from "@/pages/Games";
 import InfoPage from "@/pages/InfoPage";
@@ -11,7 +12,8 @@ import NotFound from "@/pages/NotFound";
 import Settings from "@/pages/Settings";
 import ToolPage from "@/pages/ToolPage";
 import Tools from "@/pages/Tools";
-import { Route, Switch } from "wouter";
+import { Route, Router, Switch } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Home from "./pages/Home";
 
@@ -21,6 +23,7 @@ function AppRoutes() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/tools" component={Tools} />
+      <Route path="/tools/file-share" component={FileShare} />
       <Route path="/tools/:slug" component={ToolPage} />
       <Route path="/games" component={Games} />
       <Route path="/games/:slug" component={GamePage} />
@@ -48,7 +51,7 @@ function App() {
       <AppSettingsProvider>
         <TooltipProvider>
           <Toaster />
-          <SiteShell><AppRoutes /></SiteShell>
+          <Router hook={useHashLocation}><SiteShell><AppRoutes /></SiteShell></Router>
         </TooltipProvider>
       </AppSettingsProvider>
     </ErrorBoundary>
