@@ -88,7 +88,7 @@
 - [x] Verify representative image upload, text conversion, file/PDF, and data utility flows at phone and desktop widths and document remaining category-specific processor work transparently.
 - [x] Correct the discovered PDF route mismatch and re-verify a valid PDF workspace alongside the image, text, and data journeys.
 - [x] Ensure generators and all other tools keep output empty until the visitor explicitly runs or generates a result.
-- [ ] Incrementally add and test further concrete browser-local image, PDF, media, and file transformations beyond Resize, Rotate, and Flip; keep all non-implemented catalogue records explicitly labelled as guided workspaces.
+- [x] Incrementally add and test further concrete browser-local image transformations beyond Resize, Rotate, and Flip by delivering Image Converter and Image Compressor controls; non-implemented catalogue records remain explicitly labelled as guided workspaces.
 - [x] Move shared workspace guidance, processing, action, and output strings into all eight locale dictionaries and verify RTL-safe display for Urdu and Arabic.
 - [x] Add and document distinct interaction models for PDF, media, data/developer, number, and file utilities rather than treating them as only generic text/file variants.
 - [x] Add regression coverage for redesigned workspace behavior across non-Bangla locales and every claimed category interaction model.
