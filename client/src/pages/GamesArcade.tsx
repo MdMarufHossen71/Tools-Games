@@ -7,6 +7,7 @@ import { Link, useLocation } from "wouter";
 import { PlayableGame } from "./PlayableGame";
 import "../games.css";
 import "../games-fixes.css";
+import "../games-status.css";
 
 const categoryIcons: Record<GameCategory, typeof Puzzle> = { puzzle: Puzzle, arcade: Zap, words: Type, casual: GamepadIcon, multiplayer: Users };
 const categoryKeys: Record<GameCategory, "game.puzzle" | "game.arcade" | "game.words" | "games.casual" | "games.multiplayer"> = { puzzle: "game.puzzle", arcade: "game.arcade", words: "game.words", casual: "games.casual", multiplayer: "games.multiplayer" };
@@ -19,7 +20,7 @@ export default function GamesArcade() {
   const dailyLeaderboard = trpc.games.dailyLeaderboard.useQuery();
   const challengeSlug = dailyChallenge.data?.gameSlug ?? "wordle";
   const challengeGame = gameBySlug(challengeSlug);
-  const results = useMemo(() => games.filter((game) => (category === "all" || game.category === category) && `${game.name} ${game.description[language]}`.toLowerCase().includes(query.toLowerCase())), [category, language, query]);
+  const results = useMemo(() => games.filter((game) => game.playable && (category === "all" || game.category === category) && `${game.name} ${game.description[language]}`.toLowerCase().includes(query.toLowerCase())), [category, language, query]);
   return <main className="site-frame games-page">
     <section className="games-hero">
       <div><p className="eyebrow">ToolsHUB / {games.length} GAMES</p><h1>{t("games.title")}</h1><p>{t("games.heroCopy")}</p></div>
@@ -37,11 +38,11 @@ export default function GamesArcade() {
       <div className="daily-standings" aria-label={t("games.leaderboard")}>{dailyLeaderboard.data?.entries.slice(0, 3).map((entry) => <span key={entry.userId}><b>#{entry.rank}</b>{entry.score.toLocaleString()}</span>) ?? <span>—</span>}</div>
       <Link className="game-play-link" href={`/games/${challengeSlug}`}><Play size={15} fill="currentColor"/>{t("games.play")}</Link>
     </section>
-    <section className="games-results" aria-live="polite"><span>{results.length} {t("games.available")}</span><Link className="daily-pill" href={`/games/${challengeSlug}`}><Trophy size={15}/>{t("games.daily")}</Link><Link className="daily-pill" href="/games/lobby"><Users size={15}/>{t("games.multiplayer")}</Link></section>
+    <section className="games-results" aria-live="polite"><span>{results.length} {t("games.available")}</span><span className="games-release-note">Every game below is ready to play in your browser.</span><Link className="daily-pill" href={`/games/${challengeSlug}`}><Trophy size={15}/>{t("games.daily")}</Link><Link className="daily-pill" href="/games/lobby"><Users size={15}/>{t("games.multiplayer")}</Link></section>
     <section className="game-card-grid">{results.map((game) => { const Icon = categoryIcons[game.category]; return <article className="game-card" key={game.slug}>
       <div className={`game-card-art ${game.category}`}><Icon size={30}/><span>{game.name.slice(0, 2).toUpperCase()}</span></div>
       <div className="game-card-body"><div className="game-card-meta"><span>{t(categoryKeys[game.category])}</span>{game.multiplayer && <span className="multiplayer-dot"><Users size={12}/>{t("games.online")}</span>}</div><h2>{game.name}</h2><p>{game.description[language]}</p>
-      {game.playable ? <Link href={`/games/${game.slug}`} className="game-play-link"><Play size={15} fill="currentColor"/>{t("games.play")}</Link> : game.multiplayer ? <Link href={`/games/lobby?game=${game.slug}`} className="game-play-link"><Users size={15}/>{t("games.multiplayer")}</Link> : <span className="game-coming">{t("common.soon")}</span>}</div>
+      <Link href={`/games/${game.slug}`} className="game-play-link"><Play size={15} fill="currentColor"/>{t("games.play")}</Link></div>
     </article>; })}</section>
     {!results.length && <div className="games-empty"><Gamepad2 size={32}/><p>{t("games.empty")}</p></div>}
   </main>;

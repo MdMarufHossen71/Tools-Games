@@ -12,6 +12,11 @@ describe("ToolsHUB catalogue integrity", () => {
   it("keeps all game slugs unique and advertises only implemented games as playable", () => {
     expect(games).toHaveLength(45);
     expect(new Set(games.map((game) => game.slug)).size).toBe(games.length);
-    expect(playableGames.map((game) => game.slug).sort()).toEqual(["2048", "memory-match", "minesweeper", "snake", "sudoku", "tetris", "tic-tac-toe", "wordle"]);
+    expect(playableGames.map((game) => game.slug).sort()).toEqual([
+      "2048", "anagram", "breakout", "bubble-pop", "color-flow", "cookie-clicker",
+      "flappy-flight", "fruit-slice", "hangman", "memory-match", "minesweeper",
+      "sliding-puzzle", "snake", "space-dodge", "sudoku", "tetris", "tic-tac-toe",
+      "whack-a-mole", "word-sprint", "wordle",
+    ]);
   });
 });

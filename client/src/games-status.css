@@ -1,0 +1,22 @@
+.games-results {
+  justify-content: flex-start;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+
+.games-release-note {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(40, 167, 115, .1);
+  color: #197650;
+  font-size: .78rem;
+  font-weight: 750;
+}
+
+@media (max-width: 700px) {
+  .games-release-note {
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+}

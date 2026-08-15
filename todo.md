@@ -115,3 +115,5 @@
 - [ ] Replace generic Calculator, Scientific Calculator, Percentage Calculator, Area Calculator, and Trigonometry inputs with functional interactive math workspaces.
 - [ ] Define and apply explicit category-specific settings patterns so tools that need configuration are not rendered as generic text areas.
 - [x] Add site-specific Privacy Policy, Terms of Use, Acceptable Use, Cookie and Local Storage Notice, and Contact/Reporting pages linked from the global footer, with encrypted support-report storage.
+- [x] Audit all Games catalogue cards and routes, remove misleading coming-soon calls to action from the primary playable flow, and publish a staged playable-game release plan.
+- [x] Implement and test the first additional set of genuinely playable browser games with responsive controls and original visual direction.
