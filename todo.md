@@ -98,3 +98,4 @@
 - [x] Verify an Arabic or Urdu ToolPage render exposes the shared RTL direction state and direction-safe control ordering used by the workspace layout.
 - [x] Extend ToolPage regression coverage with a generic file utility route that asserts the `*/*` acceptance contract.
 - [x] Add and verify browser-local Image Converter format selection and Image Compressor JPEG-quality controls at the mobile breakpoint, without uploading source images.
+- [x] Add recognizable per-destination favicon/logo identity to Useful Links cards with same-origin cached logo delivery, readable name-monogram fallbacks, accessible labels, and desktop/mobile validation.

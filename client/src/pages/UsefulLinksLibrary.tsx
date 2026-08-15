@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { ExternalLink, FileCheck2, Landmark, Search, ShieldCheck, Smartphone } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { linkIconPath, linkMonogram } from "@/lib/linkIdentity";
 import "../links-library.css";
 
 export type LinkRecord = {
@@ -44,12 +45,21 @@ function matchText(value: string, query: string) {
   return bits.map((bit, index) => bit.toLocaleLowerCase() === query.toLocaleLowerCase() ? <mark key={`${bit}-${index}`}>{bit}</mark> : bit);
 }
 
+function LinkIdentity({ url, title }: { url: string; title: string }) {
+  const [iconLoaded, setIconLoaded] = useState(false);
+  const iconPath = linkIconPath(url);
+  return <div className="useful-link-icon useful-link-brand" aria-hidden="true">
+    <span className="useful-link-monogram">{linkMonogram(title)}</span>
+    {iconPath && <img className={iconLoaded ? "is-visible" : ""} src={iconPath} alt="" width="32" height="32" loading="lazy" decoding="async" onLoad={() => setIconLoaded(true)} />}
+  </div>;
+}
+
 function LinkCard({ item, query, bangla, labels }: { item: LinkRecord; query: string; bangla: boolean; labels: { curated: string; research: string; government: string; app: string; open: string } }) {
   const title = bangla && item.nameBn ? item.nameBn : item.name;
   const category = bangla && item.categoryBn ? item.categoryBn : item.category;
   const sourceTag = item.source === "awesome" ? labels.curated : item.source === "osint" ? labels.research : null;
   return <a className="useful-link-card" href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`${title} — ${labels.open}`}>
-    <div className="useful-link-icon" aria-hidden="true">{item.isGovernment ? <Landmark size={18} /> : item.isApp ? <Smartphone size={18} /> : item.source === "osint" ? <ShieldCheck size={18} /> : <FileCheck2 size={18} />}</div>
+    <LinkIdentity url={item.url} title={title} />
     <div className="useful-link-content"><div className="useful-link-heading"><h3>{matchText(title, query)}</h3><ExternalLink size={15} /></div><p>{matchText(item.description, query)}</p><div className="useful-link-tags"><span className="category-tag">{category}</span>{sourceTag && <span className={item.source === "osint" ? "source-tag research" : "source-tag"}>{sourceTag}</span>}{item.isGovernment && <span className="gov-tag">{labels.government}</span>}{item.isApp && <span className="app-tag">{labels.app}</span>}{item.verified && <span className="verified-tag" title="Verified">✓</span>}</div></div>
   </a>;
 }

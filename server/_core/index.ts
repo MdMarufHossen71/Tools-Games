@@ -16,6 +16,31 @@ import { randomDailyChallengeFor, readDailyChallenge, utcDateKey } from "../dail
 import { buildContentSecurityPolicy, isApiRateLimitExempt, securityHeaders } from "../httpSecurity";
 
 const aiWindows = new Map<string, number[]>();
+const faviconCache = new Map<string, { body: Buffer; contentType: string; expiresAt: number }>();
+const faviconCacheTtlMs = 7 * 24 * 60 * 60 * 1000;
+const faviconCacheLimit = 600;
+
+function validFaviconHostname(value: string) {
+  const hostname = value.toLocaleLowerCase();
+  return /^[a-z0-9.-]{1,253}$/.test(hostname) && !hostname.startsWith(".") && !hostname.endsWith(".") ? hostname : null;
+}
+
+async function readFavicon(hostname: string) {
+  const cached = faviconCache.get(hostname);
+  if (cached && cached.expiresAt > Date.now()) return cached;
+  if (cached) faviconCache.delete(hostname);
+  const upstream = await fetch(`https://icons.duckduckgo.com/ip3/${encodeURIComponent(hostname)}.ico`, { headers: { accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" }, signal: AbortSignal.timeout(4_000) });
+  if (!upstream.ok) return null;
+  const body = Buffer.from(await upstream.arrayBuffer());
+  if (!body.length || body.length > 256_000) return null;
+  const contentType = upstream.headers.get("content-type")?.split(";")[0] || "image/x-icon";
+  if (!contentType.startsWith("image/")) return null;
+  const entry = { body, contentType, expiresAt: Date.now() + faviconCacheTtlMs };
+  faviconCache.set(hostname, entry);
+  if (faviconCache.size > faviconCacheLimit) faviconCache.delete(faviconCache.keys().next().value!);
+  return entry;
+}
+
 function consumeAiWindow(key: string, limit: number) {
   const now = Date.now(); const recent = (aiWindows.get(key) ?? []).filter((time) => now - time < 60_000);
   if (recent.length >= limit) return false; recent.push(now); aiWindows.set(key, recent); return true;
@@ -64,6 +89,20 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  app.get("/api/link-icon/:hostname", async (req, res) => {
+    const hostname = validFaviconHostname(req.params.hostname);
+    if (!hostname) { res.status(400).end(); return; }
+    try {
+      const icon = await readFavicon(hostname);
+      if (!icon) { res.status(404).end(); return; }
+      res.setHeader("Content-Type", icon.contentType);
+      res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+      res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+      res.send(icon.body);
+    } catch {
+      res.status(404).end();
+    }
+  });
   app.post("/api/ai/stream", async (req, res) => {
     let user = null;
     try { user = await sdk.authenticateRequest(req); } catch { user = null; }
