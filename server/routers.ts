@@ -55,6 +55,7 @@ import {
   revokeAdminFileShare,
   revokeAdminShortLink,
   closeMultiplayerRoom,
+  createSupportMessage,
   saveBlogArticle,
   saveGameSession,
   saveGameScore,
@@ -111,6 +112,15 @@ export const appRouter = router({
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => { ctx.res.clearCookie(COOKIE_NAME, { ...getSessionCookieOptions(ctx.req), maxAge: -1 }); return { success: true } as const; }),
+  }),
+  support: router({
+    submit: publicProcedure.input(z.object({
+      kind: z.enum(["support", "bug", "abuse", "privacy"]),
+      subject: z.string().trim().min(4).max(180),
+      email: z.string().trim().email().max(320).nullable().optional(),
+      message: z.string().trim().min(12).max(4_000),
+      pageUrl: z.string().max(512).nullable().optional(),
+    })).mutation(({ ctx, input }) => createSupportMessage({ reporterId: ctx.user?.id, ...input })),
   }),
   preferences: router({
     get: protectedProcedure.query(({ ctx }) => getUserSettings(ctx.user.id)),

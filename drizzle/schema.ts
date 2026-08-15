@@ -19,6 +19,22 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+/** Support, safety, and privacy reports are encrypted before persistence. */
+export const supportMessages = mysqlTable("support_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  reporterId: int("reporterId"),
+  kind: mysqlEnum("kind", ["support", "bug", "abuse", "privacy"]).default("support").notNull(),
+  subject: varchar("subject", { length: 180 }).notNull(),
+  emailCiphertext: text("emailCiphertext"),
+  messageCiphertext: text("messageCiphertext").notNull(),
+  pageUrl: varchar("pageUrl", { length: 512 }),
+  status: mysqlEnum("status", ["open", "resolved"]).default("open").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  index("support_messages_status_created_idx").on(table.status, table.createdAt),
+  index("support_messages_reporter_idx").on(table.reporterId),
+]);
+
 export const userSettings = mysqlTable("user_settings", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),

@@ -1,6 +1,6 @@
 import { and, desc, eq, gt, like, lte, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { aiConversations, blogArticles, blogLikes, clipboardItems, dailyChallengeScores, friendships, gameProgress, InsertUser, leaderboardEntries, multiplayerRoomMembers, multiplayerRoomMessages, multiplayerRooms, notes, noteVersions, platformConfig, savedTools, sharedFiles, shortLinks, usefulLinks, userSettings, users, vaultEntries } from "../drizzle/schema";
+import { aiConversations, blogArticles, blogLikes, clipboardItems, dailyChallengeScores, friendships, gameProgress, InsertUser, leaderboardEntries, multiplayerRoomMembers, multiplayerRoomMessages, multiplayerRooms, notes, noteVersions, platformConfig, savedTools, sharedFiles, shortLinks, supportMessages, usefulLinks, userSettings, users, vaultEntries } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { blogSeeds } from "./blogSeed";
 import { newOpaqueToken, openAtRest, sealAtRest } from "./security";
@@ -16,6 +16,20 @@ export async function isUserSuspended(openId: string) { return Boolean((await ge
 export function settingsResult<T>(setting: T | undefined): T | null { return setting ?? null; }
 export async function getUserSettings(userId: number) { const db = await getDb(); if (!db) return null; return settingsResult((await db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1))[0]); }
 export async function saveUserSettings(userId: number, values: { language: "en" | "bn" | "hi" | "ur" | "ar" | "es" | "fr" | "de"; appearance: string; customColors?: unknown }) { const db = await getDb(); if (!db) throw new Error("Database unavailable"); await db.insert(userSettings).values({ userId, language: values.language, appearance: values.appearance, customColors: values.customColors }).onDuplicateKeyUpdate({ set: { language: values.language, appearance: values.appearance, customColors: values.customColors } }); return getUserSettings(userId); }
+
+export async function createSupportMessage(input: { reporterId?: number | null; kind: "support" | "bug" | "abuse" | "privacy"; subject: string; email?: string | null; message: string; pageUrl?: string | null }) {
+  const db = await getDb();
+  if (!db) throw new Error("Support inbox is temporarily unavailable");
+  const result = await db.insert(supportMessages).values({
+    reporterId: input.reporterId ?? null,
+    kind: input.kind,
+    subject: input.subject,
+    emailCiphertext: input.email ? sealAtRest(input.email) : null,
+    messageCiphertext: sealAtRest(input.message),
+    pageUrl: input.pageUrl ?? null,
+  });
+  return { id: Number(result[0].insertId), received: true as const };
+}
 
 export function profileStreakFromResources(resources: unknown) {
   if (!resources || typeof resources !== "object") return 0;

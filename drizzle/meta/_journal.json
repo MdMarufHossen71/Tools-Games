@@ -71,6 +71,13 @@
       "when": 1786769774156,
       "tag": "0009_unknown_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1786801210097,
+      "tag": "0010_majestic_earthquake",
+      "breakpoints": true
     }
   ]
 }
