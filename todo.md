@@ -10,7 +10,7 @@
 - [x] Build reusable tool-page components with bilingual copy, client-side input/output, copy/download, How it works accordion, related tools, and private input persistence rules.
 - [ ] Implement high-value functional client-side tools across every category and data-driven entries for the wider catalog.
 - [x] Implement secure file sharing with S3-backed uploads, encrypted metadata, share tokens, expiry, password gates, and download management.
-- [ ] Implement URL shortener with custom aliases, secure redirect handling, click analytics, UTM builder, QR output, and My Links controls.
+- [x] Implement URL shortener with custom aliases, secure redirect handling, click analytics, UTM builder, QR output, and My Links controls.
 - [ ] Implement cloud clipboard and one-time burn links with authenticated cross-device persistence.
 - [ ] Implement cloud notes with folders, tags, colors, markdown editing, version history, search, sharing, exports, and storage-backed attachments.
 - [ ] Implement encrypted password vault records with client-derived encryption and password generation utilities.
@@ -66,3 +66,5 @@
 - [x] Audit and implement explicit RTL directionality for navigation arrows, chevrons, grouped controls, and directional icons, with targeted Arabic and Urdu verification evidence.
 - [x] Implement and verify a friendly localized Not Found state before closing the combined privacy, security, SEO, and error-state release requirement.
 - [x] Run and document explicit desktop and 360px mobile functional checks for key guest and authenticated journeys: tools, AI, blog, useful links, My Data, games, multiplayer, and administration.
+- [ ] Add a privacy-safe public profile statistics surface, or formally limit profile statistics to authenticated account owners with an explicit product decision.
+- [ ] Verify and document role-aware navigation and every My Data control against the profile-and-account completion requirement.

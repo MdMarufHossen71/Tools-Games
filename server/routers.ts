@@ -15,6 +15,7 @@ import {
   bulkUpsertUsefulLinks,
   decryptedFileShareMetadata,
   deleteClipboardItem,
+  deleteUserShortLink,
   deleteAiConversation,
   deleteUserNote,
   deleteVaultEntry,
@@ -30,6 +31,7 @@ import {
   getMultiplayerRoom,
   getPublishedArticleBySlug,
   getPublicPlatformConfig,
+  getProfileSummary,
   getUserSettings,
   listBlogArticlesForAdmin,
   listAiConversations,
@@ -112,6 +114,9 @@ export const appRouter = router({
   preferences: router({
     get: protectedProcedure.query(({ ctx }) => getUserSettings(ctx.user.id)),
     save: protectedProcedure.input(z.object({ language: locales, appearance: z.string().min(1).max(48), customColors: z.record(z.string(), z.string()).optional() })).mutation(({ ctx, input }) => saveUserSettings(ctx.user.id, input)),
+  }),
+  profile: router({
+    summary: protectedProcedure.query(({ ctx }) => getProfileSummary(ctx.user.id)),
   }),
   blog: router({
     list: publicProcedure.input(z.object({ query: z.string().max(80).optional(), category: z.string().max(60).optional(), author: z.string().max(120).optional() }).optional()).query(({ input }) => listPublishedArticles(input)),
@@ -200,6 +205,7 @@ export const appRouter = router({
       return { alias, path: `/s/${alias}` };
     }),
     list: protectedProcedure.query(({ ctx }) => listShortLinks(ctx.user.id)),
+    delete: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ ctx, input }) => deleteUserShortLink(ctx.user.id, input.id)),
     resolve: publicProcedure.input(z.object({ alias: z.string().min(4).max(80), password: z.string().max(120).nullable().optional() })).mutation(async ({ input }) => {
       const result = await resolveShortLink(input.alias);
       if (!result) unavailable("This link is unavailable or has expired");

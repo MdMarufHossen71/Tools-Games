@@ -1,6 +1,6 @@
 import { and, desc, eq, gt, like, lte, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { aiConversations, blogArticles, blogLikes, clipboardItems, dailyChallengeScores, friendships, gameProgress, InsertUser, leaderboardEntries, multiplayerRoomMembers, multiplayerRoomMessages, multiplayerRooms, notes, noteVersions, platformConfig, sharedFiles, shortLinks, usefulLinks, userSettings, users, vaultEntries } from "../drizzle/schema";
+import { aiConversations, blogArticles, blogLikes, clipboardItems, dailyChallengeScores, friendships, gameProgress, InsertUser, leaderboardEntries, multiplayerRoomMembers, multiplayerRoomMessages, multiplayerRooms, notes, noteVersions, platformConfig, savedTools, sharedFiles, shortLinks, usefulLinks, userSettings, users, vaultEntries } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { blogSeeds } from "./blogSeed";
 import { newOpaqueToken, openAtRest, sealAtRest } from "./security";
@@ -16,6 +16,24 @@ export async function isUserSuspended(openId: string) { return Boolean((await ge
 export function settingsResult<T>(setting: T | undefined): T | null { return setting ?? null; }
 export async function getUserSettings(userId: number) { const db = await getDb(); if (!db) return null; return settingsResult((await db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1))[0]); }
 export async function saveUserSettings(userId: number, values: { language: "en" | "bn" | "hi" | "ur" | "ar" | "es" | "fr" | "de"; appearance: string; customColors?: unknown }) { const db = await getDb(); if (!db) throw new Error("Database unavailable"); await db.insert(userSettings).values({ userId, language: values.language, appearance: values.appearance, customColors: values.customColors }).onDuplicateKeyUpdate({ set: { language: values.language, appearance: values.appearance, customColors: values.customColors } }); return getUserSettings(userId); }
+
+export function profileStreakFromResources(resources: unknown) {
+  if (!resources || typeof resources !== "object") return 0;
+  const streak = (resources as { gameStreak?: { current?: unknown } }).gameStreak?.current;
+  return typeof streak === "number" && Number.isInteger(streak) && streak >= 0 ? streak : 0;
+}
+
+export async function getProfileSummary(userId: number) {
+  const db = await getDb();
+  if (!db) return { savedTools: 0, games: 0, notes: 0, streak: 0 };
+  const [[saved], [games], [noteCount], progress] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(savedTools).where(eq(savedTools.userId, userId)),
+    db.select({ count: sql<number>`count(*)` }).from(gameProgress).where(eq(gameProgress.userId, userId)),
+    db.select({ count: sql<number>`count(*)` }).from(notes).where(eq(notes.userId, userId)),
+    db.select({ resources: gameProgress.resources }).from(gameProgress).where(eq(gameProgress.userId, userId)),
+  ]);
+  return { savedTools: Number(saved.count), games: Number(games.count), notes: Number(noteCount.count), streak: Math.max(0, ...progress.map(row => profileStreakFromResources(row.resources))) };
+}
 
 export async function getAdminDashboard() {
   const db = await getDb();
@@ -369,6 +387,12 @@ export async function listShortLinks(ownerId: number) {
   if (!db) return [];
   const rows = await db.select().from(shortLinks).where(eq(shortLinks.ownerId, ownerId)).orderBy(desc(shortLinks.createdAt));
   return rows.map((row) => ({ id: row.id, alias: row.alias, expiryAt: row.expiryAt, clickLimit: row.clickLimit, clickCount: row.clickCount, createdAt: row.createdAt, isPasswordProtected: Boolean(row.passwordCiphertext) }));
+}
+
+export async function deleteUserShortLink(ownerId: number, id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.delete(shortLinks).where(and(eq(shortLinks.id, id), eq(shortLinks.ownerId, ownerId)));
 }
 
 export async function resolveShortLink(alias: string) {
