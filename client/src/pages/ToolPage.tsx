@@ -12,6 +12,7 @@ import { imageCropRect, type CropAspect } from "@/lib/imageCrop";
 import { boundedCanvasSize, imageSourceForProcessing } from "@/lib/imageProcessing";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { trpc } from "@/lib/trpc";
+import MathWorkspace, { isInteractiveMathTool } from "@/pages/MathWorkspace";
 import "@/tool-page.css";
 import "@/tool-page-image.css";
 
@@ -72,6 +73,7 @@ export default function ToolPage() {
 
   if (!tool) return <div className="site-frame empty-page"><p className="eyebrow">ToolsHUB</p><h1>{t("notFound.title")}</h1><p>{t("notFound.copy")}</p><Link href="/tools" className="primary-cta">{t("common.back")}</Link></div>;
   const category = getCategory(tool.category);
+  const interactiveMath = isInteractiveMathTool(tool.slug);
   const related = tools.filter(item => item.category === tool.category && item.slug !== tool.slug).slice(0, 5);
   const spec = { accept: workspace.accept ?? "*/*", type: workspace.fileType ?? "file" };
   const example = examples[tool.slug];
@@ -153,7 +155,7 @@ export default function ToolPage() {
   return <div className={`site-frame tool-page workspace-${workspace.kind}`} dir={language === "ar" || language === "ur" ? "rtl" : "ltr"}>
     <nav className="crumbs"><Link href="/tools">{t("nav.tools")}</Link><span>/</span><Link href={`/tools?category=${tool.category}`}>{t(`category.${category.id}`)}</Link><span>/</span><strong>{tool.name}</strong></nav>
     <section className="tool-intro"><div><p className="eyebrow">{category.name.toUpperCase()} / {t("tool.private")}</p><h1>{tool.name}</h1><p>{tool.description[language]}</p></div><span className={`category-icon ${category.color}`}><category.icon /></span></section>
-    <div className="tool-layout"><section className="tool-workbench">
+    <div className="tool-layout"><section className="tool-workbench">{interactiveMath ? <MathWorkspace slug={tool.slug} language={language} /> : <>
       <div className="workbench-head"><div><h2>{t("tool.input")}</h2><span><LockKeyhole size={14} /> {t("tool.private")}</span></div><button className="subtle-button" onClick={clear}><RefreshCw size={15} />{t("tool.reset")}</button></div>
       <section className="tool-steps" aria-label={t("tool.how")}><strong><Info size={15} />{t("tool.how")}</strong><ol><li>{isFileTool ? copy.choose : t("tool.input")}</li><li>{t("tool.run")}</li><li>{t("tool.output")}</li></ol></section>
       {isFileTool ? <>
@@ -168,7 +170,7 @@ export default function ToolPage() {
       </>}
       <div className="workbench-actions"><button className="primary-cta compact" onClick={run} disabled={isFileTool && !selectedFile}>{needsGenerate ? <WandSparkles size={17} /> : <Sparkles size={17} />}{needsGenerate ? t("tool.generate") : t("tool.run")}</button>{tool.slug === "text-to-speech" && <button className="subtle-button" onClick={speakText}><Sparkles size={15} />{t("tool.run")}</button>}</div>
       <div className="output-card"><div className="workbench-head"><div><h2>{t("tool.output")}</h2></div><div className="output-actions"><button className="icon-button" onClick={copyOutput} disabled={!hasRun || !(imageOutput || output)} aria-label={t("common.copy")}>{copied ? <Check size={17} /> : <Clipboard size={17} />}</button><button className="icon-button" onClick={downloadOutput} disabled={!hasRun || !(imageOutput || output)} aria-label={t("tool.downloadText")}><Download size={17} /></button></div></div>{imageOutput && <img className="image-output-preview" src={imageOutput} alt={copy.processedImage} />}<pre className={result.error && hasRun ? "error-output" : ""}>{displayOutput}</pre></div>
-      <details className="how-card"><summary>{t("tool.how")}</summary><p>{t("tool.howCopy")}</p><p className="privacy-exceptions">{t("tool.privacyExceptions")}</p></details>
+      <details className="how-card"><summary>{t("tool.how")}</summary><p>{t("tool.howCopy")}</p><p className="privacy-exceptions">{t("tool.privacyExceptions")}</p></details></>}
     </section><aside className="tool-aside"><div className="tool-aside-card"><h2>{t("tool.related")}</h2>{related.map(item => <Link href={`/tools/${item.slug}`} key={item.slug}><span>{item.name}</span><span>→</span></Link>)}</div></aside></div>
   </div>;
 }

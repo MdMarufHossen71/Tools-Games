@@ -6,6 +6,7 @@ import { startLogin } from "@/const";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { getLocaleOption, localeOptions } from "@/i18n";
 import { trpc } from "@/lib/trpc";
+import PlayfulEffects from "@/components/PlayfulEffects";
 
 const nav = [
   { href: "/tools", key: "nav.tools" as const, icon: Wrench }, { href: "/games", key: "nav.games" as const, icon: Gamepad2 },
@@ -38,7 +39,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const openMobileSearch = () => { setMenuOpen(true); window.setTimeout(() => inputRef.current?.focus(), 0); };
   const announcement = platformConfig.data?.announcement;
 
-  return <div className="site-shell"><header className="topbar"><div className="topbar-inner">
+  return <div className="site-shell"><PlayfulEffects /><header className="topbar"><div className="topbar-inner">
     <Link href="/" className="brand" aria-label="ToolsHUB"><span className="brand-symbol"><Boxes size={20} strokeWidth={2.2} /></span><span>Tools<span>HUB</span><small>{t("brand.tagline")}</small></span></Link>
     <form onSubmit={search} className="global-search"><Search size={17} /><input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search.placeholder")} aria-label={t("search.placeholder")} /><kbd>/</kbd></form>
     <nav className="desktop-nav" aria-label={t("nav.tools")}>{nav.map(({ href, key }) => <Link key={href} href={href} className={`${location.startsWith(href) ? "active " : ""}${href === "/links" ? "library-nav" : ""}`}><span>{t(key)}</span>{href === "/links" && <b>2,173</b>}</Link>)}</nav>

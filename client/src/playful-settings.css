@@ -1,0 +1,9 @@
+.playful-settings { margin-top: 1.25rem; }
+.effect-settings-list { border-top: 1px solid var(--line); display: grid; margin-top: 1rem; }
+.effect-setting { align-items: center; border-bottom: 1px solid var(--line); display: grid; gap: .8rem; grid-template-columns: auto 1fr auto; padding: .9rem 0; }
+.effect-setting-icon { align-items: center; background: color-mix(in srgb, var(--primary) 12%, var(--surface)); border-radius: .7rem; color: var(--primary); display: inline-flex; height: 2.35rem; justify-content: center; width: 2.35rem; }
+.effect-setting strong, .effect-setting small { display: block; }
+.effect-setting strong { color: var(--ink); font-size: .9rem; }
+.effect-setting small { color: var(--muted); font-size: .78rem; line-height: 1.4; margin-top: .15rem; }
+.effect-setting button[role="switch"] { background: var(--surface-alt); border-color: var(--line); }
+.effect-setting button[role="switch"][data-state="checked"] { background: var(--primary); border-color: var(--primary); }

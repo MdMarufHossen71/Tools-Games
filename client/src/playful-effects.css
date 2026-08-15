@@ -1,0 +1,11 @@
+.playful-effects { inset: 0; pointer-events: none; position: fixed; z-index: 70; }
+.cursor-cat { font-size: 1.6rem; left: 0; pointer-events: none; position: absolute; top: 0; transition: transform 80ms linear; will-change: transform; }
+.trail-particle { line-height: 1; position: absolute; transform-origin: center; will-change: transform, opacity; }
+.trail-particle.sparkle { color: var(--primary); font-size: 1.25rem; }
+.trail-particle.bubble { color: var(--secondary); font-size: .8rem; }
+.floating-buddy { align-items: center; bottom: 1.4rem; display: flex; gap: .55rem; position: fixed; right: 1.4rem; }
+.buddy-face { align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 10px 26px color-mix(in srgb, var(--ink) 15%, transparent); display: inline-flex; font-size: 1.1rem; height: 2.8rem; justify-content: center; width: 2.8rem; }
+.buddy-message { align-items: start; background: var(--ink); border-radius: .9rem; box-shadow: 0 10px 26px color-mix(in srgb, var(--ink) 20%, transparent); color: var(--surface); display: flex; font-size: .76rem; gap: .5rem; max-width: 14rem; padding: .65rem .7rem; pointer-events: auto; }
+.buddy-message button { background: transparent; border: 0; color: inherit; cursor: pointer; padding: 0; }
+@media (prefers-reduced-motion: no-preference) { .trail-particle { animation: playful-trail-pop 800ms var(--ease-out, ease-out) forwards; } @keyframes playful-trail-pop { from { opacity: .95; transform: translate3d(0, 0, 0) scale(1); } to { opacity: 0; transform: translate3d(0, -28px, 0) scale(.7); } } }
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) { .playful-effects { display: none; } }

@@ -8,6 +8,7 @@ import App from "./App";
 import { startLogin } from "./const";
 import "./index.css";
 import "./rtl.css";
+import "./public-refinement.css";
 
 const queryClient = new QueryClient();
 

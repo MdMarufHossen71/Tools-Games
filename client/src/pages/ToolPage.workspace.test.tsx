@@ -49,6 +49,17 @@ describe("ToolPage mobile workspace", () => {
     expect(renderWorkspace("en", "/tools/json-formatter")).toContain('inputMode="text"');
   });
 
+  it("replaces the requested math routes with dedicated keyboard-friendly calculator workspaces", () => {
+    const calculator = renderWorkspace("en", "/tools/calculator");
+    expect(calculator).toContain('aria-label="Calculator"');
+    expect(calculator).toContain('class="calculator-keys"');
+    expect(calculator).not.toContain('<textarea');
+    expect(renderWorkspace("en", "/tools/scientific-calculator")).toContain('class="scientific-actions"');
+    expect(renderWorkspace("bn", "/tools/percentage-calculator")).toContain("শতকরা ক্যালকুলেটর");
+    expect(renderWorkspace("en", "/tools/area-calculator")).toContain("Rectangle");
+    expect(renderWorkspace("en", "/tools/trigonometry")).toContain("Sine");
+  });
+
   it("presents Image Crop as an active local canvas editor, not a guided placeholder", () => {
     const crop = renderWorkspace("en", "/tools/image-crop");
     expect(crop).toContain(translations.en["workspace.active"]);

@@ -104,16 +104,16 @@
 - [x] Refine the mobile header hierarchy for compact branding, direct utility access, and an unambiguous navigation-menu control.
 - [x] Fix the reported mobile Image Crop export failure so valid crop settings produce a local preview and downloadable image with actionable failure feedback.
 - [x] Repair the shared canvas image decode/export flow for Resize, Rotate, Flip, Convert, Compress, and Crop so every implemented image tool works on mobile and desktop.
-- [ ] Benchmark the user-provided tool sites and implement original improvements to ToolsHUB tool discovery, workspace controls, and mobile usability.
-- [ ] Add an original optional desktop mouse-following cat companion that is disabled on touch devices and respects reduced-motion preferences.
-- [ ] Add a persistent settings control to enable or disable the optional cat companion.
-- [ ] Add optional desktop-only sparkle and bubble-trail effects with performance limits and reduced-motion safeguards.
-- [ ] Add a small optional floating buddy with occasional non-disruptive playful messages.
-- [ ] Provide individual persistent settings controls for every playful effect.
-- [ ] Redesign the public ToolsHUB visual system with a more intentional original typography, color, spacing, card, and motion language.
-- [ ] Redesign the home, tool catalogue, shared workspaces, and responsive navigation to improve visual quality and task clarity on desktop and mobile.
-- [ ] Replace generic Calculator, Scientific Calculator, Percentage Calculator, Area Calculator, and Trigonometry inputs with functional interactive math workspaces.
-- [ ] Define and apply explicit category-specific settings patterns so tools that need configuration are not rendered as generic text areas.
+- [x] Benchmark the user-provided tool sites and implement original improvements to ToolsHUB tool discovery, workspace controls, and mobile usability.
+- [x] Add an original optional desktop mouse-following cat companion that is disabled on touch devices and respects reduced-motion preferences.
+- [x] Add a persistent settings control to enable or disable the optional cat companion.
+- [x] Add optional desktop-only sparkle and bubble-trail effects with performance limits and reduced-motion safeguards.
+- [x] Add a small optional floating buddy with occasional non-disruptive playful messages.
+- [x] Provide individual persistent settings controls for every playful effect.
+- [x] Redesign the public ToolsHUB visual system with a more intentional original typography, color, spacing, card, and motion language.
+- [x] Redesign the home, tool catalogue, shared workspaces, and responsive navigation to improve visual quality and task clarity on desktop and mobile.
+- [x] Replace generic Calculator, Scientific Calculator, Percentage Calculator, Area Calculator, and Trigonometry inputs with functional interactive math workspaces.
+- [x] Define and apply explicit category-specific settings patterns so tools that need configuration are not rendered as generic text areas.
 - [x] Add site-specific Privacy Policy, Terms of Use, Acceptable Use, Cookie and Local Storage Notice, and Contact/Reporting pages linked from the global footer, with encrypted support-report storage.
 - [x] Audit all Games catalogue cards and routes, remove misleading coming-soon calls to action from the primary playable flow, and publish a staged playable-game release plan.
 - [x] Implement and test the first additional set of genuinely playable browser games with responsive controls and original visual direction.

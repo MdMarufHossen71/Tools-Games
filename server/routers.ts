@@ -124,7 +124,7 @@ export const appRouter = router({
   }),
   preferences: router({
     get: protectedProcedure.query(({ ctx }) => getUserSettings(ctx.user.id)),
-    save: protectedProcedure.input(z.object({ language: locales, appearance: z.string().min(1).max(48), customColors: z.record(z.string(), z.string()).optional() })).mutation(({ ctx, input }) => saveUserSettings(ctx.user.id, input)),
+    save: protectedProcedure.input(z.object({ language: locales, appearance: z.string().min(1).max(48), customColors: z.record(z.string(), z.string()).optional(), playfulEffects: z.object({ cat: z.boolean(), trail: z.boolean(), buddy: z.boolean() }).optional() })).mutation(({ ctx, input }) => saveUserSettings(ctx.user.id, input)),
   }),
   profile: router({
     summary: protectedProcedure.query(({ ctx }) => getProfileSummary(ctx.user.id)),
