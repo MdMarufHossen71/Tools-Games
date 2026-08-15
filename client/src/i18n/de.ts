@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const de: TranslationDictionary = {
+const deBase = {
   "tool.copyFailed": "Kopieren nicht möglich. Wähle das Ergebnis und versuche es erneut.",
   "tool.downloadFailed": "Der Download konnte nicht gestartet werden. Bitte versuche es erneut.",
   "blog.heading": "Der ToolsHUB Blog",
@@ -65,4 +65,13 @@ export const de: TranslationDictionary = {
   "games.lobbyTitle": "Gemeinsam und privat spielen", "games.lobbyCopy": "Erstelle einen Raum nur mit Einladung oder tritt einem offenen Zwei-Spieler-Match bei. Eine reine Relay-Verbindung schützt deine IP.", "games.createRoom": "Raum erstellen", "games.publicRoom": "Öffentlicher Raum", "games.privateRoom": "Nur mit Einladung", "games.availableRooms": "Offene Räume", "games.joinRoom": "Raum beitreten", "games.invite": "Einladungslink kopieren", "games.connecting": "Privates Relay wird vorbereitet…", "games.relayUnavailable": "Das private Relay ist nicht verfügbar. Bitte versuche es später erneut.", "games.roomExpired": "Dieser Raum ist abgelaufen oder nicht mehr verfügbar.", "games.chat": "Raum-Chat", "games.send": "Senden", "games.noRooms": "Derzeit gibt es keine offenen Räume.", "games.leave": "Raum verlassen", "games.online": "Online", "games.roomCode": "Raumcode", "games.ready": "Bereit",
   "games.heroCopy": "Schnelles Spielen direkt im Browser, ohne Download. Wähle eine Herausforderung und nutze deine Pause sinnvoll.", "games.available": "Spiele verfügbar", "games.empty": "Keine Spiele passen zu dieser Suche.", "games.notFound": "Spiel nicht gefunden", "games.choose": "Wähle ein Spiel aus der Spielhalle, um loszulegen.",
   "links.eyebrow": "NÜTZLICHE LINKS / KURATIERTES VERZEICHNIS", "links.title": "Bibliothek nützlicher Links", "links.copy": "Bangladesch-Dienste, Alltagswebseiten und Recherchewerkzeuge in einem durchsuchbaren Verzeichnis.", "links.search": "2.100+ Links durchsuchen", "links.results": "Ergebnisse", "links.allLetters": "Alle", "links.bd": "Bangladesch-Dienste", "links.everyday": "Nützliche Alltagswebseiten", "links.osint": "OSINT- und Recherchewerkzeuge", "links.curated": "Kuratiert", "links.research": "Recherche/OSINT", "links.government": "সরকারি", "links.app": "App", "links.open": "In neuem Tab öffnen", "links.loading": "Bibliothek wird geladen…", "links.empty": "Keine Links entsprechen deiner Suche.", "links.showMore": "Mehr anzeigen"
+};
+
+export const de: TranslationDictionary = {
+  ...deBase,
+  "games.livePlayEyebrow": "LIVE-MEHRSPIELER / PRIVATES RELAY",
+  "games.ticTacToeCopy": "Ein schnelles Drei-gewinnt-Spiel für zwei Personen.",
+  "games.connectFourCopy": "Bringe vier Steine in eine Reihe vor deinem Gegenüber.",
+  "games.roomCreateCopy": "Wähle ein Spiel und die Privatsphäre. Nur-Einladung-Räume erscheinen nicht in der öffentlichen Liste.",
+  "games.loadingRooms": "Offene Räume werden geprüft…",
 };

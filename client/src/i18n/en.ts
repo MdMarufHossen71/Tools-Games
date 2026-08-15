@@ -1,4 +1,4 @@
-export const en = {
+const enBase = {
   "tool.copyFailed": "Couldn't copy. Select the result and try again.",
   "tool.downloadFailed": "Couldn't start the download. Please try again.",
   "blog.heading": "The ToolsHUB Blog",
@@ -63,5 +63,15 @@ export const en = {
   "games.heroCopy": "Fast, browser-native play with no downloads. Pick a challenge, then make the break count.", "games.available": "games available", "games.empty": "No games match that search yet.", "games.notFound": "Game not found", "games.choose": "Choose a game from the arcade to start playing.",
   "links.eyebrow": "USEFUL LINKS / CURATED DIRECTORY", "links.title": "Useful Links Library", "links.copy": "Bangladesh services, everyday websites, and research tools in one searchable directory.", "links.search": "Search 2,100+ links", "links.results": "results", "links.allLetters": "All", "links.bd": "Bangladesh services", "links.everyday": "Everyday Useful Websites", "links.osint": "OSINT & Research Tools", "links.curated": "Curated", "links.research": "Research/OSINT", "links.government": "সরকারি", "links.app": "App", "links.open": "Open in new tab", "links.loading": "Loading the library…", "links.empty": "No links match your search.", "links.showMore": "Show more"
 } as const;
+
+const multiplayerLobbyCopy = {
+  "games.livePlayEyebrow": "LIVE MULTIPLAYER / PRIVATE RELAY",
+  "games.ticTacToeCopy": "A quick three-in-a-row match for two players.",
+  "games.connectFourCopy": "Drop four in a row before your opponent does.",
+  "games.roomCreateCopy": "Choose a game and privacy setting. Invite-only rooms stay off the public list.",
+  "games.loadingRooms": "Checking open rooms…",
+} as const;
+
+export const en = { ...enBase, ...multiplayerLobbyCopy } as const;
 export type TranslationKey = keyof typeof en;
 export type TranslationDictionary = Record<TranslationKey, string>;

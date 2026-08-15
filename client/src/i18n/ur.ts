@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const ur: TranslationDictionary = {
+const urBase = {
   "tool.copyFailed": "کاپی نہیں ہو سکا۔ نتیجہ منتخب کر کے دوبارہ کوشش کریں۔",
   "tool.downloadFailed": "ڈاؤن لوڈ شروع نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔",
   "blog.heading": "ToolsHUB بلاگ",
@@ -65,4 +65,13 @@ export const ur: TranslationDictionary = {
   "games.lobbyTitle": "نجی طور پر اکٹھے کھیلیں", "games.lobbyCopy": "صرف دعوت والا کمرہ بنائیں یا کھلے دو کھلاڑی میچ میں شامل ہوں۔ صرف ریلے کنکشن آپ کا IP محفوظ رکھتا ہے۔", "games.createRoom": "کمرہ بنائیں", "games.publicRoom": "عوامی کمرہ", "games.privateRoom": "صرف دعوت", "games.availableRooms": "کھلے کمرے", "games.joinRoom": "کمرے میں شامل ہوں", "games.invite": "دعوتی لنک کاپی کریں", "games.connecting": "نجی ریلے تیار ہو رہا ہے…", "games.relayUnavailable": "نجی ریلے دستیاب نہیں ہے۔ بعد میں دوبارہ کوشش کریں۔", "games.roomExpired": "یہ کمرہ ختم ہو چکا ہے یا دستیاب نہیں ہے۔", "games.chat": "روم چیٹ", "games.send": "بھیجیں", "games.noRooms": "اس وقت کوئی کھلا کمرہ نہیں ہے۔", "games.leave": "کمرہ چھوڑیں", "games.online": "آن لائن", "games.roomCode": "روم کوڈ", "games.ready": "تیار",
   "games.heroCopy": "بغیر ڈاؤن لوڈ کے تیز، براؤزر پر چلنے والا کھیل۔ ایک چیلنج منتخب کریں اور اپنے وقفے کو بامقصد بنائیں۔", "games.available": "گیمز دستیاب", "games.empty": "اس تلاش سے کوئی گیم نہیں ملا۔", "games.notFound": "گیم نہیں ملا", "games.choose": "کھیلنا شروع کرنے کے لیے آرکیڈ سے ایک گیم منتخب کریں۔",
   "links.eyebrow": "مفید روابط / منتخب ڈائریکٹری", "links.title": "مفید روابط کی لائبریری", "links.copy": "بنگلہ دیشی خدمات، روزمرہ ویب سائٹس اور تحقیقی ٹولز ایک قابلِ تلاش ڈائریکٹری میں۔", "links.search": "2,100+ روابط تلاش کریں", "links.results": "نتائج", "links.allLetters": "سب", "links.bd": "بنگلہ دیشی خدمات", "links.everyday": "روزمرہ مفید ویب سائٹس", "links.osint": "OSINT اور تحقیقی ٹولز", "links.curated": "منتخب", "links.research": "تحقیق/OSINT", "links.government": "সরকারি", "links.app": "ایپ", "links.open": "نئے ٹیب میں کھولیں", "links.loading": "لائبریری لوڈ ہو رہی ہے…", "links.empty": "آپ کی تلاش سے کوئی رابطہ نہیں ملا۔", "links.showMore": "مزید دکھائیں"
+};
+
+export const ur: TranslationDictionary = {
+  ...urBase,
+  "games.livePlayEyebrow": "لائیو ملٹی پلیئر / نجی ریلے",
+  "games.ticTacToeCopy": "دو کھلاڑیوں کے لیے فوری تین-ان-اے-رو میچ۔",
+  "games.connectFourCopy": "حریف سے پہلے ایک قطار میں چار ڈالیں۔",
+  "games.roomCreateCopy": "گیم اور پرائیویسی سیٹنگ منتخب کریں۔ دعوت والے کمرے عوامی فہرست میں نہیں ہوتے۔",
+  "games.loadingRooms": "کھلے کمرے دیکھے جا رہے ہیں…",
 };

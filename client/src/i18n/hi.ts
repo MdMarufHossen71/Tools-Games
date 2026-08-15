@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const hi: TranslationDictionary = {
+const hiBase = {
   "tool.copyFailed": "कॉपी नहीं हो सका। परिणाम चुनकर फिर प्रयास करें।",
   "tool.downloadFailed": "डाउनलोड शुरू नहीं हो सका। कृपया फिर प्रयास करें।",
   "blog.heading": "ToolsHUB ब्लॉग",
@@ -65,4 +65,13 @@ export const hi: TranslationDictionary = {
   "games.lobbyTitle": "निजी रूप से साथ खेलें", "games.lobbyCopy": "केवल-आमंत्रण कक्ष बनाएं या खुले दो-खिलाड़ी मैच में शामिल हों। केवल रिले कनेक्शन आपका IP सुरक्षित रखता है।", "games.createRoom": "कमरा बनाएं", "games.publicRoom": "सार्वजनिक कमरा", "games.privateRoom": "केवल निमंत्रण", "games.availableRooms": "खुले कमरे", "games.joinRoom": "कमरे में शामिल हों", "games.invite": "निमंत्रण लिंक कॉपी करें", "games.connecting": "निजी रिले तैयार हो रहा है…", "games.relayUnavailable": "निजी रिले उपलब्ध नहीं है। कृपया बाद में फिर प्रयास करें।", "games.roomExpired": "यह कमरा समाप्त हो गया है या अब उपलब्ध नहीं है।", "games.chat": "रूम चैट", "games.send": "भेजें", "games.noRooms": "अभी कोई खुला कमरा नहीं है।", "games.leave": "कमरा छोड़ें", "games.online": "ऑनलाइन", "games.roomCode": "रूम कोड", "games.ready": "तैयार",
   "games.heroCopy": "बिना डाउनलोड के तेज़, ब्राउज़र-आधारित खेल। एक चुनौती चुनें और अपने विराम को सार्थक बनाएं।", "games.available": "गेम उपलब्ध", "games.empty": "इस खोज से कोई गेम मेल नहीं खाता।", "games.notFound": "गेम नहीं मिला", "games.choose": "खेलना शुरू करने के लिए आर्केड से एक गेम चुनें।",
   "links.eyebrow": "उपयोगी लिंक / क्यूरेटेड निर्देशिका", "links.title": "उपयोगी लिंक लाइब्रेरी", "links.copy": "बांग्लादेशी सेवाएँ, रोज़मर्रा की वेबसाइटें और शोध उपकरण एक खोजयोग्य निर्देशिका में।", "links.search": "2,100+ लिंक खोजें", "links.results": "परिणाम", "links.allLetters": "सभी", "links.bd": "बांग्लादेश सेवाएँ", "links.everyday": "रोज़मर्रा की उपयोगी वेबसाइटें", "links.osint": "OSINT और शोध उपकरण", "links.curated": "क्यूरेटेड", "links.research": "रिसर्च/OSINT", "links.government": "সরকারি", "links.app": "ऐप", "links.open": "नए टैब में खोलें", "links.loading": "लाइब्रेरी लोड हो रही है…", "links.empty": "आपकी खोज से कोई लिंक मेल नहीं खाता।", "links.showMore": "और दिखाएँ"
+};
+
+export const hi: TranslationDictionary = {
+  ...hiBase,
+  "games.livePlayEyebrow": "लाइव मल्टीप्लेयर / निजी रिले",
+  "games.ticTacToeCopy": "दो खिलाड़ियों के लिए तेज़ तीन-इन-ए-रो मैच।",
+  "games.connectFourCopy": "प्रतिद्वंद्वी से पहले एक पंक्ति में चार गिराइए।",
+  "games.roomCreateCopy": "गेम और गोपनीयता सेटिंग चुनें। आमंत्रण-आधारित कमरे सार्वजनिक सूची में नहीं रहते।",
+  "games.loadingRooms": "खुले कमरे देखे जा रहे हैं…",
 };

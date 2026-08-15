@@ -29,6 +29,10 @@ export default function NotFound() {
 
           <p className="text-slate-600 mb-8 leading-relaxed">{t("notFound.copy")}</p>
 
+          <p className="-mt-4 mb-8 text-xs font-medium tracking-wide text-slate-500" lang="bn">
+            পৃষ্ঠা পাওয়া যায়নি — Page not found
+          </p>
+
           <div
             id="not-found-button-group"
             className="flex flex-col sm:flex-row gap-3 justify-center"
@@ -37,7 +41,7 @@ export default function NotFound() {
               onClick={handleGoHome}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
             >
-              <Home className="w-4 h-4 mr-2" />
+              <Home className="w-4 h-4" />
               {t("common.back")}
             </Button>
           </div>

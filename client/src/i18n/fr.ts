@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const fr: TranslationDictionary = {
+const frBase = {
   "tool.copyFailed": "Impossible de copier. Sélectionnez le résultat et réessayez.",
   "tool.downloadFailed": "Impossible de lancer le téléchargement. Réessayez.",
   "blog.heading": "Le blog ToolsHUB",
@@ -65,4 +65,13 @@ export const fr: TranslationDictionary = {
   "games.lobbyTitle": "Jouez ensemble, en privé", "games.lobbyCopy": "Créez un salon sur invitation ou rejoignez un match ouvert à deux joueurs. Une connexion uniquement relayée protège votre IP.", "games.createRoom": "Créer un salon", "games.publicRoom": "Salon public", "games.privateRoom": "Sur invitation", "games.availableRooms": "Salons ouverts", "games.joinRoom": "Rejoindre le salon", "games.invite": "Copier le lien d'invitation", "games.connecting": "Préparation du relais privé…", "games.relayUnavailable": "Le relais privé est indisponible. Réessayez plus tard.", "games.roomExpired": "Ce salon a expiré ou n'est plus disponible.", "games.chat": "Discussion du salon", "games.send": "Envoyer", "games.noRooms": "Aucun salon ouvert actuellement.", "games.leave": "Quitter le salon", "games.online": "En ligne", "games.roomCode": "Code du salon", "games.ready": "Prêt",
   "games.heroCopy": "Jouez rapidement dans le navigateur, sans téléchargement. Choisissez un défi et profitez de votre pause.", "games.available": "jeux disponibles", "games.empty": "Aucun jeu ne correspond encore à cette recherche.", "games.notFound": "Jeu introuvable", "games.choose": "Choisissez un jeu dans l’arcade pour commencer à jouer.",
   "links.eyebrow": "LIENS UTILES / ANNUAIRE SÉLECTIONNÉ", "links.title": "Bibliothèque de liens utiles", "links.copy": "Services du Bangladesh, sites du quotidien et outils de recherche dans un annuaire consultable.", "links.search": "Rechercher parmi plus de 2 100 liens", "links.results": "résultats", "links.allLetters": "Tous", "links.bd": "Services du Bangladesh", "links.everyday": "Sites utiles du quotidien", "links.osint": "Outils OSINT et de recherche", "links.curated": "Sélectionné", "links.research": "Recherche/OSINT", "links.government": "সরকারি", "links.app": "Application", "links.open": "Ouvrir dans un nouvel onglet", "links.loading": "Chargement de la bibliothèque…", "links.empty": "Aucun lien ne correspond à votre recherche.", "links.showMore": "Afficher plus"
+};
+
+export const fr: TranslationDictionary = {
+  ...frBase,
+  "games.livePlayEyebrow": "MULTIJOUEUR EN DIRECT / RELAIS PRIVÉ",
+  "games.ticTacToeCopy": "Une partie rapide de morpion pour deux joueurs.",
+  "games.connectFourCopy": "Alignez quatre jetons avant votre adversaire.",
+  "games.roomCreateCopy": "Choisissez le jeu et la confidentialité. Les salles sur invitation ne figurent pas dans la liste publique.",
+  "games.loadingRooms": "Recherche de salles ouvertes…",
 };

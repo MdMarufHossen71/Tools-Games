@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const es: TranslationDictionary = {
+const esBase = {
   "tool.copyFailed": "No se pudo copiar. Selecciona el resultado e inténtalo de nuevo.",
   "tool.downloadFailed": "No se pudo iniciar la descarga. Inténtalo de nuevo.",
   "blog.heading": "El blog de ToolsHUB",
@@ -65,4 +65,13 @@ export const es: TranslationDictionary = {
   "games.lobbyTitle": "Jueguen juntos, en privado", "games.lobbyCopy": "Crea una sala solo con invitación o únete a una partida abierta de dos jugadores. La conexión solo por relé protege tu IP.", "games.createRoom": "Crear sala", "games.publicRoom": "Sala pública", "games.privateRoom": "Solo con invitación", "games.availableRooms": "Salas abiertas", "games.joinRoom": "Unirse a la sala", "games.invite": "Copiar enlace de invitación", "games.connecting": "Preparando relé privado…", "games.relayUnavailable": "El relé privado no está disponible. Inténtalo más tarde.", "games.roomExpired": "Esta sala ha caducado o ya no está disponible.", "games.chat": "Chat de la sala", "games.send": "Enviar", "games.noRooms": "No hay salas abiertas ahora.", "games.leave": "Salir de la sala", "games.online": "En línea", "games.roomCode": "Código de sala", "games.ready": "Listo",
   "games.heroCopy": "Juego rápido en el navegador, sin descargas. Elige un desafío y aprovecha tu descanso.", "games.available": "juegos disponibles", "games.empty": "Ningún juego coincide con esta búsqueda.", "games.notFound": "Juego no encontrado", "games.choose": "Elige un juego del arcade para empezar a jugar.",
   "links.eyebrow": "ENLACES ÚTILES / DIRECTORIO SELECCIONADO", "links.title": "Biblioteca de enlaces útiles", "links.copy": "Servicios de Bangladesh, sitios cotidianos y herramientas de investigación en un directorio con búsqueda.", "links.search": "Buscar más de 2.100 enlaces", "links.results": "resultados", "links.allLetters": "Todos", "links.bd": "Servicios de Bangladesh", "links.everyday": "Sitios útiles cotidianos", "links.osint": "Herramientas OSINT e investigación", "links.curated": "Seleccionado", "links.research": "Investigación/OSINT", "links.government": "সরকারি", "links.app": "Aplicación", "links.open": "Abrir en una pestaña nueva", "links.loading": "Cargando la biblioteca…", "links.empty": "Ningún enlace coincide con tu búsqueda.", "links.showMore": "Mostrar más"
+};
+
+export const es: TranslationDictionary = {
+  ...esBase,
+  "games.livePlayEyebrow": "MULTIJUGADOR EN VIVO / RELÉ PRIVADO",
+  "games.ticTacToeCopy": "Una rápida partida de tres en raya para dos jugadores.",
+  "games.connectFourCopy": "Consigue cuatro en fila antes que tu rival.",
+  "games.roomCreateCopy": "Elige un juego y la privacidad. Las salas por invitación no aparecen en la lista pública.",
+  "games.loadingRooms": "Buscando salas abiertas…",
 };

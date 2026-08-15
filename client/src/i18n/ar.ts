@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const ar: TranslationDictionary = {
+const arBase = {
   "tool.copyFailed": "تعذر النسخ. حدّد النتيجة وحاول مرة أخرى.",
   "tool.downloadFailed": "تعذر بدء التنزيل. حاول مرة أخرى.",
   "blog.heading": "مدونة ToolsHUB",
@@ -65,4 +65,13 @@ export const ar: TranslationDictionary = {
   "games.lobbyTitle": "العبوا معًا بخصوصية", "games.lobbyCopy": "أنشئ غرفة بالدعوة فقط أو انضم إلى مباراة مفتوحة للاعبين. اتصال الترحيل فقط يحمي عنوان IP الخاص بك.", "games.createRoom": "إنشاء غرفة", "games.publicRoom": "غرفة عامة", "games.privateRoom": "بالدعوة فقط", "games.availableRooms": "الغرف المفتوحة", "games.joinRoom": "انضم إلى الغرفة", "games.invite": "نسخ رابط الدعوة", "games.connecting": "جارٍ تجهيز الترحيل الخاص…", "games.relayUnavailable": "الترحيل الخاص غير متاح. حاول مرة أخرى لاحقًا.", "games.roomExpired": "انتهت صلاحية هذه الغرفة أو لم تعد متاحة.", "games.chat": "دردشة الغرفة", "games.send": "إرسال", "games.noRooms": "لا توجد غرف مفتوحة الآن.", "games.leave": "مغادرة الغرفة", "games.online": "متصل", "games.roomCode": "رمز الغرفة", "games.ready": "جاهز",
   "games.heroCopy": "لعب سريع داخل المتصفح بلا تنزيلات. اختر تحديًا واجعل وقت الاستراحة مفيدًا.", "games.available": "ألعاب متاحة", "games.empty": "لا توجد ألعاب تطابق هذا البحث بعد.", "games.notFound": "لم يتم العثور على اللعبة", "games.choose": "اختر لعبة من صالة الألعاب لبدء اللعب.",
   "links.eyebrow": "روابط مفيدة / دليل منسق", "links.title": "مكتبة الروابط المفيدة", "links.copy": "خدمات بنغلاديش ومواقع يومية وأدوات بحث في دليل واحد قابل للبحث.", "links.search": "ابحث في أكثر من 2,100 رابط", "links.results": "نتائج", "links.allLetters": "الكل", "links.bd": "خدمات بنغلاديش", "links.everyday": "مواقع مفيدة يومية", "links.osint": "أدوات OSINT والبحث", "links.curated": "منسق", "links.research": "بحث/OSINT", "links.government": "সরকারি", "links.app": "تطبيق", "links.open": "افتح في علامة تبويب جديدة", "links.loading": "جارٍ تحميل المكتبة…", "links.empty": "لا توجد روابط تطابق البحث.", "links.showMore": "عرض المزيد"
+};
+
+export const ar: TranslationDictionary = {
+  ...arBase,
+  "games.livePlayEyebrow": "لعب جماعي مباشر / ترحيل خاص",
+  "games.ticTacToeCopy": "مباراة سريعة لصف ثلاثة للاعبين.",
+  "games.connectFourCopy": "أسقط أربع قطع متتالية قبل خصمك.",
+  "games.roomCreateCopy": "اختر اللعبة وإعداد الخصوصية. غرف الدعوة فقط لا تظهر في القائمة العامة.",
+  "games.loadingRooms": "يتم التحقق من الغرف المفتوحة…",
 };

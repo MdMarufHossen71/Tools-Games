@@ -1,5 +1,5 @@
 import type { TranslationDictionary } from "./en";
-export const bn: TranslationDictionary = {
+const bnBase = {
   "tool.copyFailed": "কপি করা যায়নি। ফলাফল নির্বাচন করে আবার চেষ্টা করুন।",
   "tool.downloadFailed": "ডাউনলোড শুরু করা যায়নি। আবার চেষ্টা করুন।",
   "blog.heading": "ToolsHUB ব্লগ",
@@ -65,4 +65,13 @@ export const bn: TranslationDictionary = {
   "games.lobbyTitle": "ব্যক্তিগতভাবে একসাথে খেলুন", "games.lobbyCopy": "শুধু আমন্ত্রণের রুম তৈরি করুন বা খোলা দুই-খেলোয়াড়ের ম্যাচে যোগ দিন। শুধু রিলে সংযোগ আপনার IP সুরক্ষিত রাখে।", "games.createRoom": "রুম তৈরি করুন", "games.publicRoom": "পাবলিক রুম", "games.privateRoom": "শুধু আমন্ত্রণে", "games.availableRooms": "খোলা রুম", "games.joinRoom": "রুমে যোগ দিন", "games.invite": "আমন্ত্রণ লিংক কপি করুন", "games.connecting": "ব্যক্তিগত রিলে প্রস্তুত হচ্ছে…", "games.relayUnavailable": "ব্যক্তিগত রিলে এখন পাওয়া যাচ্ছে না। পরে আবার চেষ্টা করুন।", "games.roomExpired": "এই রুমটির মেয়াদ শেষ হয়েছে বা আর পাওয়া যাচ্ছে না।", "games.chat": "রুম চ্যাট", "games.send": "পাঠান", "games.noRooms": "এখন কোনো খোলা রুম নেই।", "games.leave": "রুম ছাড়ুন", "games.online": "অনলাইন", "games.roomCode": "রুম কোড", "games.ready": "প্রস্তুত",
   "games.heroCopy": "ডাউনলোড ছাড়াই দ্রুত, ব্রাউজার-ভিত্তিক খেলা। একটি চ্যালেঞ্জ বেছে নিন, তারপর বিরতিটাকে মূল্যবান করুন।", "games.available": "টি গেম উপলভ্য", "games.empty": "এই অনুসন্ধানের সঙ্গে কোনো গেম মেলেনি।", "games.notFound": "গেমটি পাওয়া যায়নি", "games.choose": "খেলা শুরু করতে আর্কেড থেকে একটি গেম বেছে নিন।",
   "links.eyebrow": "দরকারি লিংক / বাছাইকৃত ডিরেক্টরি", "links.title": "দরকারি লিংক লাইব্রেরি", "links.copy": "বাংলাদেশের সেবা, দৈনন্দিন ওয়েবসাইট ও গবেষণা টুল—এক জায়গায়।", "links.search": "২,১০০+ লিংক খুঁজুন", "links.results": "ফলাফল", "links.allLetters": "সব", "links.bd": "বাংলাদেশ সেবা", "links.everyday": "দৈনন্দিন দরকারি ওয়েবসাইট", "links.osint": "OSINT ও গবেষণা টুল", "links.curated": "বাছাইকৃত", "links.research": "গবেষণা/OSINT", "links.government": "সরকারি", "links.app": "অ্যাপ", "links.open": "নতুন ট্যাবে খুলুন", "links.loading": "লাইব্রেরি লোড হচ্ছে…", "links.empty": "আপনার খোঁজে কোনো লিংক মেলেনি।", "links.showMore": "আরও দেখুন"
+};
+
+export const bn: TranslationDictionary = {
+  ...bnBase,
+  "games.livePlayEyebrow": "লাইভ মাল্টিপ্লেয়ার / ব্যক্তিগত রিলে",
+  "games.ticTacToeCopy": "দুই খেলোয়াড়ের জন্য দ্রুত তিন-ঘরে-এক-সারি ম্যাচ।",
+  "games.connectFourCopy": "প্রতিপক্ষের আগে একই সারিতে চারটি ফেলে দিন।",
+  "games.roomCreateCopy": "গেম ও গোপনীয়তার ধরন বেছে নিন। আমন্ত্রণভিত্তিক রুম পাবলিক তালিকায় থাকে না।",
+  "games.loadingRooms": "খোলা রুম খোঁজা হচ্ছে…",
 };

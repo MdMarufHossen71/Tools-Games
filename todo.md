@@ -38,10 +38,10 @@
 - [ ] Add localized social sign-in buttons above the email form with the “Or continue with” separator, without changing guest mode.
 - [x] Build hidden role-guarded admin console for user oversight, tool visibility, links, file shares, short links, announcements, and platform metrics.
 - [x] Add server-side scheduled daily challenge reset using a secure deployed Heartbeat handler rather than an in-process timer.
-- [ ] Add privacy messaging, secure validation, CSP, rate limiting, friendly bilingual 404/500 states, SEO metadata, structured data, sitemap, and robots directives.
+- [x] Add privacy messaging, secure validation, CSP, rate limiting, friendly bilingual 404/500 states, SEO metadata, structured data, sitemap, and robots directives.
 - [ ] Add unit tests for database helpers, secure procedures, tool algorithms, authentication interactions, scheduled handlers, and game score validation.
-- [ ] Perform desktop and 360px mobile visual checks, functional test flows, type checks, and test suite runs.
-- [ ] Push completed source code to MdMarufHossen71/Tools-Games on the server-side branch.
+- [x] Perform desktop and 360px mobile visual checks, functional test flows, type checks, and test suite runs.
+- [x] Push completed source code to MdMarufHossen71/Tools-Games on the server-side branch.
 - [ ] Save the verified release checkpoint and guide the user to publish the site from the project interface.
 - [x] Add blog schema and APIs for categories, tags, authors, bilingual metadata, drafts, scheduled publication, featured pins, reactions, and article search indexing.
 - [x] Build responsive `/blog`, `/blog/{slug}`, and `/blog/author/{username}` pages with featured/latest discovery, filters, search, rich Markdown display, video embeds, related articles, share actions, like actions, and reading progress.
@@ -60,7 +60,9 @@
 - [x] Add authenticated AI conversation persistence with owner-scoped list/load/rename/delete controls and transcript role filtering.
 - [x] Restore authenticated saved game best scores and progress on revisit without overriding active local play.
 - [x] Guard score saving for guests with a localized, non-blocking sign-in message and failure feedback.
-- [ ] Add a production-safe Content Security Policy, baseline browser security headers, and scoped API rate limits without breaking OAuth, storage, tRPC, AI streaming, or Heartbeat requests.
+- [x] Add a production-safe Content Security Policy, baseline browser security headers, and scoped API rate limits without breaking OAuth, storage, tRPC, AI streaming, or Heartbeat requests.
 - [x] Add a production-safe Content Security Policy, baseline browser security headers, rate-limit exclusions for authenticated Heartbeat work, and route-level smoke coverage for OAuth, storage, tRPC, and guest AI SSE.
 - [x] Build a role-gated `/admin` console with real aggregate metrics, searchable user oversight, content shortcuts, and system status while preserving existing blog and link editors.
 - [x] Audit and implement explicit RTL directionality for navigation arrows, chevrons, grouped controls, and directional icons, with targeted Arabic and Urdu verification evidence.
+- [x] Implement and verify a friendly localized Not Found state before closing the combined privacy, security, SEO, and error-state release requirement.
+- [x] Run and document explicit desktop and 360px mobile functional checks for key guest and authenticated journeys: tools, AI, blog, useful links, My Data, games, multiplayer, and administration.
