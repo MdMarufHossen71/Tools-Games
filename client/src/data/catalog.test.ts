@@ -17,7 +17,7 @@ describe("ToolsHUB catalog", () => {
   });
 
   it("filters catalogue search, categories, hidden routes, and no-results states deterministically", () => {
-    expect(filterTools("", "all")).toHaveLength(244);
+    expect(filterTools("", "all")).toHaveLength(254);
     expect(filterTools("json formatter", "web-dev").map((tool) => tool.slug)).toContain("json-formatter");
     expect(filterTools("", "math")).toHaveLength(20);
     expect(filterTools("", "all", ["json-formatter"])).not.toContainEqual(expect.objectContaining({ slug: "json-formatter" }));

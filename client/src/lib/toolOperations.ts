@@ -3,6 +3,11 @@ const decodeBase64 = (value: string) => new TextDecoder().decode(Uint8Array.from
 
 const randomString = (length: number, alphabet: string) => Array.from(crypto.getRandomValues(new Uint32Array(length)), (value) => alphabet[value % alphabet.length]).join("");
 
+const decodeEntities = (value: string) => value.replace(/&(amp|lt|gt|quot|#39);/g, (match, entity: string) => ({ amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'" }[entity] ?? match));
+const escapeHtml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+const emailExpression = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+const cleanEmailPart = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+
 const morse: Record<string, string> = { a: ".-", b: "-...", c: "-.-.", d: "-..", e: ".", f: "..-.", g: "--.", h: "....", i: "..", j: ".---", k: "-.-", l: ".-..", m: "--", n: "-.", o: "---", p: ".--.", q: "--.-", r: ".-.", s: "...", t: "-", u: "..-", v: "...-", w: ".--", x: "-..-", y: "-.--", z: "--..", "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...", "8": "---..", "9": "----." };
 
 export type ToolResult = { value: string; error?: boolean };
@@ -14,7 +19,7 @@ export type ToolResult = { value: string; error?: boolean };
  * completed specialized transformation.
  */
 export const localOperationSlugs = [
-  "word-counter", "case-converter", "reverse-text", "sort-lines", "shuffle-lines", "remove-extra-spaces", "remove-empty-lines", "remove-duplicates", "add-text-to-lines", "text-repeater", "text-to-binary", "binary-to-text", "url-extractor", "line-numberer", "sentence-counter", "find-replace", "slug-generator", "reading-time",
+  "word-counter", "case-converter", "reverse-text", "sort-lines", "shuffle-lines", "remove-extra-spaces", "remove-empty-lines", "remove-duplicates", "add-text-to-lines", "text-repeater", "text-to-binary", "binary-to-text", "url-extractor", "line-numberer", "sentence-counter", "find-replace", "slug-generator", "reading-time", "gmail-alias-variations", "email-syntax-advisor", "email-extractor", "email-pattern-builder", "mailto-link-builder", "email-size-estimator", "html-to-text", "email-signature-builder", "spam-wording-advisor", "subject-line-advisor",
   "base64-encode", "base64-decode", "image-to-base64", "file-to-base64", "pdf-metadata", "url-encode", "url-decode", "html-entity-encode", "html-entity-decode", "rot13", "morse-code", "password-generator", "random-string", "uuid-generator", "nanoid-generator", "random-number", "number-sorter", "average-calculator", "binary-converter", "decimal-converter",
   "json-formatter", "json-minifier", "json-validator", "csv-converter", "html-beautifier", "css-minifier", "regex-tester", "email-validator", "url-parser", "query-string-parser", "json-escape", "calculator", "percentage-calculator", "hex-to-rgb", "random-color", "invert-color", "gradient-generator", "unix-timestamp", "date-difference", "file-size-converter", "file-type-identifier", "fancy-text", "coin-flipper", "dice-roller",
 ] as const;
@@ -43,6 +48,33 @@ export function runTool(slug: string, input: string, nonce = 0): ToolResult {
       case "find-replace": { const [find = "", replacement = "", ...text] = input.split("\n"); return { value: text.join("\n").split(find).join(replacement) }; }
       case "slug-generator": return { value: input.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "") };
       case "reading-time": return { value: String(Math.max(1, Math.ceil((input.trim() ? input.trim().split(/\s+/).length : 0) / 200))) };
+      case "gmail-alias-variations": {
+        const value = input.trim().toLowerCase();
+        const [local, domain] = value.split("@");
+        if (!local || !/^(gmail\.com|googlemail\.com)$/i.test(domain ?? "") || !/^[a-z0-9.]+$/.test(local)) throw new Error();
+        const clean = local.replace(/\./g, "");
+        if (clean.length < 2) throw new Error();
+        const variants = new Set([`${clean}@${domain}`, `${clean.slice(0, 1)}.${clean.slice(1)}@${domain}`, `${clean.slice(0, 2)}.${clean.slice(2)}@${domain}`, `${clean}+personal@${domain}`, `${clean}+newsletters@${domain}`, `${clean}+receipts@${domain}`, `${clean}+shopping@${domain}`]);
+        return { value: `Aliases only — these are not new email accounts.\n${Array.from(variants).slice(0, 7).join("\n")}` };
+      }
+      case "email-syntax-advisor": {
+        const value = input.trim().toLowerCase(); const [local = "", domain = ""] = value.split("@");
+        const flags = [!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && "Use a standard local@domain.tld format", local.length > 64 && "Local part is longer than 64 characters", domain.length > 253 && "Domain is longer than 253 characters", /\.\./.test(value) && "Avoid consecutive dots", /@gmail\.con$/.test(value) && "Did you mean gmail.com?"].filter(Boolean);
+        return { value: JSON.stringify({ syntax: flags.length ? "needs review" : "format looks valid", localPart: local || null, domain: domain || null, warnings: flags, limitation: "Local format checks only; this does not verify that a mailbox exists or can receive mail." }, null, 2) };
+      }
+      case "email-extractor": return { value: Array.from(new Set(input.match(emailExpression) ?? [])).slice(0, 100).join("\n") };
+      case "email-pattern-builder": {
+        const [firstRaw = "", lastRaw = "", domainRaw = ""] = input.split(/[\n,]/); const first = cleanEmailPart(firstRaw); const last = cleanEmailPart(lastRaw); const domain = domainRaw.trim().toLowerCase().replace(/^@/, "");
+        if (!first || !last || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) throw new Error();
+        const candidates = [`${first}`, `${last}`, `${first}${last}`, `${first}.${last}`, `${first[0]}${last}`, `${first[0]}.${last}`, `${first}${last[0]}`, `${first}.${last[0]}`, `${last}${first}`, `${last}.${first}`, `${last}${first[0]}`, `${last}.${first[0]}`].map(local => `${local}@${domain}`);
+        return { value: `Unverified naming patterns — do not treat these as confirmed contact addresses.\n${Array.from(new Set(candidates)).join("\n")}` };
+      }
+      case "mailto-link-builder": { const [to = "", subject = "", ...body] = input.split("\n"); const recipients = to.split(/[;,\s]+/).filter(Boolean); if (!recipients.every(value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))) throw new Error(); const params = new URLSearchParams(); if (subject) params.set("subject", subject); if (body.join("\n")) params.set("body", body.join("\n")); return { value: `mailto:${recipients.join(",")}${params.size ? `?${params.toString()}` : ""}` }; }
+      case "email-size-estimator": { const bytes = new TextEncoder().encode(input).length; return { value: JSON.stringify({ characters: input.length, utf8Bytes: bytes, estimatedBase64Bytes: Math.ceil(bytes / 3) * 4, limitation: "Text-body estimate only; transport and attachment overhead can vary." }, null, 2) }; }
+      case "html-to-text": return { value: decodeEntities(input.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()) };
+      case "email-signature-builder": { const [name = "", title = "", company = "", phone = "", website = ""] = input.split("\n").map(value => value.trim()); if (!name) throw new Error(); const text = [name, [title, company].filter(Boolean).join(" · "), phone, website].filter(Boolean).join("\n"); const html = [escapeHtml(name), escapeHtml([title, company].filter(Boolean).join(" · ")), escapeHtml(phone), escapeHtml(website)].filter(Boolean).join("<br>"); return { value: `${text}\n\nHTML:\n${html}` }; }
+      case "spam-wording-advisor": { const words = ["act now", "click here", "free", "guarantee", "urgent", "winner", "100%", "risk-free", "limited time", "buy now"]; const lower = input.toLowerCase(); const matches = words.filter(word => lower.includes(word)); return { value: JSON.stringify({ flaggedPhrases: matches, advisory: matches.length ? "Review the flagged wording and make claims specific and supportable." : "No phrases from this small local advisory list were found.", limitation: "This local heuristic cannot predict spam-folder placement, reputation, or deliverability." }, null, 2) }; }
+      case "subject-line-advisor": { const subject = input.trim(); const flags = [subject.length === 0 && "Add a subject line", subject.length > 60 && "Consider a shorter mobile-friendly subject", /^[A-Z\s\d!?.]+$/.test(subject) && subject.length > 2 && "Avoid all-capital wording", (subject.match(/!/g) ?? []).length > 1 && "Limit repeated exclamation marks"].filter(Boolean); return { value: JSON.stringify({ characters: subject.length, guidance: flags.length ? flags : ["Length and punctuation look balanced."], limitation: "Editorial guidance only; this cannot predict open rates or inbox placement." }, null, 2) }; }
       case "base64-encode": return { value: encodeBase64(input) };
       case "base64-decode": return { value: decodeBase64(input.trim()) };
       case "image-to-base64":
@@ -54,7 +86,7 @@ export function runTool(slug: string, input: string, nonce = 0): ToolResult {
       case "url-encode": return { value: encodeURIComponent(input) };
       case "url-decode": return { value: decodeURIComponent(input) };
       case "html-entity-encode": return { value: input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") };
-      case "html-entity-decode": { const entities: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'" }; return { value: input.replace(/&(amp|lt|gt|quot|#39);/g, (match, entity: string) => entities[entity] ?? match) }; }
+      case "html-entity-decode": return { value: decodeEntities(input) };
       case "rot13": return { value: input.replace(/[a-z]/gi, character => String.fromCharCode((character <= "Z" ? 90 : 122) >= character.charCodeAt(0) + 13 ? character.charCodeAt(0) + 13 : character.charCodeAt(0) - 13)) };
       case "morse-code": return { value: input.toLowerCase().split("").map(character => character === " " ? "/" : morse[character] ?? character).join(" ") };
       case "password-generator": return { value: randomString(18, "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*_-+=") };

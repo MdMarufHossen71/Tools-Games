@@ -6,7 +6,7 @@ export type Tool = { slug: string; name: string; category: ToolCategoryId; descr
 export type ToolCategory = { id: ToolCategoryId; name: string; nameBn: string; icon: LucideIcon; color: string; items: string[] };
 const categories: ToolCategory[] = [
   { id: "math", name: "Math", nameBn: "গণিত", icon: Calculator, color: "mint", items: ["Calculator", "Scientific Calculator", "Percentage Calculator", "Area Calculator", "Trigonometry", "Radians to Degrees", "Rule of Three", "Fraction Calculator", "GCD & LCM", "Prime Checker", "Linear Equation Solver", "Quadratic Equation Solver", "Matrix Calculator", "Loan & EMI Calculator", "BMI Calculator", "GPA Calculator", "Discount Calculator", "Ratio Calculator", "Unit Converter", "Currency Converter"] },
-  { id: "text", name: "Text & Lists", nameBn: "টেক্সট ও তালিকা", icon: Type, color: "sky", items: ["Word Counter", "Case Converter", "Reverse Text", "Sort Lines", "Shuffle Lines", "Add Text to Lines", "Remove Extra Spaces", "Remove Empty Lines", "Remove Duplicates", "Find & Replace", "Regex Replacer", "Markdown Preview", "Lorem Ipsum", "Bangla Filler Text", "Duplicate Word Finder", "Slug Generator", "Unicode Entities", "Text Diff", "Reading Time", "Text Repeater", "Text to Binary", "Binary to Text", "URL Extractor", "Line Numberer", "Sentence Counter"] },
+  { id: "text", name: "Text & Lists", nameBn: "টেক্সট ও তালিকা", icon: Type, color: "sky", items: ["Word Counter", "Case Converter", "Reverse Text", "Sort Lines", "Shuffle Lines", "Add Text to Lines", "Remove Extra Spaces", "Remove Empty Lines", "Remove Duplicates", "Find & Replace", "Regex Replacer", "Markdown Preview", "Lorem Ipsum", "Bangla Filler Text", "Duplicate Word Finder", "Slug Generator", "Unicode Entities", "Text Diff", "Reading Time", "Text Repeater", "Text to Binary", "Binary to Text", "URL Extractor", "Line Numberer", "Sentence Counter", "Gmail Alias Variations", "Email Syntax Advisor", "Email Extractor", "Email Pattern Builder", "Mailto Link Builder", "Email Size Estimator", "HTML to Text", "Email Signature Builder", "Spam Wording Advisor", "Subject Line Advisor"] },
   { id: "images", name: "Images", nameBn: "ইমেজ", icon: Image, color: "rose", items: ["Image Resize", "Image Crop", "Image Rotate", "Image Flip", "Round Corners", "Add Border", "Split Image", "Merge Images", "Image Converter", "Image Compressor", "Image to Base64", "Favicon Generator", "SVG to PNG", "Watermark Image", "Meme Generator", "Image Color Picker", "Histogram", "Blur Image", "Pixelate Image", "Brightness & Contrast", "Saturation", "Grayscale", "Sepia", "Vignette", "Duotone", "Sharpen", "Noise", "Threshold", "Posterize", "Edge Detection", "Image Gradient", "QR Image"] },
   { id: "pdf", name: "PDF", nameBn: "পিডিএফ", icon: FileText, color: "amber", items: ["PDF to Image", "Image to PDF", "Merge PDF", "Split PDF", "Rotate PDF", "Compress PDF", "Extract PDF Text", "PDF Page Numbers", "Reorder PDF Pages", "Watermark PDF", "PDF Metadata", "PDF Preview", "Protect PDF", "Unlock PDF", "PDF Form Filler", "PDF to Text"] },
   { id: "colors", name: "Colors", nameBn: "রঙ", icon: Palette, color: "violet", items: ["Color Picker", "Lighten Color", "Darken Color", "Saturation Change", "Invert Color", "Random Color", "Color Blend", "Gradient Generator", "Radial Gradient", "Color Harmony", "Palette Extractor", "Contrast Checker", "WCAG Checker", "HEX to RGB", "RGB to HSL", "CMYK Converter", "Shades Generator", "Color Blindness"] },
@@ -20,7 +20,28 @@ const categories: ToolCategory[] = [
 ];
 const slugify = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 export const toolCategories = categories.map(({ items, ...meta }) => ({ ...meta, count: items.length }));
-const toolDescription = (name: string) => Object.fromEntries(localeOptions.map(({ code }) => [code, `${name} — ${translations[code]["tool.description"]}`])) as Record<Locale, string>;
+const emailUtilityNames = new Set(["Gmail Alias Variations", "Email Syntax Advisor", "Email Extractor", "Email Pattern Builder", "Mailto Link Builder", "Email Size Estimator", "HTML to Text", "Email Signature Builder", "Spam Wording Advisor", "Subject Line Advisor"]);
+const emailUtilityNotes: Record<Locale, string> = {
+  en: "A browser-local email utility. It does not send email, verify inboxes, or guarantee delivery.",
+  bn: "ব্রাউজার-লোকাল ইমেইল ইউটিলিটি। এটি ইমেইল পাঠায় না, ইনবক্স যাচাই করে না এবং ডেলিভারির নিশ্চয়তা দেয় না।",
+  hi: "ब्राउज़र-लोकल ईमेल उपयोगिता। यह ईमेल नहीं भेजती, इनबॉक्स सत्यापित नहीं करती और डिलीवरी की गारंटी नहीं देती।",
+  ur: "یہ براؤزر میں چلنے والی ای میل یوٹیلیٹی ہے۔ یہ ای میل نہیں بھیجتی، ان باکس کی تصدیق نہیں کرتی اور ڈیلیوری کی ضمانت نہیں دیتی۔",
+  ar: "أداة بريد إلكتروني تعمل محليًا في المتصفح. لا ترسل رسائل ولا تتحقق من صناديق الوارد ولا تضمن التسليم.",
+  es: "Una utilidad de correo local en el navegador. No envía correos, verifica buzones ni garantiza la entrega.",
+  fr: "Un utilitaire d’e-mail local au navigateur. Il n’envoie pas d’e-mails, ne vérifie pas les boîtes et ne garantit pas la livraison.",
+  de: "Ein lokales Browser-E-Mail-Werkzeug. Es versendet keine E-Mails, prüft keine Postfächer und garantiert keine Zustellung.",
+};
+const gmailAliasNotes: Record<Locale, string> = {
+  en: "Creates bounded Gmail-style aliases for the same inbox, not new accounts. Use only in accordance with service rules.",
+  bn: "একই ইনবক্সের জন্য সীমিত Gmail-ধাঁচের alias তৈরি করে, নতুন অ্যাকাউন্ট নয়। কেবল সেবার নিয়ম মেনেই ব্যবহার করুন।",
+  hi: "एक ही इनबॉक्स के लिए सीमित Gmail-शैली alias बनाता है, नए खाते नहीं। केवल सेवा नियमों के अनुसार उपयोग करें।",
+  ur: "اسی ان باکس کے لیے محدود Gmail طرز کے alias بناتا ہے، نئے اکاؤنٹس نہیں۔ صرف سروس کے قواعد کے مطابق استعمال کریں۔",
+  ar: "ينشئ أسماء مستعارة محدودة بأسلوب Gmail لصندوق الوارد نفسه، وليست حسابات جديدة. استخدمه وفق قواعد الخدمة فقط.",
+  es: "Crea alias limitados de estilo Gmail para la misma bandeja, no cuentas nuevas. Úsalo solo conforme a las reglas del servicio.",
+  fr: "Crée des alias limités de type Gmail pour la même boîte de réception, pas de nouveaux comptes. Utilisez-le uniquement selon les règles du service.",
+  de: "Erstellt begrenzte Gmail-ähnliche Aliasse für dasselbe Postfach, keine neuen Konten. Nur gemäß den Dienstregeln verwenden.",
+};
+const toolDescription = (name: string) => Object.fromEntries(localeOptions.map(({ code }) => [code, emailUtilityNames.has(name) ? (name === "Gmail Alias Variations" ? gmailAliasNotes[code] : emailUtilityNotes[code]) : `${name} — ${translations[code]["tool.description"]}`])) as Record<Locale, string>;
 export const tools: Tool[] = categories.flatMap((category) => category.items.map((name, index) => ({ slug: slugify(name), name, category: category.id, description: toolDescription(name), keywords: `${name} ${category.name} ${category.nameBn}`.toLowerCase().split(/\s+/), ai: name.startsWith("AI") || ["Speech to Text", "Text to Speech", "Meme Generator", "Emoji Kitchen"].includes(name), featured: index < 2 })));
 export function filterTools(query: string, category: ToolCategoryId | "all" = "all", hiddenSlugs: string[] = []) {
   const hidden = new Set(hiddenSlugs);

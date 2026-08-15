@@ -3,8 +3,8 @@ import { tools } from "./catalog";
 import { games, playableGames } from "./games";
 
 describe("ToolsHUB catalogue integrity", () => {
-  it("keeps all tool slugs unique and preserves the published 244-tool catalogue", () => {
-    expect(tools).toHaveLength(244);
+  it("keeps all tool slugs unique and preserves the published 254-tool catalogue", () => {
+    expect(tools).toHaveLength(254);
     expect(new Set(tools.map((tool) => tool.slug)).size).toBe(tools.length);
     expect(tools.every((tool) => tool.name && tool.description.en && tool.description.bn)).toBe(true);
   });

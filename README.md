@@ -6,7 +6,7 @@
 
 | Area | Current implementation |
 |---|---|
-| Tools | 244 catalogue entries across 12 browser-tool categories; all routes use the reusable client-side ToolPage workspace. |
+| Tools | 254 catalogue entries across 12 browser-tool categories, including ten original browser-local email utilities; all routes use the reusable client-side ToolPage workspace. |
 | Games | 45 catalogue games; 8 playable browser games; online Tic Tac Toe and Connect Four use a relay-only room lobby. |
 | AI | Streaming SSE chat, honest guest/member limits, and authenticated conversation history. |
 | Personal data | Encrypted file sharing, encrypted URL targets, encrypted clipboard, notes/version history, and client-encrypted vault records. |
@@ -60,7 +60,7 @@ The Express entry point adds a restrictive Content Security Policy, baseline bro
 
 ### Tools
 
-The complete, named tool inventory is the source-controlled `categories` manifest in [`client/src/data/catalog.ts`](client/src/data/catalog.ts). This provides the canonical list of all 244 visible tool routes and avoids a separate, drift-prone duplicate. The categories are **Math (20)**, **Text & Lists (20)**, **Images (32)**, **PDF (16)**, **Colors (18)**, **Date & Time (16)**, **Encoding & Crypto (20)**, **Web & Dev (24)**, **Audio & Video (16)**, **Fun & Creative (18)**, **File Utilities (16)**, and **Numbers & Random (18)**.
+The complete, named tool inventory is the source-controlled `categories` manifest in [`client/src/data/catalog.ts`](client/src/data/catalog.ts). This provides the canonical list of all **254** visible tool routes and avoids a separate, drift-prone duplicate. The categories are **Math (20)**, **Text & Lists (35)**, **Images (32)**, **PDF (16)**, **Colors (18)**, **Date & Time (16)**, **Encoding & Crypto (22)**, **Web & Dev (27)**, **Audio & Video (16)**, **Fun & Creative (18)**, **File Utilities (16)**, and **Numbers & Random (18)**.
 
 ### Games
 
@@ -83,7 +83,7 @@ pnpm check
 pnpm test
 ```
 
-The verified release suite currently contains **61 assertions across 29 test files**, covering security policy, authentication/logout, error recovery, tool privacy, translation coverage, catalogue integrity, explicit local-operation execution, link imports, score/session/streak/profile validation, daily challenges, TURN credentials, multiplayer rules, friendship records, Useful Links keyboard controls and filtered states, UTM construction, password generation, and AI-history safeguards.
+The verified release suite currently contains **62 assertions across 29 test files**, covering security policy, authentication/logout, error recovery, tool privacy, translation coverage, catalogue integrity, explicit local-operation execution, email-utility safeguards, link imports, score/session/streak/profile validation, daily challenges, TURN credentials, multiplayer rules, friendship records, Useful Links keyboard controls and filtered states, UTM construction, password generation, and AI-history safeguards.
 
 ## Deployment and daily challenge schedule
 
