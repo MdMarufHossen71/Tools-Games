@@ -1,5 +1,76 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786740129421,
+      "tag": "0000_thick_speed",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786740726872,
+      "tag": "0001_chilly_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786741323666,
+      "tag": "0002_low_fixer",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786742526854,
+      "tag": "0003_fearless_guardsmen",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786744033625,
+      "tag": "0004_large_changeling",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1786746592033,
+      "tag": "0005_remarkable_paibok",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786766956755,
+      "tag": "0006_handy_nocturne",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786767455486,
+      "tag": "0007_smiling_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1786768843393,
+      "tag": "0008_freezing_preak",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1786769774156,
+      "tag": "0009_unknown_nightmare",
+      "breakpoints": true
+    }
+  ]
 }

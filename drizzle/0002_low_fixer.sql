@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` MODIFY COLUMN `language` varchar(12) NOT NULL DEFAULT 'en';

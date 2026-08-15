@@ -1,0 +1,50 @@
+/* Directional UI is mirrored only for RTL locales; semantic icons remain unchanged. */
+html[dir="rtl"] .lucide-arrow-left,
+html[dir="rtl"] .lucide-arrow-right,
+html[dir="rtl"] .lucide-chevron-left,
+html[dir="rtl"] .lucide-chevron-right,
+html[dir="rtl"] .lucide-panel-left,
+html[dir="rtl"] .lucide-panel-right {
+  transform: scaleX(-1);
+}
+
+/* Flex rows follow the document direction, with explicit overrides for legacy physical margins. */
+html[dir="rtl"] .topbar-inner,
+html[dir="rtl"] .top-actions,
+html[dir="rtl"] .desktop-nav,
+html[dir="rtl"] .hero-actions,
+html[dir="rtl"] .section-title-row,
+html[dir="rtl"] .text-link,
+html[dir="rtl"] .category-card,
+html[dir="rtl"] .tool-card,
+html[dir="rtl"] .catalog-search,
+html[dir="rtl"] .filters,
+html[dir="rtl"] .language-options,
+html[dir="rtl"] .upgrade-strip {
+  direction: rtl;
+}
+
+html[dir="rtl"] .desktop-nav {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] .language-dropdown {
+  right: auto;
+  left: 0;
+  transform-origin: top left;
+}
+
+html[dir="rtl"] .language-dropdown button {
+  text-align: right;
+}
+
+html[dir="rtl"] .language-dropdown button svg {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] .category-card > svg {
+  margin-left: 0;
+  margin-right: auto;
+}

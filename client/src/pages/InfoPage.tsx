@@ -1,0 +1,5 @@
+import { Gamepad2, Globe2, LockKeyhole, Sparkles, Wrench } from "lucide-react";
+import { useSettings } from "@/contexts/AppSettingsContext";
+type Variant = "games" | "ai" | "links" | "data" | "privacy" | "tool";
+const info: Record<Variant, { title: "games.title" | "ai.title" | "nav.links" | "nav.data" | "footer.privacyTitle" | "nav.tools"; icon: typeof Sparkles }> = { games: { title: "games.title", icon: Gamepad2 }, ai: { title: "ai.title", icon: Sparkles }, links: { title: "nav.links", icon: Globe2 }, data: { title: "nav.data", icon: Wrench }, privacy: { title: "footer.privacyTitle", icon: LockKeyhole }, tool: { title: "nav.tools", icon: Wrench } };
+export function InfoPage({ variant }: { variant: Variant }) { const { t } = useSettings(); const item = info[variant]; const Icon = item.icon; return <div className="site-frame empty-page info-page"><span className="icon-orb"><Icon /></span><p className="eyebrow">ToolsHUB</p><h1>{t(item.title)}</h1><p>{variant === "privacy" ? t("footer.privacy") : t("hero.detail")}</p>{variant === "games" && <div className="privacy-badge">{t("privacy.badge")}</div>}</div>; }

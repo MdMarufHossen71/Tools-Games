@@ -1,0 +1,12 @@
+{
+  "name": "ToolsHUB",
+  "short_name": "ToolsHUB",
+  "description": "ToolsHUB — free online tools, browser games and AI tools. No signup needed.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8fc",
+  "theme_color": "#5c4cf5",
+  "icons": [
+    { "src": "/manus-storage/toolshub-hub-icon_dd53df4f.png", "sizes": "any", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

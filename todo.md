@@ -1,0 +1,66 @@
+# Project TODO
+
+- [x] Extend the database schema for user profiles, settings, saved tools, usage history, game progress, leaderboards, notes, files, clipboard, AI conversations, friendships, links, analytics, and admin content.
+- [ ] Build the public responsive application shell with sticky navigation, global search, mobile menu, bilingual footer, guest upgrade banner, and accessible toast/keyboard behaviors.
+- [x] Implement English and বাংলা dictionaries, persistent language preference, and complete bilingual UI coverage.
+- [x] Implement dark, light, system, and ten preset custom themes with a custom six-color theme editor and persisted preferences.
+- [ ] Implement Manus OAuth-driven profile, settings, role-aware navigation, public profile stats, and My Data controls.
+- [x] Build the home page with animated hero, category discovery, popular/new tools, and trending games sections.
+- [x] Build a searchable, filterable catalog representing 200+ client-side tools across Math, Text, Images, PDF, Colors, Date/Time, Encoding/Crypto, Web/Dev, Audio/Video, Fun/Creative, File Utilities, and Numbers.
+- [x] Build reusable tool-page components with bilingual copy, client-side input/output, copy/download, How it works accordion, related tools, and private input persistence rules.
+- [ ] Implement high-value functional client-side tools across every category and data-driven entries for the wider catalog.
+- [x] Implement secure file sharing with S3-backed uploads, encrypted metadata, share tokens, expiry, password gates, and download management.
+- [ ] Implement URL shortener with custom aliases, secure redirect handling, click analytics, UTM builder, QR output, and My Links controls.
+- [ ] Implement cloud clipboard and one-time burn links with authenticated cross-device persistence.
+- [ ] Implement cloud notes with folders, tags, colors, markdown editing, version history, search, sharing, exports, and storage-backed attachments.
+- [ ] Implement encrypted password vault records with client-derived encryption and password generation utilities.
+- [ ] Implement AI Suite with streaming chat, saved conversations, guest versus account limits, text/code/image helpers, rate-limit disclosure, and safety disclaimer.
+- [x] Build 40+ games catalog with responsive game cards, playable single-player games, English/বাংলা Wordle modes, score persistence, and device-aware controls.
+- [ ] Implement server-side leaderboard validation, friends records, streaks, daily challenge UI, and game progress syncing.
+- [x] Add an idempotent cron-authenticated daily challenge handler, date-keyed daily standings, and an arcade daily challenge panel without deleting all-time leaderboard history.
+- [x] Ensure the scheduled daily challenge chooses a validated playable game with cryptographically secure randomness while retaining a stable public fallback before the first run.
+- [x] Implement multiplayer room/lobby records, presence expiration, invite links, session chat, and client connection states.
+- [x] Enforce WebRTC relay-only privacy in every multiplayer and peer-to-peer flow using TURN-only ICE configuration, `iceTransportPolicy: "relay"`, and signaling that contains no IP, LAN, hostname, or other network-identifying data.
+- [x] Document secure TURN credential configuration, generate cryptographically random room IDs, immediately wipe finished rooms, expire inactive rooms, show the required Bangla privacy badge, disclose relay privacy on the Privacy page, and add a development-only relay-candidate verification log.
+- [x] Research and document the current Cloudflare TURN onboarding path, pricing constraints, and a no-cost development alternative for the relay setup.
+- [x] Build searchable, filterable bilingual useful-links directory and admin-managed link content.
+- [x] Add verified Bangladesh government-service link cards, including NID, passport, BRTA, tax, railway, utility, education, land, police, and post-office destinations.
+- [x] Add verified Jobs & Career, Expatriate Services, and Health & Utility link cards with বাংলা category labels, official or app tags, and safe external-link attributes.
+- [x] Make every Useful Links category collapsible and add role-gated admin create, edit, and removal controls for link records.
+- [x] Import the supplied 2,108-link JSON/CSV library into editable database records while preserving every seed URL byte-for-byte and retaining unverified destinations.
+- [x] Add separate “Everyday Useful Websites” and “OSINT & Research Tools” category hierarchies after the Bangladesh service cards, with Curated and Research/OSINT source tags.
+- [ ] Build instant client-side name-and-description search, A–Z filtering, keyboard navigation, result highlighting, result counts, and lazy accordion rendering for the large link library.
+- [x] Add admin bulk JSON/CSV import validation and management controls matching the supplied `{ cat, src, links }` schema.
+- [x] Include all link names in global search and add the requested Useful Links SEO metadata.
+- [ ] Preserve the existing email-and-password sign-in flow while adding Google social sign-in only through the available free built-in provider flow.
+- [ ] Add GitHub social sign-in only when the free built-in connector supports it; otherwise omit it and document the reason at delivery without requesting external credentials.
+- [ ] Link social and email identities by verified email where safe so cloud data, game progress, leaderboards, and personal workspaces remain in one account.
+- [ ] Add localized social sign-in buttons above the email form with the “Or continue with” separator, without changing guest mode.
+- [x] Build hidden role-guarded admin console for user oversight, tool visibility, links, file shares, short links, announcements, and platform metrics.
+- [x] Add server-side scheduled daily challenge reset using a secure deployed Heartbeat handler rather than an in-process timer.
+- [ ] Add privacy messaging, secure validation, CSP, rate limiting, friendly bilingual 404/500 states, SEO metadata, structured data, sitemap, and robots directives.
+- [ ] Add unit tests for database helpers, secure procedures, tool algorithms, authentication interactions, scheduled handlers, and game score validation.
+- [ ] Perform desktop and 360px mobile visual checks, functional test flows, type checks, and test suite runs.
+- [ ] Push completed source code to MdMarufHossen71/Tools-Games on the server-side branch.
+- [ ] Save the verified release checkpoint and guide the user to publish the site from the project interface.
+- [x] Add blog schema and APIs for categories, tags, authors, bilingual metadata, drafts, scheduled publication, featured pins, reactions, and article search indexing.
+- [x] Build responsive `/blog`, `/blog/{slug}`, and `/blog/author/{username}` pages with featured/latest discovery, filters, search, rich Markdown display, video embeds, related articles, share actions, like actions, and reading progress.
+- [x] Add a role-guarded `/admin/blog` editor with slug controls, cover upload, categories/tags, live Markdown preview, draft/publish scheduling, featured state, and homepage pin controls.
+- [x] Add the bilingual “Latest from the blog” homepage section and include published articles in the global site search.
+- [x] Write and publish the six requested starter articles, including internal links to appropriate ToolsHUB features and useful Bangla guidance.
+- [x] Implement article-level SEO metadata, Open Graph/Twitter fields, Article JSON-LD, clean slugs, and responsive blog quality checks.
+- [ ] Align every visible header, footer, hero, blog, and admin label with the ToolsHUB name, requested tagline, homepage headline, and copyright treatment.
+- [x] Add ToolsHUB page-title templates, default metadata, Organization JSON-LD, robots/sitemap labels, PWA manifest, accent-color hub wordmark favicon, and branded social sharing card assets without changing routes.
+- [x] Replace the bilingual system with identical-key language modules for English, বাংলা, Hindi, Urdu, Arabic, Spanish, French, and German; route every interface string through the i18n helper; preserve English tool names and SEO slugs.
+- [x] Add first-visit browser language detection, guest local storage persistence, authenticated database synchronization, native-name flag language dropdown, and a coverage report that warns on English fallbacks and blocks incomplete launch locales.
+- [x] Enforce full RTL layout, control ordering, and icon direction for Arabic and Urdu, and verify these at desktop and mobile breakpoints.
+- [x] Add a per-article AI-powered “Read in your language” control while keeping blog authoring in its original language.
+- [ ] Enforce the private-input persistence policy on tool pages and document the exceptions instead of relying solely on visual messaging.
+- [x] Add resilient clipboard and download error handling with localized success and failure feedback on tool pages.
+- [x] Add authenticated AI conversation persistence with owner-scoped list/load/rename/delete controls and transcript role filtering.
+- [x] Restore authenticated saved game best scores and progress on revisit without overriding active local play.
+- [x] Guard score saving for guests with a localized, non-blocking sign-in message and failure feedback.
+- [ ] Add a production-safe Content Security Policy, baseline browser security headers, and scoped API rate limits without breaking OAuth, storage, tRPC, AI streaming, or Heartbeat requests.
+- [x] Add a production-safe Content Security Policy, baseline browser security headers, rate-limit exclusions for authenticated Heartbeat work, and route-level smoke coverage for OAuth, storage, tRPC, and guest AI SSE.
+- [x] Build a role-gated `/admin` console with real aggregate metrics, searchable user oversight, content shortcuts, and system status while preserving existing blog and link editors.
+- [x] Audit and implement explicit RTL directionality for navigation arrows, chevrons, grouped controls, and directional icons, with targeted Arabic and Urdu verification evidence.

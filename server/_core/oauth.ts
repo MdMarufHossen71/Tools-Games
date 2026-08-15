@@ -48,6 +48,11 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
+      if (await db.isUserSuspended(userInfo.openId)) {
+        res.status(403).json({ error: "This account is suspended. Please contact the site administrator." });
+        return;
+      }
+
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
         expiresInMs: ONE_YEAR_MS,

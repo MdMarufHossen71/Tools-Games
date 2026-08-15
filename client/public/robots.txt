@@ -1,0 +1,4 @@
+# ToolsHUB crawler directives
+User-agent: *
+Allow: /
+Sitemap: https://toolshub.manus.space/sitemap.xml

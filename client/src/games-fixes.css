@@ -1,0 +1,19 @@
+.games-page, .game-player-page { --line: var(--border, #d9ddea); --surface: var(--card, #ffffff); --ink: var(--text, #19213d); --accent: var(--primary, #5c4cf5); }
+.wordle-grid { display: grid; width: 100%; gap: 0.42rem; }
+.wordle-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.42rem; }
+.wordle-row span { min-height: 56px; height: 56px; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--line); border-radius: 8px; }
+@media (max-width: 700px) { .wordle-row span { min-height: 48px; height: 48px; } }
+.game-leaderboard { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1rem 0 2.25rem; padding: 0.9rem 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); }
+.game-leaderboard h3 { margin: 0; font-size: 0.9rem; }
+.game-leaderboard div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.65rem; color: var(--muted, #687085); font-size: 0.82rem; }
+.game-leaderboard strong { color: var(--accent); }
+.game-save-notice { margin: -1.4rem 0 1.9rem; color: var(--muted, #687085); font-size: 0.82rem; text-align: center; }
+
+.daily-challenge-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 1.1rem; margin: 1.25rem 0; padding: 1.15rem 1.25rem; border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--line)); border-radius: 1.1rem; background: linear-gradient(100deg, color-mix(in srgb, var(--accent) 10%, var(--surface)), var(--surface)); box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 9%, transparent); }
+.daily-challenge-copy .eyebrow { display: flex; align-items: center; gap: .4rem; margin-bottom: .25rem; }
+.daily-challenge-copy h2 { margin: 0; font-size: 1.25rem; }
+.daily-challenge-copy p:last-child { margin: .3rem 0 0; color: var(--muted, #687085); font-size: .82rem; }
+.daily-standings { display: flex; gap: .5rem; align-items: center; }
+.daily-standings span { display: grid; gap: .16rem; min-width: 3.45rem; padding: .45rem .55rem; border-radius: .7rem; text-align: center; background: color-mix(in srgb, var(--surface) 82%, var(--accent)); color: var(--muted, #687085); font-size: .72rem; }
+.daily-standings b { color: var(--ink); font-size: .85rem; }
+@media (max-width: 640px) { .daily-challenge-card { grid-template-columns: 1fr auto; } .daily-standings { grid-column: 1 / -1; } }

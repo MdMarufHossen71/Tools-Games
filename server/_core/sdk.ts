@@ -311,6 +311,10 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
+    if (user.isSuspended) {
+      throw ForbiddenError("This account is suspended. Please contact the site administrator.");
+    }
+
     await db.upsertUser({
       openId: user.openId,
       lastSignedIn: signedInAt,

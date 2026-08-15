@@ -31,13 +31,9 @@ class ErrorBoundary extends Component<Props, State> {
               className="text-destructive mb-6 flex-shrink-0"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
-
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
+            <h2 className="text-xl font-bold mb-2">Something went wrong.</h2>
+            <p className="text-center text-muted-foreground mb-1">Please reload the page and try again. Your private data has not been sent or saved by this error screen.</p>
+            <p className="text-center text-sm text-muted-foreground mb-6">একটি অপ্রত্যাশিত সমস্যা হয়েছে। পেজটি রিলোড করে আবার চেষ্টা করুন।</p>
 
             <button
               onClick={() => window.location.reload()}
@@ -48,7 +44,7 @@ class ErrorBoundary extends Component<Props, State> {
               )}
             >
               <RotateCcw size={16} />
-              Reload Page
+              Reload page / পেজ রিলোড করুন
             </button>
           </div>
         </div>
