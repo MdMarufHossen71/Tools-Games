@@ -102,3 +102,5 @@
 - [x] Implement a real browser-local Image Crop workspace with visible crop settings, touch-friendly repositioning, preview, and download instead of a guided placeholder.
 - [x] Audit image-tool availability labels so concrete tools show their controls and guided-only catalogue entries do not imply unavailable settings.
 - [x] Refine the mobile header hierarchy for compact branding, direct utility access, and an unambiguous navigation-menu control.
+- [x] Fix the reported mobile Image Crop export failure so valid crop settings produce a local preview and downloadable image with actionable failure feedback.
+- [x] Repair the shared canvas image decode/export flow for Resize, Rotate, Flip, Convert, Compress, and Crop so every implemented image tool works on mobile and desktop.

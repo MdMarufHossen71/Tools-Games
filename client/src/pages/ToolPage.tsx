@@ -9,6 +9,7 @@ import { fileInputMode } from "@/lib/fileToolInput";
 import { getToolWorkspaceModel } from "@/lib/toolWorkspaceModel";
 import { canvasImageAction, imageOutputExtension } from "@/lib/imageToolOptions";
 import { imageCropRect, type CropAspect } from "@/lib/imageCrop";
+import { boundedCanvasSize, imageSourceForProcessing } from "@/lib/imageProcessing";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { trpc } from "@/lib/trpc";
 import "@/tool-page.css";
@@ -44,6 +45,7 @@ export default function ToolPage() {
   const [nonce, setNonce] = useState(0);
   const [copied, setCopied] = useState(false);
   const [imageOutput, setImageOutput] = useState("");
+  const [imageError, setImageError] = useState(false);
   const [imageScale, setImageScale] = useState(100);
   const [imageRotation, setImageRotation] = useState(90);
   const [flipAxis, setFlipAxis] = useState<"horizontal" | "vertical">("horizontal");
@@ -65,7 +67,7 @@ export default function ToolPage() {
 
   useEffect(() => {
     setInput(current => inputAfterToolChange(previousToolSlug.current, tool?.slug, current));
-    setSelectedFile(null); setImageOutput(""); setHasRun(false); previousToolSlug.current = tool?.slug;
+    setSelectedFile(null); setImageOutput(""); setImageError(false); setHasRun(false); previousToolSlug.current = tool?.slug;
   }, [tool?.slug]);
 
   if (!tool) return <div className="site-frame empty-page"><p className="eyebrow">ToolsHUB</p><h1>{t("notFound.title")}</h1><p>{t("notFound.copy")}</p><Link href="/tools" className="primary-cta">{t("common.back")}</Link></div>;
@@ -74,10 +76,10 @@ export default function ToolPage() {
   const spec = { accept: workspace.accept ?? "*/*", type: workspace.fileType ?? "file" };
   const example = examples[tool.slug];
   const output = result.error ? t("tool.invalid") : result.value;
-  const clear = () => { setInput(""); setSelectedFile(null); setImageOutput(""); setHasRun(false); setCropZoom(100); setCropX(0); setCropY(0); setCropAspect("free"); setNonce(value => value + 1); };
+  const clear = () => { setInput(""); setSelectedFile(null); setImageOutput(""); setImageError(false); setHasRun(false); setCropZoom(100); setCropX(0); setCropY(0); setCropAspect("free"); setNonce(value => value + 1); };
   const loadFile = (file?: File) => {
     if (!file) return;
-    setSelectedFile(file); setImageOutput(""); setHasRun(false);
+    setSelectedFile(file); setImageOutput(""); setImageError(false); setHasRun(false);
     if (imageAction === "crop") { setCropZoom(100); setCropX(0); setCropY(0); setCropAspect("free"); }
     if (!hasProcessor) { setInput(""); return; }
     const mode = fileInputMode(tool.slug);
@@ -92,40 +94,52 @@ export default function ToolPage() {
   const run = async () => {
     setHasRun(true);
     if (usesCanvasImage && selectedFile) {
-      const source = URL.createObjectURL(selectedFile);
+      const fallbackSource = URL.createObjectURL(selectedFile);
+      const source = imageSourceForProcessing(input, fallbackSource);
+      const revokeFallback = () => URL.revokeObjectURL(fallbackSource);
+      const failImageProcessing = () => { revokeFallback(); setImageError(true); toast.error(t("tool.invalid")); };
       const image = new Image();
       image.onload = () => {
-        if (imageAction === "crop") {
-          const crop = imageCropRect(image.naturalWidth, image.naturalHeight, cropZoom, cropX, cropY, cropAspect);
+        try {
+          if (!image.naturalWidth || !image.naturalHeight) throw new Error("Image has no readable dimensions");
+          if (imageAction === "crop") {
+            const crop = imageCropRect(image.naturalWidth, image.naturalHeight, cropZoom, cropX, cropY, cropAspect);
+            const outputSize = boundedCanvasSize(crop.sw, crop.sh);
+            const canvas = document.createElement("canvas");
+            canvas.width = outputSize.width;
+            canvas.height = outputSize.height;
+            const context = canvas.getContext("2d");
+            if (!context) throw new Error("Canvas is unavailable");
+            context.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, outputSize.width, outputSize.height);
+            setImageOutput(canvas.toDataURL("image/png"));
+            setImageError(false);
+            revokeFallback();
+            return;
+          }
+          const scale = imageAction === "resize" ? Math.min(200, Math.max(10, imageScale)) / 100 : 1;
+          const logicalSize = boundedCanvasSize(image.naturalWidth * scale, image.naturalHeight * scale);
+          const sourceWidth = logicalSize.width;
+          const sourceHeight = logicalSize.height;
+          const rotation = imageAction === "rotate" ? imageRotation : 0;
+          const sideways = rotation === 90 || rotation === 270;
           const canvas = document.createElement("canvas");
-          canvas.width = crop.sw;
-          canvas.height = crop.sh;
+          canvas.width = sideways ? sourceHeight : sourceWidth;
+          canvas.height = sideways ? sourceWidth : sourceHeight;
           const context = canvas.getContext("2d");
-          if (!context) { URL.revokeObjectURL(source); return; }
-          context.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
-          setImageOutput(canvas.toDataURL("image/png"));
-          URL.revokeObjectURL(source);
-          return;
+          if (!context) throw new Error("Canvas is unavailable");
+          context.translate(canvas.width / 2, canvas.height / 2);
+          context.rotate((rotation * Math.PI) / 180);
+          if (imageAction === "flip") context.scale(flipAxis === "horizontal" ? -1 : 1, flipAxis === "vertical" ? -1 : 1);
+          context.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
+          const outputMime = imageAction === "compress" ? "image/jpeg" : imageAction === "convert" ? imageMime : "image/png";
+          setImageOutput(canvas.toDataURL(outputMime, imageAction === "compress" || imageAction === "convert" ? imageQuality / 100 : undefined));
+          setImageError(false);
+          revokeFallback();
+        } catch {
+          failImageProcessing();
         }
-        const scale = imageAction === "resize" ? Math.min(200, Math.max(10, imageScale)) / 100 : 1;
-        const sourceWidth = Math.max(1, Math.round(image.naturalWidth * scale));
-        const sourceHeight = Math.max(1, Math.round(image.naturalHeight * scale));
-        const rotation = imageAction === "rotate" ? imageRotation : 0;
-        const sideways = rotation === 90 || rotation === 270;
-        const canvas = document.createElement("canvas");
-        canvas.width = sideways ? sourceHeight : sourceWidth;
-        canvas.height = sideways ? sourceWidth : sourceHeight;
-        const context = canvas.getContext("2d");
-        if (!context) return;
-        context.translate(canvas.width / 2, canvas.height / 2);
-        context.rotate((rotation * Math.PI) / 180);
-        if (imageAction === "flip") context.scale(flipAxis === "horizontal" ? -1 : 1, flipAxis === "vertical" ? -1 : 1);
-        context.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
-        const outputMime = imageAction === "compress" ? "image/jpeg" : imageAction === "convert" ? imageMime : "image/png";
-        setImageOutput(canvas.toDataURL(outputMime, imageAction === "compress" || imageAction === "convert" ? imageQuality / 100 : undefined));
-        URL.revokeObjectURL(source);
       };
-      image.onerror = () => { URL.revokeObjectURL(source); toast.error(t("tool.invalid")); };
+      image.onerror = failImageProcessing;
       image.src = source;
       return;
     }
@@ -134,7 +148,7 @@ export default function ToolPage() {
   const copyOutput = async () => { const value = imageOutput || output; if (!value) return toast.error(t("tool.invalid")); try { await navigator.clipboard.writeText(value); setCopied(true); toast.success(t("tool.copied")); window.setTimeout(() => setCopied(false), 1800); } catch { toast.error(t("tool.copyFailed")); } };
   const downloadOutput = () => { const value = imageOutput || output; if (!value) return toast.error(t("tool.invalid")); const anchor = document.createElement("a"); if (imageOutput) { const mime = imageOutput.match(/^data:([^;]+);/)?.[1] ?? "image/png"; anchor.href = imageOutput; anchor.download = `${tool.slug}.${imageOutputExtension(mime)}`; } else { const href = URL.createObjectURL(new Blob([output], { type: "text/plain" })); anchor.href = href; anchor.download = `${tool.slug}.txt`; window.setTimeout(() => URL.revokeObjectURL(href), 0); } anchor.click(); toast.success(t("tool.downloadText")); };
   const speakText = () => { if (!input.trim() || !("speechSynthesis" in window)) return toast.error(t("tool.invalid")); window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(input)); };
-  const displayOutput = !hasRun ? copy.noOutput : usesCanvasImage ? imageOutput ? copy.imageReady : copy.processing : isFileTool && !hasProcessor ? copy.guided : output || t("tool.invalid");
+  const displayOutput = !hasRun ? copy.noOutput : usesCanvasImage ? imageOutput ? copy.imageReady : imageError ? copy.noOutput : copy.processing : isFileTool && !hasProcessor ? copy.guided : output || t("tool.invalid");
 
   return <div className={`site-frame tool-page workspace-${workspace.kind}`} dir={language === "ar" || language === "ur" ? "rtl" : "ltr"}>
     <nav className="crumbs"><Link href="/tools">{t("nav.tools")}</Link><span>/</span><Link href={`/tools?category=${tool.category}`}>{t(`category.${category.id}`)}</Link><span>/</span><strong>{tool.name}</strong></nav>

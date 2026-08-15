@@ -4,6 +4,8 @@ import { canvasImageAction, imageOutputExtension } from "./imageToolOptions";
 describe("imageToolOptions", () => {
   it("only enables concrete browser-local canvas transforms", () => {
     expect(canvasImageAction("image-resize")).toBe("resize");
+    expect(canvasImageAction("image-rotate")).toBe("rotate");
+    expect(canvasImageAction("image-flip")).toBe("flip");
     expect(canvasImageAction("image-converter")).toBe("convert");
     expect(canvasImageAction("image-compressor")).toBe("compress");
     expect(canvasImageAction("image-crop")).toBe("crop");
