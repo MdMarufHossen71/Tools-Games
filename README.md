@@ -37,6 +37,8 @@ The canonical contracts are in `server/routers.ts`; relational definitions are i
 
 ToolsHUB uses a memory-first policy for routine browser-tool inputs. Sensitive server-side records use application encryption and access controls. Password-vault encryption and key derivation happen in the browser. Multiplayer WebRTC configuration is **TURN relay only**: it excludes STUN servers, uses `iceTransportPolicy: "relay"`, rejects non-relay candidates in development, and uses cryptographically random room tokens.
 
+Profile activity statistics are intentionally visible only to the authenticated account owner. This avoids publishing usage, note, or game activity by default while retaining a data-backed personal summary in the profile workspace.
+
 The Express entry point adds a restrictive Content Security Policy, baseline browser hardening headers, scoped API rate limits, and safe error responses. The scheduled daily challenge route accepts authenticated Heartbeat traffic and safely rejects unauthenticated requests.
 
 ## Primary routes
@@ -81,7 +83,7 @@ pnpm check
 pnpm test
 ```
 
-The verified release suite currently contains **54 assertions across 27 test files**, covering security policy, authentication/logout, error recovery, tool privacy, translation coverage, link imports, score/session/streak/profile validation, daily challenges, TURN credentials, multiplayer rules, friendship records, Useful Links keyboard controls, UTM construction, and AI-history safeguards.
+The verified release suite currently contains **55 assertions across 28 test files**, covering security policy, authentication/logout, error recovery, tool privacy, translation coverage, link imports, score/session/streak/profile validation, daily challenges, TURN credentials, multiplayer rules, friendship records, Useful Links keyboard controls, UTM construction, password generation, and AI-history safeguards.
 
 ## Deployment and daily challenge schedule
 

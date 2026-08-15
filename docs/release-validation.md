@@ -9,7 +9,7 @@ This document records the release checks performed in the managed development en
 | Check | Result | Evidence |
 | --- | --- | --- |
 | Strict TypeScript | Passed | `pnpm check` completed with zero errors after the final RTL and Not Found changes. |
-| Automated suite | Passed | `pnpm test` completed with 45 passing tests. |
+| Automated suite | Passed | `pnpm test` completed with 55 passing tests across 28 test files, including the browser-local cryptographic password generator. |
 | Security-policy coverage | Passed | HTTP security tests cover CSP generation and API route rate-limit policy, including OAuth, storage, tRPC, guest AI SSE, and Heartbeat handling. |
 | Public API smoke checks | Passed | `platform.summary`, `games.dailyChallenge`, and `games.listRooms` returned HTTP 200 with valid inputs. |
 | Protected API boundary | Passed | A guest request to `notes.list` returned HTTP 401; a guest request to `admin.dashboard` returned HTTP 403. |
@@ -24,6 +24,17 @@ This document records the release checks performed in the managed development en
 | AI, My Data, multiplayer lobby, admin access boundary | Checked | Core mobile views checked | Public and protected entry states render correctly; guest boundaries preserve a non-blocking sign-in flow. |
 | Arabic and Urdu RTL | Checked | Checked | Directional arrows, card controls, navigation order, and the administrative sidebar were verified after explicit RTL fixes. |
 | Not Found fallback | Checked | Checked | `/missing-release-route?lang=en` and `?lang=bn` show a safe localized 404 card plus the bilingual “পৃষ্ঠা পাওয়া যায়নি — Page not found” recovery message. |
+
+## Profile, role, and My Data audit
+
+| Surface | Access and verification outcome |
+| --- | --- |
+| Profile activity | The `profile.summary` protected query returns real saved-tool, game-progress, note, and game-streak totals. Profile activity is deliberately owner-only, as documented in the README, rather than a public profile surface. |
+| Guest navigation | Protected profile and My Data routes retain a non-blocking sign-in boundary; public tools, games, links, blog, and AI guest access remain available. |
+| Member navigation | Authenticated members can use profile/preferences and the owner-scoped My Data tabs for encrypted files, clipboard, notes/version history, client-encrypted vault entries, and UTM-enabled short links with QR and revoke controls. |
+| Administrator navigation | `/admin` is role-gated in both client routing and protected server procedures. Admin dashboard, user-suspension, content, tool-visibility, announcement, secure-share, and short-link controls remain unavailable to ordinary members. |
+
+The owner-side profile summary and each My Data tab were included in the authenticated 360px and desktop entry-journey review. Sensitive contents are not surfaced in public search, anonymous routes, or profile statistics.
 
 ## Manual production follow-up
 

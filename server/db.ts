@@ -331,6 +331,14 @@ export async function listUserNotes(userId: number) {
   return db.select().from(notes).where(eq(notes.userId, userId)).orderBy(desc(notes.isPinned), desc(notes.updatedAt));
 }
 
+export async function listUserNoteVersions(userId: number, noteId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const ownedNote = (await db.select({ id: notes.id }).from(notes).where(and(eq(notes.id, noteId), eq(notes.userId, userId))).limit(1))[0];
+  if (!ownedNote) return [];
+  return db.select().from(noteVersions).where(eq(noteVersions.noteId, noteId)).orderBy(desc(noteVersions.version));
+}
+
 export async function saveUserNote(input: { id?: number; userId: number; folderId?: string | null; title: string; content?: string | null; tags: string[]; color: string; isPinned: boolean }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");

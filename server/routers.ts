@@ -45,6 +45,7 @@ import {
   listPublishedArticles,
   listShortLinks,
   listUserNotes,
+  listUserNoteVersions,
   listUsefulLinks,
   listVaultEntries,
   resolveShortLink,
@@ -151,6 +152,7 @@ export const appRouter = router({
   }),
   notes: router({
     list: protectedProcedure.query(({ ctx }) => listUserNotes(ctx.user.id)),
+    history: protectedProcedure.input(z.object({ id: z.number().int().positive() })).query(({ ctx, input }) => listUserNoteVersions(ctx.user.id, input.id)),
     save: protectedProcedure.input(noteInput).mutation(({ ctx, input }) => saveUserNote({ userId: ctx.user.id, ...input })),
     delete: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ ctx, input }) => deleteUserNote(ctx.user.id, input.id)),
   }),
