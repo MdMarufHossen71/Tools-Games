@@ -27,9 +27,9 @@ export default function GamesArcade() {
     </section>
     <section className="games-toolbar" aria-label={t("games.menu")}>
       <label className="games-search"><Search size={18}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search.placeholder")} aria-label={t("search.placeholder")} /></label>
-      <div className="game-filter-list" role="list">
-        <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>{t("games.all")}</button>
-        {(Object.keys(categoryKeys) as GameCategory[]).map((item) => { const Icon = categoryIcons[item]; return <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}><Icon size={14}/>{t(categoryKeys[item])}</button>; })}
+      <div className="game-filter-list" role="tablist" aria-label={t("games.menu")}>
+        <button type="button" role="tab" aria-selected={category === "all"} className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>{t("games.all")}</button>
+        {(Object.keys(categoryKeys) as GameCategory[]).map((item) => { const Icon = categoryIcons[item]; return <button type="button" role="tab" aria-selected={category === item} key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}><Icon size={14}/>{t(categoryKeys[item])}</button>; })}
       </div>
     </section>
     <section className="daily-challenge-card" aria-label={t("games.daily")}>

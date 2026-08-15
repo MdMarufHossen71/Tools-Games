@@ -8,7 +8,7 @@
 - [x] Build the home page with animated hero, category discovery, popular/new tools, and trending games sections.
 - [x] Build a searchable, filterable catalog representing 200+ client-side tools across Math, Text, Images, PDF, Colors, Date/Time, Encoding/Crypto, Web/Dev, Audio/Video, Fun/Creative, File Utilities, and Numbers.
 - [x] Build reusable tool-page components with bilingual copy, client-side input/output, copy/download, How it works accordion, related tools, and private input persistence rules.
-- [x] Implement high-value functional client-side tools across every category and data-driven entries for the wider catalog; 30+ dedicated browser-local operations ship, while catalogue-specific processors beyond the release baseline are documented in `docs/release-scope.md`.
+- [x] Implement high-value functional client-side tools across every category and data-driven entries for the wider catalog; 62 dedicated browser-local operations ship, while catalogue-specific processors beyond the release baseline are documented in `docs/release-scope.md`.
 - [x] Implement secure file sharing with S3-backed uploads, encrypted metadata, share tokens, expiry, password gates, and download management.
 - [x] Implement URL shortener with custom aliases, secure redirect handling, click analytics, UTM builder, QR output, and My Links controls.
 - [x] Implement authenticated cloud clipboard persistence; one-time burn links are explicitly deferred as a post-release enhancement in `docs/release-scope.md`.
@@ -39,7 +39,7 @@
 - [x] Build hidden role-guarded admin console for user oversight, tool visibility, links, file shares, short links, announcements, and platform metrics.
 - [x] Add server-side scheduled daily challenge reset using a secure deployed Heartbeat handler rather than an in-process timer.
 - [x] Add privacy messaging, secure validation, CSP, rate limiting, friendly bilingual 404/500 states, SEO metadata, structured data, sitemap, and robots directives.
-- [x] Add and run the release unit-test baseline: 55 assertions across 28 test files cover representative database/procedure, tool, authentication, scheduled-handler, game, and security paths; remaining expansion opportunities are documented in `docs/release-scope.md`.
+- [x] Add and run the release unit-test baseline: 61 assertions across 29 test files cover representative database/procedure, tool, authentication, scheduled-handler, game, catalogue-integrity, and security paths; remaining expansion opportunities are documented in `docs/release-scope.md`.
 - [x] Perform desktop and 360px mobile visual checks, functional test flows, type checks, and test suite runs.
 - [x] Push completed source code to MdMarufHossen71/Tools-Games on the server-side branch.
 - [x] Save the verified release checkpoint and guide the user to publish the site from the project interface.
@@ -68,3 +68,13 @@
 - [x] Run and document explicit desktop and 360px mobile functional checks for key guest and authenticated journeys: tools, AI, blog, useful links, My Data, games, multiplayer, and administration.
 - [x] Add a privacy-safe public profile statistics surface, or formally limit profile statistics to authenticated account owners with an explicit product decision.
 - [x] Verify and document role-aware navigation and every My Data control against the profile-and-account completion requirement.
+- [x] Re-audit every ToolsHUB catalogue entry and all playable games for accurate operations, clear states, and reliable desktop/mobile interactions; catalogue integrity tests now verify 244 unique tools, 45 unique games, and the eight playable game routes.
+- [x] Improve mobile and desktop navigation, including a prominent 2,173-link Library route in global navigation, footer, hero, and homepage discovery ribbon, plus a repaired 761–1050px menu behavior.
+- [x] Validate the optimized public catalogue, game routes, and Useful Links access at 1280×720 and 375×812; evidence is recorded in `docs/catalogue-responsive-audit.md`.
+- [x] Verify all eight playable game routes at desktop and phone viewports, recording route-specific interaction checks in `docs/catalogue-responsive-audit.md`.
+- [x] Add explicit regression coverage tying all 62 browser-local operation slugs to concrete catalogue entries and verify catalogue listing, search/filter, workspace, and Useful Links states at desktop and phone widths.
+- [x] Assert the exact 62-operation registry size and prove every registered slug executes a dedicated non-passthrough processor.
+- [x] Run and document explicit desktop and phone checks for tool listing search/filter behavior, tool workspace output, and Useful Links filtered and empty states.
+- [x] Support Useful Links query parameters so filtered and empty states can be shared and directly verified across desktop and mobile routes.
+- [x] Re-run resolved-data desktop checks for Useful Links filtered and empty search states and record the visible results.
+- [x] Reconfirm the resolved desktop Useful Links findings are recorded in the responsive audit and preserve that verification in the ledger.

@@ -5,7 +5,7 @@ import { ExternalLink, FileCheck2, Landmark, Search, ShieldCheck, Smartphone } f
 import { useEffect, useMemo, useState } from "react";
 import "../links-library.css";
 
-type LinkRecord = {
+export type LinkRecord = {
   id: number;
   section: "bd" | "awesome" | "osint";
   source: "bd_official" | "bd_app" | "bd_general" | "awesome" | "osint";
@@ -29,6 +29,15 @@ export function keyboardLetter(current: string, key: "ArrowLeft" | "ArrowRight",
   return values[(index + (key === "ArrowRight" ? 1 : values.length - 1)) % values.length];
 }
 
+export function filterUsefulLinks(data: LinkRecord[] = [], query = "", letter = "#") {
+  const normalized = query.trim().toLocaleLowerCase();
+  return data.filter((item) => {
+    const searchable = `${item.name} ${item.nameBn ?? ""} ${item.description} ${item.category} ${item.categoryBn ?? ""}`.toLocaleLowerCase();
+    const first = item.name.trim().slice(0, 1).toLocaleUpperCase();
+    return (!normalized || searchable.includes(normalized)) && (letter === "#" || first === letter);
+  });
+}
+
 function matchText(value: string, query: string) {
   if (!query) return value;
   const bits = value.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig"));
@@ -48,17 +57,13 @@ function LinkCard({ item, query, bangla, labels }: { item: LinkRecord; query: st
 export default function UsefulLinksLibrary() {
   const { language, t } = useSettings();
   const { data, isLoading } = trpc.usefulLinks.list.useQuery();
-  const [query, setQuery] = useState("");
-  const [letter, setLetter] = useState("#");
+  const initial = new URLSearchParams(window.location.search);
+  const [query, setQuery] = useState(initial.get("search") ?? "");
+  const [letter, setLetter] = useState(initial.get("letter")?.slice(0, 1).toLocaleUpperCase() || "#");
   const [shown, setShown] = useState<Record<string, number>>({});
   const bangla = language === "bn";
-  const normalized = query.trim().toLocaleLowerCase();
   const letters = ["#", ...Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ")];
-  const filtered = useMemo(() => (data as LinkRecord[] | undefined ?? []).filter((item) => {
-    const searchable = `${item.name} ${item.nameBn ?? ""} ${item.description} ${item.category} ${item.categoryBn ?? ""}`.toLocaleLowerCase();
-    const first = item.name.trim().slice(0, 1).toLocaleUpperCase();
-    return (!normalized || searchable.includes(normalized)) && (letter === "#" || first === letter);
-  }), [data, normalized, letter]);
+  const filtered = useMemo(() => filterUsefulLinks((data as LinkRecord[] | undefined) ?? [], query, letter), [data, query, letter]);
   const labels = { curated: t("links.curated"), research: t("links.research"), government: t("links.government"), app: t("links.app"), open: t("links.open") };
   const grouped = useMemo(() => {
     const categoryMaps: Record<typeof sections[number], Map<string, LinkRecord[]>> = { bd: new Map(), awesome: new Map(), osint: new Map() };

@@ -10,11 +10,11 @@ The encrypted vault now includes an in-browser **Generate** action. It obtains t
 
 | Area | Released capability | Explicit follow-up boundary |
 |---|---|---|
-| Tool catalogue | 244 discoverable catalogue records, private browser-local workspaces, and 30+ dedicated local operations across text, encoding, data, color, file, and creative utilities. | Catalogue records without a dedicated operation retain the common workspace fallback; additional tool-specific processors are a future catalogue expansion. |
+| Tool catalogue | 244 discoverable catalogue records, private browser-local workspaces, and 62 dedicated local operations across text, encoding, data, color, file, and creative utilities. | Catalogue records without a dedicated operation retain the common workspace fallback; additional tool-specific processors are a future catalogue expansion. |
 | Cloud Clipboard | Authenticated cross-device clipboard CRUD with protected persistence. | One-time burn-link delivery is not included in this release. |
 | Cloud Notes | Authenticated note creation, editing, deletion, and owner-scoped revision history. | Full-text search, sharing, export formats, folders/tags/colors, and storage-backed attachments are follow-up features. |
 | AI Suite | Streaming chat, transparent guest/member request limits, safety messaging, and authenticated conversation history. | Standalone text, code, and image helper screens are follow-up interfaces; they are not represented as separately implemented tools. |
-| Tests | `pnpm check` and `pnpm test` passed: **55 assertions in 28 test files**. Coverage includes daily-challenge handling, relay-only WebRTC rules, security headers, privacy helpers, multilingual integrity, game persistence, links, short links, password generation, and error recovery. | Additional end-to-end and expanded helper-path coverage can be added as the platform evolves. |
+| Tests | `pnpm check` and `pnpm test` passed: **61 assertions in 29 test files**. Coverage includes daily-challenge handling, relay-only WebRTC rules, security headers, privacy helpers, multilingual integrity, catalogue integrity, explicit local-operation execution, game persistence, links and filtered states, short links, password generation, and error recovery. | Additional end-to-end and expanded helper-path coverage can be added as the platform evolves. |
 
 ## Social Authentication Limitation
 

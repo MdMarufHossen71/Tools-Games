@@ -7,6 +7,18 @@ const morse: Record<string, string> = { a: ".-", b: "-...", c: "-.-.", d: "-..",
 
 export type ToolResult = { value: string; error?: boolean };
 
+/**
+ * Concrete browser-local processors implemented by `runTool`.
+ * Catalogue entries outside this list intentionally use the shared private workspace
+ * until a dedicated processor is added; this avoids representing a passthrough as a
+ * completed specialized transformation.
+ */
+export const localOperationSlugs = [
+  "word-counter", "case-converter", "reverse-text", "sort-lines", "shuffle-lines", "remove-extra-spaces", "remove-empty-lines", "remove-duplicates", "add-text-to-lines", "text-repeater", "text-to-binary", "binary-to-text", "url-extractor", "line-numberer", "sentence-counter", "find-replace", "slug-generator", "reading-time",
+  "base64-encode", "base64-decode", "image-to-base64", "file-to-base64", "pdf-metadata", "url-encode", "url-decode", "html-entity-encode", "html-entity-decode", "rot13", "morse-code", "password-generator", "random-string", "uuid-generator", "nanoid-generator", "random-number", "number-sorter", "average-calculator", "binary-converter", "decimal-converter",
+  "json-formatter", "json-minifier", "json-validator", "csv-converter", "html-beautifier", "css-minifier", "regex-tester", "email-validator", "url-parser", "query-string-parser", "json-escape", "calculator", "percentage-calculator", "hex-to-rgb", "random-color", "invert-color", "gradient-generator", "unix-timestamp", "date-difference", "file-size-converter", "file-type-identifier", "fancy-text", "coin-flipper", "dice-roller",
+] as const;
+
 export function runTool(slug: string, input: string, nonce = 0): ToolResult {
   try {
     switch (slug) {
@@ -23,6 +35,11 @@ export function runTool(slug: string, input: string, nonce = 0): ToolResult {
       case "remove-duplicates": return { value: Array.from(new Set(input.split("\n"))).join("\n") };
       case "add-text-to-lines": { const [prefix = "", ...lines] = input.split("\n"); return { value: lines.map(line => `${prefix}${line}`).join("\n") }; }
       case "text-repeater": { const [count = 2, ...text] = input.split("\n"); return { value: Array.from({ length: Math.min(Math.max(Number(count) || 2, 1), 100) }, () => text.join("\n")).join("\n") }; }
+      case "text-to-binary": return { value: Array.from(input).map(character => character.codePointAt(0)!.toString(2).padStart(8, "0")).join(" ") };
+      case "binary-to-text": return { value: input.trim().split(/\s+/).map(value => /^[01]{1,21}$/.test(value) ? String.fromCodePoint(parseInt(value, 2)) : "").join("") };
+      case "url-extractor": return { value: Array.from(new Set(input.match(/https?:\/\/[^\s<>"]+/g) ?? [])).join("\n") };
+      case "line-numberer": return { value: input.split("\n").map((line, index) => `${index + 1}. ${line}`).join("\n") };
+      case "sentence-counter": return { value: String((input.trim().match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? []).filter(Boolean).length) };
       case "find-replace": { const [find = "", replacement = "", ...text] = input.split("\n"); return { value: text.join("\n").split(find).join(replacement) }; }
       case "slug-generator": return { value: input.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "") };
       case "reading-time": return { value: String(Math.max(1, Math.ceil((input.trim() ? input.trim().split(/\s+/).length : 0) / 200))) };
@@ -36,6 +53,8 @@ export function runTool(slug: string, input: string, nonce = 0): ToolResult {
       }
       case "url-encode": return { value: encodeURIComponent(input) };
       case "url-decode": return { value: decodeURIComponent(input) };
+      case "html-entity-encode": return { value: input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") };
+      case "html-entity-decode": { const entities: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: "\"", "#39": "'" }; return { value: input.replace(/&(amp|lt|gt|quot|#39);/g, (match, entity: string) => entities[entity] ?? match) }; }
       case "rot13": return { value: input.replace(/[a-z]/gi, character => String.fromCharCode((character <= "Z" ? 90 : 122) >= character.charCodeAt(0) + 13 ? character.charCodeAt(0) + 13 : character.charCodeAt(0) - 13)) };
       case "morse-code": return { value: input.toLowerCase().split("").map(character => character === " " ? "/" : morse[character] ?? character).join(" ") };
       case "password-generator": return { value: randomString(18, "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*_-+=") };
@@ -55,6 +74,9 @@ export function runTool(slug: string, input: string, nonce = 0): ToolResult {
       case "css-minifier": return { value: input.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ").replace(/\s*([{}:;,])\s*/g, "$1").trim() };
       case "regex-tester": { const [pattern = "", sample = ""] = input.split("\n", 2); return { value: JSON.stringify({ matches: Array.from(sample.matchAll(new RegExp(pattern, "g"))).map(match => ({ match: match[0], index: match.index })) }, null, 2) }; }
       case "email-validator": return { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim()) ? "✓" : "✕" };
+      case "url-parser": { const url = new URL(input.trim()); return { value: JSON.stringify({ protocol: url.protocol, host: url.host, hostname: url.hostname, pathname: url.pathname, query: url.search, hash: url.hash }, null, 2) }; }
+      case "query-string-parser": { const raw = input.trim(); const source = raw.startsWith("?") ? raw.slice(1) : raw.includes("://") ? new URL(raw).search.slice(1) : raw; return { value: JSON.stringify(Object.fromEntries(new URLSearchParams(source)), null, 2) }; }
+      case "json-escape": return { value: JSON.stringify(input) };
       case "calculator": { if (!/^[\d+\-*/%().\s]+$/.test(input)) throw new Error(); const result = Function(`"use strict"; return (${input})`)(); return { value: String(result) }; }
       case "percentage-calculator": { const [part = 0, total = 100] = input.split(/[,\s]+/).map(Number); return { value: String(total ? (part / total) * 100 : 0) }; }
       case "hex-to-rgb": { const hex = input.trim().replace("#", ""); if (!/^[0-9a-f]{6}$/i.test(hex)) throw new Error(); return { value: `${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)}` }; }
