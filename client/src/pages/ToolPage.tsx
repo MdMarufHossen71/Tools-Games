@@ -1,10 +1,10 @@
 import { Check, Clipboard, Download, LockKeyhole, RefreshCw, Sparkles, WandSparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getCategory, tools } from "@/data/catalog";
 import { runTool } from "@/lib/toolOperations";
-import { toolInputPrivacyPolicy } from "@/lib/toolPrivacy";
+import { inputAfterToolChange, toolInputPrivacyPolicy } from "@/lib/toolPrivacy";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { trpc } from "@/lib/trpc";
 import "@/tool-page.css";
@@ -18,12 +18,14 @@ export default function ToolPage() {
   const tool = platformConfig.data?.hiddenToolSlugs.includes(slug) ? undefined : tools.find(item => item.slug === slug);
   const { language, t } = useSettings();
   const [input, setInput] = useState("");
+  const previousToolSlug = useRef<string | undefined>(undefined);
   const [nonce, setNonce] = useState(0);
   const [copied, setCopied] = useState(false);
   const result = useMemo(() => tool ? (!input.trim() && !generateTools.has(tool.slug) ? { value: "" } : runTool(tool.slug, input, nonce)) : { value: "" }, [tool, input, nonce]);
 
   useEffect(() => {
-    if (toolInputPrivacyPolicy.clearOnToolChange) setInput("");
+    setInput(current => inputAfterToolChange(previousToolSlug.current, tool?.slug, current));
+    previousToolSlug.current = tool?.slug;
   }, [tool?.slug]);
 
   if (!tool) return <div className="site-frame empty-page"><p className="eyebrow">ToolsHUB</p><h1>{t("notFound.title")}</h1><p>{t("notFound.copy")}</p><Link href="/tools" className="primary-cta">{t("common.back")}</Link></div>;
@@ -33,12 +35,15 @@ export default function ToolPage() {
   const copyOutput = async () => { if (!output) { toast.error(t("tool.invalid")); return; } try { await navigator.clipboard.writeText(output); setCopied(true); toast.success(t("tool.copied")); window.setTimeout(() => setCopied(false), 1800); } catch { toast.error(t("tool.copyFailed")); } };
   const downloadOutput = () => { if (!output) { toast.error(t("tool.invalid")); return; } try { const anchor = document.createElement("a"); const href = URL.createObjectURL(new Blob([output], { type: "text/plain" })); anchor.href = href; anchor.download = `${tool.slug}.txt`; anchor.click(); window.setTimeout(() => URL.revokeObjectURL(href), 0); toast.success(t("tool.downloadText")); } catch { toast.error(t("tool.downloadFailed")); } };
   const needsGenerate = generateTools.has(tool.slug);
+  const supportsLocalFile = ["images", "pdf", "media", "files"].includes(tool.category);
+  const loadLocalFile = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => setInput(String(reader.result ?? "")); reader.readAsDataURL(file); };
+  const speakText = () => { if (!input.trim() || !("speechSynthesis" in window)) { toast.error(t("tool.invalid")); return; } window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(input)); };
 
   return <div className="site-frame tool-page">
     <nav className="crumbs"><Link href="/tools">{t("nav.tools")}</Link><span>/</span><Link href={`/tools?category=${tool.category}`}>{t(`category.${category.id}`)}</Link><span>/</span><strong>{tool.name}</strong></nav>
     <section className="tool-intro"><div><p className="eyebrow">{category.name.toUpperCase()} / {t("tool.private")}</p><h1>{tool.name}</h1><p>{tool.description[language]}</p></div><span className={`category-icon ${category.color}`}><category.icon /></span></section>
-    <div className="tool-layout"><section className="tool-workbench"><div className="workbench-head"><div><h2>{t("tool.input")}</h2><span><LockKeyhole size={14} /> {t("tool.private")}</span></div><button className="subtle-button" onClick={() => { setInput(""); setNonce(value => value + 1); }}><RefreshCw size={15} />{t("tool.reset")}</button></div><textarea value={input} onChange={event => setInput(event.target.value)} placeholder={t("tool.placeholder")} aria-label={t("tool.input")} spellCheck={false} autoComplete="off" data-lpignore="true" />
-      <div className="workbench-actions"><button className="primary-cta compact" onClick={() => setNonce(value => value + 1)}>{needsGenerate ? <WandSparkles size={17} /> : <Sparkles size={17} />}{needsGenerate ? t("tool.generate") : t("tool.run")}</button></div>
+    <div className="tool-layout"><section className="tool-workbench"><div className="workbench-head"><div><h2>{t("tool.input")}</h2><span><LockKeyhole size={14} /> {t("tool.private")}</span></div><button className="subtle-button" onClick={() => { setInput(""); setNonce(value => value + 1); }}><RefreshCw size={15} />{t("tool.reset")}</button></div>{supportsLocalFile && <input type="file" onChange={event => loadLocalFile(event.target.files?.[0])} aria-label={t("tool.input")} /> }<textarea value={input} onChange={event => { if (!toolInputPrivacyPolicy.shouldPersist()) setInput(event.target.value); }} placeholder={t("tool.placeholder")} aria-label={t("tool.input")} spellCheck={false} autoComplete="off" data-lpignore="true" />
+      <div className="workbench-actions"><button className="primary-cta compact" onClick={() => setNonce(value => value + 1)}>{needsGenerate ? <WandSparkles size={17} /> : <Sparkles size={17} />}{needsGenerate ? t("tool.generate") : t("tool.run")}</button>{tool.slug === "text-to-speech" && <button className="subtle-button" onClick={speakText}><Sparkles size={15} />{t("tool.run")}</button>}</div>
       <div className="output-card"><div className="workbench-head"><div><h2>{t("tool.output")}</h2></div><div className="output-actions"><button className="icon-button" onClick={copyOutput} aria-label={t("common.copy")}>{copied ? <Check size={17} /> : <Clipboard size={17} />}</button><button className="icon-button" onClick={downloadOutput} aria-label={t("tool.downloadText")}><Download size={17} /></button></div></div><pre className={result.error ? "error-output" : ""}>{output || "—"}</pre></div>
       <details className="how-card"><summary>{t("tool.how")}</summary><p>{t("tool.howCopy")}</p><p className="privacy-exceptions">{t("tool.privacyExceptions")}</p></details>
     </section>

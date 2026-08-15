@@ -24,6 +24,11 @@ const sections = ["bd", "awesome", "osint"] as const;
 const pageSize = 60;
 const bdCategoryOrder = ["Government Services", "Jobs & Career", "Expatriate Services", "Health & Utility"];
 
+export function keyboardLetter(current: string, key: "ArrowLeft" | "ArrowRight", values = ["#", ...Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ")]) {
+  const index = Math.max(0, values.indexOf(current));
+  return values[(index + (key === "ArrowRight" ? 1 : values.length - 1)) % values.length];
+}
+
 function matchText(value: string, query: string) {
   if (!query) return value;
   const bits = value.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig"));
@@ -87,7 +92,7 @@ export default function UsefulLinksLibrary() {
 
   return <div className="links-library site-frame">
     <header className="links-library-hero"><p className="eyebrow">{t("links.eyebrow")}</p><h1>{t("links.title")}</h1><p>{t("links.copy")}</p><div className="links-search-wrap"><Search size={19} /><input autoComplete="off" value={query} onChange={(event) => { setQuery(event.target.value); setShown({}); }} placeholder={t("links.search")} aria-label={t("links.search")} /><kbd>/</kbd></div><p className="links-result-count" aria-live="polite"><strong>{filtered.length.toLocaleString()}</strong> {t("links.results")}</p></header>
-    <div className="letter-filter" aria-label="Filter by first letter"><button className={letter === "#" ? "active" : ""} onClick={() => setLetter("#")}>{t("links.allLetters")}</button>{letters.slice(1).map((value) => <button key={value} className={letter === value ? "active" : ""} onClick={() => setLetter(value)}>{value}</button>)}</div>
+    <div className="letter-filter" aria-label="Filter by first letter" onKeyDown={(event) => { if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); setLetter(keyboardLetter(letter, event.key)); } }}><button className={letter === "#" ? "active" : ""} onClick={() => setLetter("#")}>{t("links.allLetters")}</button>{letters.slice(1).map((value) => <button key={value} className={letter === value ? "active" : ""} onClick={() => setLetter(value)}>{value}</button>)}</div>
     {isLoading ? <div className="links-status">{t("links.loading")}</div> : filtered.length === 0 ? <div className="links-status">{t("links.empty")}</div> : grouped.map(({ section, categories }) => categories.length > 0 && <section className={`link-source-section ${section}`} key={section}><div className="link-source-heading"><span>{section === "bd" ? <Landmark /> : section === "osint" ? <ShieldCheck /> : <FileCheck2 />}</span><div><p className="eyebrow">{section === "bd" ? "BANGLADESH" : section === "awesome" ? "CURATED COLLECTION" : "RESEARCH COLLECTION"}</p><h2>{titleFor(section)}</h2></div><b>{categories.reduce((sum, category) => sum + category.items.length, 0).toLocaleString()}</b></div><Accordion type="multiple" defaultValue={section === "bd" ? categories.slice(0, 2).map((category) => category.key) : []} className="link-accordion">{categories.map(({ category, items, key }) => { const limit = shown[key] ?? pageSize; const visible = items.slice(0, limit); const displayCategory = bangla && items[0]?.categoryBn ? items[0].categoryBn : category; return <AccordionItem value={key} key={key}><AccordionTrigger><span>{displayCategory}</span><small>{items.length.toLocaleString()}</small></AccordionTrigger><AccordionContent><div className="useful-link-grid">{visible.map((item) => <LinkCard key={item.id} item={item} query={query} bangla={bangla} labels={labels} />)}</div>{items.length > visible.length && <button className="show-more-links" onClick={() => setShown((current) => ({ ...current, [key]: limit + pageSize }))}>{t("links.showMore")} <span>({Math.min(pageSize, items.length - visible.length)})</span></button>}</AccordionContent></AccordionItem>; })}</Accordion></section>)}
   </div>;
 }

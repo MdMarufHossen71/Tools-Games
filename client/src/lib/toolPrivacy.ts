@@ -8,3 +8,9 @@ export const toolInputPrivacyPolicy = {
   shouldPersist: () => false,
   clearOnToolChange: true,
 };
+
+/** Applies the no-retention policy whenever a visitor moves between tools. */
+export function inputAfterToolChange(previousSlug: string | undefined, nextSlug: string | undefined, currentInput: string) {
+  if (toolInputPrivacyPolicy.clearOnToolChange && previousSlug !== nextSlug) return "";
+  return currentInput;
+}

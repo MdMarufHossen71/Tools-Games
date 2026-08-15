@@ -1,6 +1,6 @@
 import { and, desc, eq, gt, like, lte, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { aiConversations, blogArticles, blogLikes, clipboardItems, dailyChallengeScores, gameProgress, InsertUser, leaderboardEntries, multiplayerRoomMembers, multiplayerRoomMessages, multiplayerRooms, notes, noteVersions, platformConfig, sharedFiles, shortLinks, usefulLinks, userSettings, users, vaultEntries } from "../drizzle/schema";
+import { aiConversations, blogArticles, blogLikes, clipboardItems, dailyChallengeScores, friendships, gameProgress, InsertUser, leaderboardEntries, multiplayerRoomMembers, multiplayerRoomMessages, multiplayerRooms, notes, noteVersions, platformConfig, sharedFiles, shortLinks, usefulLinks, userSettings, users, vaultEntries } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { blogSeeds } from "./blogSeed";
 import { newOpaqueToken, openAtRest, sealAtRest } from "./security";
@@ -53,6 +53,40 @@ export async function setUserSuspension(actorId: number, userId: number, isSuspe
   const values = { isSuspended, suspendedAt: isSuspended ? new Date() : null, suspensionReason: isSuspended ? (reason?.trim().slice(0, 240) || null) : null };
   await db.update(users).set(values).where(eq(users.id, userId));
   return (await db.select({ id: users.id, isSuspended: users.isSuspended, suspendedAt: users.suspendedAt, suspensionReason: users.suspensionReason }).from(users).where(eq(users.id, userId)).limit(1))[0];
+}
+
+export function canonicalFriendPair(firstUserId: number, secondUserId: number) {
+  if (!Number.isInteger(firstUserId) || !Number.isInteger(secondUserId) || firstUserId <= 0 || secondUserId <= 0 || firstUserId === secondUserId) throw new Error("A friendship needs two distinct accounts");
+  return firstUserId < secondUserId ? { userId1: firstUserId, userId2: secondUserId } : { userId1: secondUserId, userId2: firstUserId };
+}
+
+export async function listFriendRecords(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(friendships).where(or(eq(friendships.userId1, userId), eq(friendships.userId2, userId))).orderBy(desc(friendships.createdAt));
+}
+
+export async function requestFriendRecord(userId: number, targetUserId: number) {
+  const pair = canonicalFriendPair(userId, targetUserId);
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const target = (await db.select({ id: users.id, isSuspended: users.isSuspended }).from(users).where(eq(users.id, targetUserId)).limit(1))[0];
+  if (!target || target.isSuspended) throw new Error("This account cannot receive friend requests");
+  const existing = (await db.select().from(friendships).where(and(eq(friendships.userId1, pair.userId1), eq(friendships.userId2, pair.userId2))).limit(1))[0];
+  if (existing) return existing;
+  await db.insert(friendships).values(pair);
+  return (await db.select().from(friendships).where(and(eq(friendships.userId1, pair.userId1), eq(friendships.userId2, pair.userId2))).limit(1))[0];
+}
+
+export async function respondToFriendRecord(userId: number, friendshipId: number, accept: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const record = (await db.select().from(friendships).where(eq(friendships.id, friendshipId)).limit(1))[0];
+  if (!record || (record.userId1 !== userId && record.userId2 !== userId)) throw new Error("Friend record not found");
+  if (record.status !== "pending") return record;
+  if (!accept) { await db.delete(friendships).where(eq(friendships.id, friendshipId)); return { ...record, status: "blocked" as const }; }
+  await db.update(friendships).set({ status: "accepted" }).where(eq(friendships.id, friendshipId));
+  return (await db.select().from(friendships).where(eq(friendships.id, friendshipId)).limit(1))[0];
 }
 
 export async function listUsefulLinks() {

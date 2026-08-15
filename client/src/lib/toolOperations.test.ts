@@ -19,4 +19,11 @@ describe("runTool", () => {
     expect(runTool("hex-to-rgb", "#6D5DFB").value).toBe("109, 93, 251");
     expect(runTool("email-validator", "hello@toolshub.example").value).toBe("✓");
   });
+
+  it("covers representative tools across creative, file, number, and developer categories", () => {
+    expect(runTool("number-sorter", "9, 2, 4").value).toBe("2\n4\n9");
+    expect(runTool("csv-converter", "name,score\nToolsHUB,100").value).toContain('"score": "100"');
+    expect(runTool("file-type-identifier", "25 50 44 46").value).toBe("PDF document");
+    expect(runTool("invert-color", "#000000").value).toBe("#FFFFFF");
+  });
 });

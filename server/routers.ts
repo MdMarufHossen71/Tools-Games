@@ -46,6 +46,9 @@ import {
   listUsefulLinks,
   listVaultEntries,
   resolveShortLink,
+  listFriendRecords,
+  requestFriendRecord,
+  respondToFriendRecord,
   revokeAdminFileShare,
   revokeAdminShortLink,
   closeMultiplayerRoom,
@@ -184,6 +187,11 @@ export const appRouter = router({
     closeRoom: protectedProcedure.input(z.object({ roomToken: z.string().regex(/^[A-Za-z0-9_-]{32,64}$/) })).mutation(({ ctx, input }) => closeMultiplayerRoom(input.roomToken, ctx.user.id)),
     roomMessages: protectedProcedure.input(z.object({ roomToken: z.string().regex(/^[A-Za-z0-9_-]{32,64}$/) })).query(({ ctx, input }) => listMultiplayerRoomMessages(input.roomToken, ctx.user.id)),
     sendRoomMessage: protectedProcedure.input(z.object({ roomToken: z.string().regex(/^[A-Za-z0-9_-]{32,64}$/), body: z.string().trim().min(1).max(500) })).mutation(({ ctx, input }) => sendMultiplayerRoomMessage({ ...input, userId: ctx.user.id })),
+  }),
+  friends: router({
+    list: protectedProcedure.query(({ ctx }) => listFriendRecords(ctx.user.id)),
+    request: protectedProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => requestFriendRecord(ctx.user.id, input.userId)),
+    respond: protectedProcedure.input(z.object({ friendshipId: z.number().int().positive(), accept: z.boolean() })).mutation(({ ctx, input }) => respondToFriendRecord(ctx.user.id, input.friendshipId, input.accept)),
   }),
   shortLinks: router({
     create: protectedProcedure.input(z.object({ alias: z.string().trim().regex(/^[a-zA-Z0-9_-]{4,80}$/).optional(), targetUrl: z.string().url().max(2048), password: z.string().min(8).max(120).nullable().optional(), expiresAt: nullableDate, clickLimit: z.number().int().min(1).max(1_000_000).nullable().optional() })).mutation(async ({ ctx, input }) => {

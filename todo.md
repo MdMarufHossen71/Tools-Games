@@ -16,7 +16,7 @@
 - [ ] Implement encrypted password vault records with client-derived encryption and password generation utilities.
 - [ ] Implement AI Suite with streaming chat, saved conversations, guest versus account limits, text/code/image helpers, rate-limit disclosure, and safety disclaimer.
 - [x] Build 40+ games catalog with responsive game cards, playable single-player games, English/বাংলা Wordle modes, score persistence, and device-aware controls.
-- [ ] Implement server-side leaderboard validation, friends records, streaks, daily challenge UI, and game progress syncing.
+- [x] Implement server-side leaderboard validation, friends records, streaks, daily challenge UI, and game progress syncing.
 - [x] Add an idempotent cron-authenticated daily challenge handler, date-keyed daily standings, and an arcade daily challenge panel without deleting all-time leaderboard history.
 - [x] Ensure the scheduled daily challenge chooses a validated playable game with cryptographically secure randomness while retaining a stable public fallback before the first run.
 - [x] Implement multiplayer room/lobby records, presence expiration, invite links, session chat, and client connection states.
@@ -29,7 +29,7 @@
 - [x] Make every Useful Links category collapsible and add role-gated admin create, edit, and removal controls for link records.
 - [x] Import the supplied 2,108-link JSON/CSV library into editable database records while preserving every seed URL byte-for-byte and retaining unverified destinations.
 - [x] Add separate “Everyday Useful Websites” and “OSINT & Research Tools” category hierarchies after the Bangladesh service cards, with Curated and Research/OSINT source tags.
-- [ ] Build instant client-side name-and-description search, A–Z filtering, keyboard navigation, result highlighting, result counts, and lazy accordion rendering for the large link library.
+- [x] Build instant client-side name-and-description search, A–Z filtering, keyboard navigation, result highlighting, result counts, and lazy accordion rendering for the large link library.
 - [x] Add admin bulk JSON/CSV import validation and management controls matching the supplied `{ cat, src, links }` schema.
 - [x] Include all link names in global search and add the requested Useful Links SEO metadata.
 - [ ] Preserve the existing email-and-password sign-in flow while adding Google social sign-in only through the available free built-in provider flow.
@@ -55,7 +55,7 @@
 - [x] Add first-visit browser language detection, guest local storage persistence, authenticated database synchronization, native-name flag language dropdown, and a coverage report that warns on English fallbacks and blocks incomplete launch locales.
 - [x] Enforce full RTL layout, control ordering, and icon direction for Arabic and Urdu, and verify these at desktop and mobile breakpoints.
 - [x] Add a per-article AI-powered “Read in your language” control while keeping blog authoring in its original language.
-- [ ] Enforce the private-input persistence policy on tool pages and document the exceptions instead of relying solely on visual messaging.
+- [x] Enforce the private-input persistence policy on tool pages and document the exceptions instead of relying solely on visual messaging.
 - [x] Add resilient clipboard and download error handling with localized success and failure feedback on tool pages.
 - [x] Add authenticated AI conversation persistence with owner-scoped list/load/rename/delete controls and transcript role filtering.
 - [x] Restore authenticated saved game best scores and progress on revisit without overriding active local play.
