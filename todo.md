@@ -99,3 +99,6 @@
 - [x] Extend ToolPage regression coverage with a generic file utility route that asserts the `*/*` acceptance contract.
 - [x] Add and verify browser-local Image Converter format selection and Image Compressor JPEG-quality controls at the mobile breakpoint, without uploading source images.
 - [x] Add recognizable per-destination favicon/logo identity to Useful Links cards with same-origin cached logo delivery, readable name-monogram fallbacks, accessible labels, and desktop/mobile validation.
+- [x] Implement a real browser-local Image Crop workspace with visible crop settings, touch-friendly repositioning, preview, and download instead of a guided placeholder.
+- [x] Audit image-tool availability labels so concrete tools show their controls and guided-only catalogue entries do not imply unavailable settings.
+- [x] Refine the mobile header hierarchy for compact branding, direct utility access, and an unambiguous navigation-menu control.

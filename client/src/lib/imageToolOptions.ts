@@ -1,6 +1,7 @@
-export type CanvasImageAction = "resize" | "rotate" | "flip" | "convert" | "compress";
+export type CanvasImageAction = "resize" | "rotate" | "flip" | "convert" | "compress" | "crop";
 
 const actions: Record<string, CanvasImageAction> = {
+  "image-crop": "crop",
   "image-resize": "resize",
   "image-rotate": "rotate",
   "image-flip": "flip",

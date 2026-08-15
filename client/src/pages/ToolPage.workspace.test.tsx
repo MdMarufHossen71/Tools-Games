@@ -48,4 +48,10 @@ describe("ToolPage mobile workspace", () => {
     expect(renderWorkspace("en", "/tools/calculator")).toContain('inputMode="decimal"');
     expect(renderWorkspace("en", "/tools/json-formatter")).toContain('inputMode="text"');
   });
+
+  it("presents Image Crop as an active local canvas editor, not a guided placeholder", () => {
+    const crop = renderWorkspace("en", "/tools/image-crop");
+    expect(crop).toContain(translations.en["workspace.active"]);
+    expect(crop).not.toContain(translations.en["workspace.guided"]);
+  });
 });

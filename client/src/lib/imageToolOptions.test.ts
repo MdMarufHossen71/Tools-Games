@@ -6,7 +6,7 @@ describe("imageToolOptions", () => {
     expect(canvasImageAction("image-resize")).toBe("resize");
     expect(canvasImageAction("image-converter")).toBe("convert");
     expect(canvasImageAction("image-compressor")).toBe("compress");
-    expect(canvasImageAction("image-crop")).toBeUndefined();
+    expect(canvasImageAction("image-crop")).toBe("crop");
   });
 
   it("uses a matching downloaded extension for each supported output type", () => {

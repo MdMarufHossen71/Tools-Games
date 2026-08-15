@@ -8,6 +8,7 @@ import { inputAfterToolChange, toolInputPrivacyPolicy } from "@/lib/toolPrivacy"
 import { fileInputMode } from "@/lib/fileToolInput";
 import { getToolWorkspaceModel } from "@/lib/toolWorkspaceModel";
 import { canvasImageAction, imageOutputExtension } from "@/lib/imageToolOptions";
+import { imageCropRect, type CropAspect } from "@/lib/imageCrop";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { trpc } from "@/lib/trpc";
 import "@/tool-page.css";
@@ -48,7 +49,12 @@ export default function ToolPage() {
   const [flipAxis, setFlipAxis] = useState<"horizontal" | "vertical">("horizontal");
   const [imageMime, setImageMime] = useState<"image/png" | "image/jpeg" | "image/webp">("image/png");
   const [imageQuality, setImageQuality] = useState(82);
+  const [cropZoom, setCropZoom] = useState(100);
+  const [cropX, setCropX] = useState(0);
+  const [cropY, setCropY] = useState(0);
+  const [cropAspect, setCropAspect] = useState<CropAspect>("free");
   const previousToolSlug = useRef<string | undefined>(undefined);
+  const cropPointer = useRef<{ id: number; clientX: number; clientY: number; cropX: number; cropY: number } | null>(null);
   const workspace = tool ? getToolWorkspaceModel(tool.category) : getToolWorkspaceModel("text");
   const isFileTool = workspace.acceptsFile;
   const imageAction = tool ? canvasImageAction(tool.slug) : undefined;
@@ -68,10 +74,11 @@ export default function ToolPage() {
   const spec = { accept: workspace.accept ?? "*/*", type: workspace.fileType ?? "file" };
   const example = examples[tool.slug];
   const output = result.error ? t("tool.invalid") : result.value;
-  const clear = () => { setInput(""); setSelectedFile(null); setImageOutput(""); setHasRun(false); setNonce(value => value + 1); };
+  const clear = () => { setInput(""); setSelectedFile(null); setImageOutput(""); setHasRun(false); setCropZoom(100); setCropX(0); setCropY(0); setCropAspect("free"); setNonce(value => value + 1); };
   const loadFile = (file?: File) => {
     if (!file) return;
     setSelectedFile(file); setImageOutput(""); setHasRun(false);
+    if (imageAction === "crop") { setCropZoom(100); setCropX(0); setCropY(0); setCropAspect("free"); }
     if (!hasProcessor) { setInput(""); return; }
     const mode = fileInputMode(tool.slug);
     if (mode === "name") { setInput(file.name); return; }
@@ -88,6 +95,18 @@ export default function ToolPage() {
       const source = URL.createObjectURL(selectedFile);
       const image = new Image();
       image.onload = () => {
+        if (imageAction === "crop") {
+          const crop = imageCropRect(image.naturalWidth, image.naturalHeight, cropZoom, cropX, cropY, cropAspect);
+          const canvas = document.createElement("canvas");
+          canvas.width = crop.sw;
+          canvas.height = crop.sh;
+          const context = canvas.getContext("2d");
+          if (!context) { URL.revokeObjectURL(source); return; }
+          context.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
+          setImageOutput(canvas.toDataURL("image/png"));
+          URL.revokeObjectURL(source);
+          return;
+        }
         const scale = imageAction === "resize" ? Math.min(200, Math.max(10, imageScale)) / 100 : 1;
         const sourceWidth = Math.max(1, Math.round(image.naturalWidth * scale));
         const sourceHeight = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -127,6 +146,7 @@ export default function ToolPage() {
         <label className="file-dropzone" onDragOver={event => event.preventDefault()} onDrop={onDrop}><>{tool.category === "images" ? <FileImage size={30} /> : <FileText size={30} />}</><strong>{copy.choose}</strong><span>{copy.upload}</span><small>{copy.drop} · {spec.type}</small><input type="file" accept={spec.accept} onChange={event => loadFile(event.target.files?.[0])} aria-label={`${copy.choose} ${spec.type}`} /></label>
         {selectedFile && <div className="selected-file"><span><Check size={16} />{copy.ready}: <strong>{selectedFile.name}</strong><small>{Math.max(1, Math.ceil(selectedFile.size / 1024))} KB</small></span><button className="subtle-button" onClick={clear}><X size={15} />{copy.remove}</button></div>}
         {usesCanvasImage && <div className="image-controls">{imageAction === "resize" && <label>{copy.resize} <input type="number" min="10" max="200" value={imageScale} onChange={event => setImageScale(Number(event.target.value) || 100)} />%</label>}{imageAction === "rotate" && <label>{copy.rotate} <select value={imageRotation} onChange={event => setImageRotation(Number(event.target.value))}><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>}{imageAction === "flip" && <label>{copy.flip} <select value={flipAxis} onChange={event => setFlipAxis(event.target.value as "horizontal" | "vertical")}><option value="horizontal">{copy.horizontal}</option><option value="vertical">{copy.vertical}</option></select></label>}{imageAction === "convert" && <label>{copy.format} <select value={imageMime} onChange={event => setImageMime(event.target.value as typeof imageMime)}><option value="image/png">PNG</option><option value="image/jpeg">JPG</option><option value="image/webp">WebP</option></select></label>}{imageAction === "compress" && <label>{copy.quality} <input type="range" min="20" max="95" value={imageQuality} onChange={event => setImageQuality(Number(event.target.value))} /> {imageQuality}%</label>}</div>}
+        {imageAction === "crop" && selectedFile && input.startsWith("data:image/") && <fieldset className="crop-workspace"><legend>{tool.name}</legend><div className="crop-stage" style={{ aspectRatio: cropAspect === "free" ? undefined : cropAspect }} onPointerDown={event => { cropPointer.current = { id: event.pointerId, clientX: event.clientX, clientY: event.clientY, cropX, cropY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={event => { const start = cropPointer.current; if (!start || start.id !== event.pointerId) return; const bounds = event.currentTarget.getBoundingClientRect(); setCropX(Math.max(-100, Math.min(100, start.cropX - ((event.clientX - start.clientX) / bounds.width) * 200))); setCropY(Math.max(-100, Math.min(100, start.cropY - ((event.clientY - start.clientY) / bounds.height) * 200))); }} onPointerUp={() => { cropPointer.current = null; }} onPointerCancel={() => { cropPointer.current = null; }}><img src={input} alt="" draggable={false} style={{ transform: `translate(${-cropX / 2}%, ${-cropY / 2}%) scale(${cropZoom / 100})` }} /><span aria-hidden="true" /></div><div className="crop-ratios" role="group" aria-label={tool.name}>{(["free", "1:1", "4:3", "16:9"] as CropAspect[]).map(aspect => <button type="button" key={aspect} className={cropAspect === aspect ? "active" : ""} onClick={() => setCropAspect(aspect)} aria-pressed={cropAspect === aspect}>{aspect === "free" ? "◻" : aspect}</button>)}</div><div className="crop-ranges"><label>{copy.resize}<input type="range" min="100" max="300" value={cropZoom} onChange={event => setCropZoom(Number(event.target.value))} aria-label={copy.resize} /><output>{cropZoom}%</output></label><label>X<input type="range" min="-100" max="100" value={cropX} onChange={event => setCropX(Number(event.target.value))} aria-label="X" /></label><label>Y<input type="range" min="-100" max="100" value={cropY} onChange={event => setCropY(Number(event.target.value))} aria-label="Y" /></label></div></fieldset>}
         <div className={`processor-status ${hasProcessor ? "implemented" : "guided"}`}><Info size={16} />{hasProcessor ? copy.active : copy.guided}</div>
       </> : <>
         {example && <button className="example-chip" type="button" onClick={() => setInput(example)}><Sparkles size={14} />{copy.example}</button>}
