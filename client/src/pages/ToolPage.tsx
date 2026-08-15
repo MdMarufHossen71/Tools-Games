@@ -7,6 +7,7 @@ import { localOperationSlugs, runTool } from "@/lib/toolOperations";
 import { inputAfterToolChange, toolInputPrivacyPolicy } from "@/lib/toolPrivacy";
 import { fileInputMode } from "@/lib/fileToolInput";
 import { getToolWorkspaceModel } from "@/lib/toolWorkspaceModel";
+import { canvasImageAction, imageOutputExtension } from "@/lib/imageToolOptions";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import { trpc } from "@/lib/trpc";
 import "@/tool-page.css";
@@ -14,7 +15,6 @@ import "@/tool-page-image.css";
 
 const generateTools = new Set(["password-generator", "random-string", "uuid-generator", "nanoid-generator", "random-number", "random-color", "gradient-generator"]);
 const processors = new Set<string>(localOperationSlugs);
-const canvasImageTools = new Set(["image-resize", "image-rotate", "image-flip"]);
 
 const examples: Record<string, string> = {
   "json-formatter": '{"name":"ToolsHUB","free":true}',
@@ -35,7 +35,7 @@ export default function ToolPage() {
   const tool = platformConfig.data?.hiddenToolSlugs.includes(slug) ? undefined : tools.find(item => item.slug === slug);
   const { language, t } = useSettings();
   const copy = {
-    choose: t("workspace.choose"), upload: t("workspace.upload"), drop: t("workspace.drop"), ready: t("workspace.ready"), remove: t("workspace.remove"), active: t("workspace.active"), guided: t("workspace.guided"), example: t("workspace.example"), noOutput: t("workspace.noOutput"), processing: t("workspace.processing"), imageReady: t("workspace.imageReady"), resize: t("workspace.resize"), rotate: t("workspace.rotate"), flip: t("workspace.flip"), horizontal: t("workspace.horizontal"), vertical: t("workspace.vertical"), processedImage: t("workspace.processedImage"),
+    choose: t("workspace.choose"), upload: t("workspace.upload"), drop: t("workspace.drop"), ready: t("workspace.ready"), remove: t("workspace.remove"), active: t("workspace.active"), guided: t("workspace.guided"), example: t("workspace.example"), noOutput: t("workspace.noOutput"), processing: t("workspace.processing"), imageReady: t("workspace.imageReady"), resize: t("workspace.resize"), rotate: t("workspace.rotate"), flip: t("workspace.flip"), horizontal: t("workspace.horizontal"), vertical: t("workspace.vertical"), format: t("workspace.format"), quality: t("workspace.quality"), processedImage: t("workspace.processedImage"),
   };
   const [input, setInput] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,10 +46,13 @@ export default function ToolPage() {
   const [imageScale, setImageScale] = useState(100);
   const [imageRotation, setImageRotation] = useState(90);
   const [flipAxis, setFlipAxis] = useState<"horizontal" | "vertical">("horizontal");
+  const [imageMime, setImageMime] = useState<"image/png" | "image/jpeg" | "image/webp">("image/png");
+  const [imageQuality, setImageQuality] = useState(82);
   const previousToolSlug = useRef<string | undefined>(undefined);
   const workspace = tool ? getToolWorkspaceModel(tool.category) : getToolWorkspaceModel("text");
   const isFileTool = workspace.acceptsFile;
-  const usesCanvasImage = Boolean(tool && canvasImageTools.has(tool.slug));
+  const imageAction = tool ? canvasImageAction(tool.slug) : undefined;
+  const usesCanvasImage = Boolean(imageAction);
   const hasProcessor = Boolean(tool && (processors.has(tool.slug) || usesCanvasImage));
   const needsGenerate = Boolean(tool && generateTools.has(tool.slug));
   const result = useMemo(() => tool ? (!input.trim() && !needsGenerate ? { value: "" } : runTool(tool.slug, input, nonce)) : { value: "" }, [tool, input, needsGenerate, nonce]);
@@ -85,10 +88,10 @@ export default function ToolPage() {
       const source = URL.createObjectURL(selectedFile);
       const image = new Image();
       image.onload = () => {
-        const scale = tool.slug === "image-resize" ? Math.min(200, Math.max(10, imageScale)) / 100 : 1;
+        const scale = imageAction === "resize" ? Math.min(200, Math.max(10, imageScale)) / 100 : 1;
         const sourceWidth = Math.max(1, Math.round(image.naturalWidth * scale));
         const sourceHeight = Math.max(1, Math.round(image.naturalHeight * scale));
-        const rotation = tool.slug === "image-rotate" ? imageRotation : 0;
+        const rotation = imageAction === "rotate" ? imageRotation : 0;
         const sideways = rotation === 90 || rotation === 270;
         const canvas = document.createElement("canvas");
         canvas.width = sideways ? sourceHeight : sourceWidth;
@@ -97,9 +100,10 @@ export default function ToolPage() {
         if (!context) return;
         context.translate(canvas.width / 2, canvas.height / 2);
         context.rotate((rotation * Math.PI) / 180);
-        if (tool.slug === "image-flip") context.scale(flipAxis === "horizontal" ? -1 : 1, flipAxis === "vertical" ? -1 : 1);
+        if (imageAction === "flip") context.scale(flipAxis === "horizontal" ? -1 : 1, flipAxis === "vertical" ? -1 : 1);
         context.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
-        setImageOutput(canvas.toDataURL("image/png"));
+        const outputMime = imageAction === "compress" ? "image/jpeg" : imageAction === "convert" ? imageMime : "image/png";
+        setImageOutput(canvas.toDataURL(outputMime, imageAction === "compress" || imageAction === "convert" ? imageQuality / 100 : undefined));
         URL.revokeObjectURL(source);
       };
       image.onerror = () => { URL.revokeObjectURL(source); toast.error(t("tool.invalid")); };
@@ -109,7 +113,7 @@ export default function ToolPage() {
     setNonce(value => value + 1);
   };
   const copyOutput = async () => { const value = imageOutput || output; if (!value) return toast.error(t("tool.invalid")); try { await navigator.clipboard.writeText(value); setCopied(true); toast.success(t("tool.copied")); window.setTimeout(() => setCopied(false), 1800); } catch { toast.error(t("tool.copyFailed")); } };
-  const downloadOutput = () => { const value = imageOutput || output; if (!value) return toast.error(t("tool.invalid")); const anchor = document.createElement("a"); if (imageOutput) { anchor.href = imageOutput; anchor.download = `${tool.slug}.png`; } else { const href = URL.createObjectURL(new Blob([output], { type: "text/plain" })); anchor.href = href; anchor.download = `${tool.slug}.txt`; window.setTimeout(() => URL.revokeObjectURL(href), 0); } anchor.click(); toast.success(t("tool.downloadText")); };
+  const downloadOutput = () => { const value = imageOutput || output; if (!value) return toast.error(t("tool.invalid")); const anchor = document.createElement("a"); if (imageOutput) { const mime = imageOutput.match(/^data:([^;]+);/)?.[1] ?? "image/png"; anchor.href = imageOutput; anchor.download = `${tool.slug}.${imageOutputExtension(mime)}`; } else { const href = URL.createObjectURL(new Blob([output], { type: "text/plain" })); anchor.href = href; anchor.download = `${tool.slug}.txt`; window.setTimeout(() => URL.revokeObjectURL(href), 0); } anchor.click(); toast.success(t("tool.downloadText")); };
   const speakText = () => { if (!input.trim() || !("speechSynthesis" in window)) return toast.error(t("tool.invalid")); window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(input)); };
   const displayOutput = !hasRun ? copy.noOutput : usesCanvasImage ? imageOutput ? copy.imageReady : copy.processing : isFileTool && !hasProcessor ? copy.guided : output || t("tool.invalid");
 
@@ -122,7 +126,7 @@ export default function ToolPage() {
       {isFileTool ? <>
         <label className="file-dropzone" onDragOver={event => event.preventDefault()} onDrop={onDrop}><>{tool.category === "images" ? <FileImage size={30} /> : <FileText size={30} />}</><strong>{copy.choose}</strong><span>{copy.upload}</span><small>{copy.drop} · {spec.type}</small><input type="file" accept={spec.accept} onChange={event => loadFile(event.target.files?.[0])} aria-label={`${copy.choose} ${spec.type}`} /></label>
         {selectedFile && <div className="selected-file"><span><Check size={16} />{copy.ready}: <strong>{selectedFile.name}</strong><small>{Math.max(1, Math.ceil(selectedFile.size / 1024))} KB</small></span><button className="subtle-button" onClick={clear}><X size={15} />{copy.remove}</button></div>}
-        {usesCanvasImage && <div className="image-controls">{tool.slug === "image-resize" && <label>{copy.resize} <input type="number" min="10" max="200" value={imageScale} onChange={event => setImageScale(Number(event.target.value) || 100)} />%</label>}{tool.slug === "image-rotate" && <label>{copy.rotate} <select value={imageRotation} onChange={event => setImageRotation(Number(event.target.value))}><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>}{tool.slug === "image-flip" && <label>{copy.flip} <select value={flipAxis} onChange={event => setFlipAxis(event.target.value as "horizontal" | "vertical")}><option value="horizontal">{copy.horizontal}</option><option value="vertical">{copy.vertical}</option></select></label>}</div>}
+        {usesCanvasImage && <div className="image-controls">{imageAction === "resize" && <label>{copy.resize} <input type="number" min="10" max="200" value={imageScale} onChange={event => setImageScale(Number(event.target.value) || 100)} />%</label>}{imageAction === "rotate" && <label>{copy.rotate} <select value={imageRotation} onChange={event => setImageRotation(Number(event.target.value))}><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>}{imageAction === "flip" && <label>{copy.flip} <select value={flipAxis} onChange={event => setFlipAxis(event.target.value as "horizontal" | "vertical")}><option value="horizontal">{copy.horizontal}</option><option value="vertical">{copy.vertical}</option></select></label>}{imageAction === "convert" && <label>{copy.format} <select value={imageMime} onChange={event => setImageMime(event.target.value as typeof imageMime)}><option value="image/png">PNG</option><option value="image/jpeg">JPG</option><option value="image/webp">WebP</option></select></label>}{imageAction === "compress" && <label>{copy.quality} <input type="range" min="20" max="95" value={imageQuality} onChange={event => setImageQuality(Number(event.target.value))} /> {imageQuality}%</label>}</div>}
         <div className={`processor-status ${hasProcessor ? "implemented" : "guided"}`}><Info size={16} />{hasProcessor ? copy.active : copy.guided}</div>
       </> : <>
         {example && <button className="example-chip" type="button" onClick={() => setInput(example)}><Sparkles size={14} />{copy.example}</button>}

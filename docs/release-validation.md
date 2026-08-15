@@ -9,7 +9,7 @@ This document records the release checks performed in the managed development en
 | Check | Result | Evidence |
 | --- | --- | --- |
 | Strict TypeScript | Passed | `pnpm check` completed with zero errors after the final RTL and Not Found changes. |
-| Automated suite | Passed | `pnpm test` completed with 66 passing tests across 32 test files, including browser-local cryptographic password generation, exact concrete-operation execution, original email-utility safeguards, browser-local file-input routing, category-specific workspace models, localized/RTL ToolPage rendering, catalogue filters, and Useful Links filtered-state checks. |
+| Automated suite | Passed | `pnpm test` completed with 68 passing tests across 33 test files, including browser-local cryptographic password generation, exact concrete-operation execution, original email-utility safeguards, browser-local file-input routing, category-specific workspace models, localized/RTL ToolPage rendering, concrete image option controls, catalogue filters, and Useful Links filtered-state checks. |
 | Security-policy coverage | Passed | HTTP security tests cover CSP generation and API route rate-limit policy, including OAuth, storage, tRPC, guest AI SSE, and Heartbeat handling. |
 | Public API smoke checks | Passed | `platform.summary`, `games.dailyChallenge`, and `games.listRooms` returned HTTP 200 with valid inputs. |
 | Protected API boundary | Passed | A guest request to `notes.list` returned HTTP 401; a guest request to `admin.dashboard` returned HTTP 403. |

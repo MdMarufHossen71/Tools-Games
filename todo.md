@@ -39,7 +39,7 @@
 - [x] Build hidden role-guarded admin console for user oversight, tool visibility, links, file shares, short links, announcements, and platform metrics.
 - [x] Add server-side scheduled daily challenge reset using a secure deployed Heartbeat handler rather than an in-process timer.
 - [x] Add privacy messaging, secure validation, CSP, rate limiting, friendly bilingual 404/500 states, SEO metadata, structured data, sitemap, and robots directives.
-- [x] Add and run the release unit-test baseline: 66 assertions across 32 test files cover representative database/procedure, tool, authentication, scheduled-handler, game, catalogue-integrity, email-utility, browser-local file-input, category-model, localized workspace rendering, and security paths; remaining expansion opportunities are documented in `docs/release-scope.md`.
+- [x] Add and run the release unit-test baseline: 68 assertions across 33 test files cover representative database/procedure, tool, authentication, scheduled-handler, game, catalogue-integrity, email-utility, browser-local file-input, category-model, localized workspace rendering, concrete image controls, and security paths; remaining expansion opportunities are documented in `docs/release-scope.md`.
 - [x] Perform desktop and 360px mobile visual checks, functional test flows, type checks, and test suite runs.
 - [x] Push completed source code to MdMarufHossen71/Tools-Games on the server-side branch.
 - [x] Save the verified release checkpoint and guide the user to publish the site from the project interface.
@@ -97,3 +97,4 @@
 - [x] Add focused ToolPage regression coverage for PDF/media/file accept types, numeric input mode, and data/developer text-entry behavior.
 - [x] Verify an Arabic or Urdu ToolPage render exposes the shared RTL direction state and direction-safe control ordering used by the workspace layout.
 - [x] Extend ToolPage regression coverage with a generic file utility route that asserts the `*/*` acceptance contract.
+- [x] Add and verify browser-local Image Converter format selection and Image Compressor JPEG-quality controls at the mobile breakpoint, without uploading source images.

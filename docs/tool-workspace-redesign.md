@@ -19,11 +19,11 @@ The workspace now also applies an explicit category model to all twelve catalogu
 
 ## Concrete Image Processing at Launch
 
-**Image Resize**, **Image Rotate**, and **Image Flip** now process selected images in the visitor’s browser with Canvas and offer an image preview plus PNG download. The interface deliberately keeps the action disabled until an image is selected. It also avoids exposing an image data URL while the result is being prepared.
+**Image Resize**, **Image Rotate**, **Image Flip**, **Image Converter**, and **Image Compressor** now process selected images in the visitor’s browser with Canvas and offer an image preview plus download. Converter output format is explicit, while Compressor exposes a bounded JPEG-quality control; neither sends the source image to ToolsHUB. The interface deliberately keeps the action disabled until an image is selected. It also avoids exposing an image data URL while the result is being prepared.
 
 ## Mobile and Desktop Verification
 
-Phone verification at 375×812 confirmed the labelled chooser, type-specific controls, touch-sized action, empty pre-action output, and Bengali labels for Image Resize, Image Rotate, Image Flip, File to Text, File to Base64, and File Size Converter. Desktop verification at 1280×720 covered Image Resize, JSON Formatter, PDF Metadata, and Random Number. A valid `pdf-metadata` route replaced an earlier invalid route used during the audit; File to Text is now a real visible route with a browser-local text-reading processor.
+Phone verification at 375×812 confirmed the labelled chooser, type-specific controls, touch-sized action, empty pre-action output, and Bengali labels for Image Resize, Image Rotate, Image Flip, File to Text, File to Base64, and File Size Converter. Desktop verification at 1280×720 covered Image Resize, JSON Formatter, PDF Metadata, and Random Number. A valid `pdf-metadata` route replaced an earlier invalid route used during the audit; File to Text is now a real visible route with a browser-local text-reading processor. Additional phone verification confirmed that Image Converter presents its explicit PNG output selector in বাংলা and Image Compressor presents its JPEG-quality slider in Arabic RTL. Both retain the labelled native image chooser, local-processing notice, disabled pre-action state, and download controls.
 
 The translation coverage suite verifies the shared workspace vocabulary in all eight locale dictionaries at 100% key coverage. Phone review also covered Arabic and Urdu RTL layouts, confirming that the file chooser, action row, output controls, and category guidance remain readable and reachable in both directions.
 

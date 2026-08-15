@@ -83,7 +83,7 @@ pnpm check
 pnpm test
 ```
 
-The verified release suite currently contains **66 assertions across 32 test files**, covering security policy, authentication/logout, error recovery, tool privacy, translation coverage, category-specific mobile workspace models, localized/RTL ToolPage rendering, catalogue integrity, explicit local-operation execution, email-utility safeguards, browser-local file-input routing, link imports, score/session/streak/profile validation, daily challenges, TURN credentials, multiplayer rules, friendship records, Useful Links keyboard controls and filtered states, UTM construction, password generation, and AI-history safeguards.
+The verified release suite currently contains **68 assertions across 33 test files**, covering security policy, authentication/logout, error recovery, tool privacy, translation coverage, category-specific mobile workspace models, localized/RTL ToolPage rendering, concrete image option controls, catalogue integrity, explicit local-operation execution, email-utility safeguards, browser-local file-input routing, link imports, score/session/streak/profile validation, daily challenges, TURN credentials, multiplayer rules, friendship records, Useful Links keyboard controls and filtered states, UTM construction, password generation, and AI-history safeguards.
 
 ## Deployment and daily challenge schedule
 
