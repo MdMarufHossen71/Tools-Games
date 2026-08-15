@@ -20,7 +20,7 @@ export type ToolResult = { value: string; error?: boolean };
  */
 export const localOperationSlugs = [
   "word-counter", "case-converter", "reverse-text", "sort-lines", "shuffle-lines", "remove-extra-spaces", "remove-empty-lines", "remove-duplicates", "add-text-to-lines", "text-repeater", "text-to-binary", "binary-to-text", "url-extractor", "line-numberer", "sentence-counter", "find-replace", "slug-generator", "reading-time", "gmail-alias-variations", "email-syntax-advisor", "email-extractor", "email-pattern-builder", "mailto-link-builder", "email-size-estimator", "html-to-text", "email-signature-builder", "spam-wording-advisor", "subject-line-advisor",
-  "base64-encode", "base64-decode", "image-to-base64", "file-to-base64", "pdf-metadata", "url-encode", "url-decode", "html-entity-encode", "html-entity-decode", "rot13", "morse-code", "password-generator", "random-string", "uuid-generator", "nanoid-generator", "random-number", "number-sorter", "average-calculator", "binary-converter", "decimal-converter",
+  "base64-encode", "base64-decode", "image-to-base64", "file-to-base64", "file-to-text", "pdf-metadata", "url-encode", "url-decode", "html-entity-encode", "html-entity-decode", "rot13", "morse-code", "password-generator", "random-string", "uuid-generator", "nanoid-generator", "random-number", "number-sorter", "average-calculator", "binary-converter", "decimal-converter",
   "json-formatter", "json-minifier", "json-validator", "csv-converter", "html-beautifier", "css-minifier", "regex-tester", "email-validator", "url-parser", "query-string-parser", "json-escape", "calculator", "percentage-calculator", "hex-to-rgb", "random-color", "invert-color", "gradient-generator", "unix-timestamp", "date-difference", "file-size-converter", "file-type-identifier", "fancy-text", "coin-flipper", "dice-roller",
 ] as const;
 
@@ -79,6 +79,7 @@ export function runTool(slug: string, input: string, nonce = 0): ToolResult {
       case "base64-decode": return { value: decodeBase64(input.trim()) };
       case "image-to-base64":
       case "file-to-base64": return { value: input.includes(",") ? input.slice(input.indexOf(",") + 1) : input };
+      case "file-to-text": return { value: `Extracted local text:\n${input}` };
       case "pdf-metadata": {
         const isPdf = input.startsWith("data:application/pdf") || input.startsWith("JVBERi");
         return { value: isPdf ? "PDF document detected in browser memory" : "Select a PDF file or paste a PDF data URL" };

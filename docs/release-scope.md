@@ -4,17 +4,17 @@
 
 ## Delivered Platform Scope
 
-ToolsHUB launches as a multilingual, responsive platform with **254 tool catalogue entries**, **45 game catalogue entries** (including eight playable browser games), an AI conversation workspace, a blog, a 2,173-record Useful Links Library, and authenticated secure-data utilities. The platform UI is available in English, বাংলা, Hindi, Urdu, Arabic, Spanish, French, and German, with explicit RTL handling for Urdu and Arabic.
+ToolsHUB launches as a multilingual, responsive platform with **255 tool catalogue entries**, **45 game catalogue entries** (including eight playable browser games), an AI conversation workspace, a blog, a 2,173-record Useful Links Library, and authenticated secure-data utilities. The platform UI is available in English, বাংলা, Hindi, Urdu, Arabic, Spanish, French, and German, with explicit RTL handling for Urdu and Arabic.
 
 The encrypted vault now includes an in-browser **Generate** action. It obtains the generated value from the Web Crypto random-number API, enforces a 12-character minimum, never sends the plaintext value to the server for generation, and encrypts the saved vault record client-side.
 
 | Area | Released capability | Explicit follow-up boundary |
 |---|---|---|
-| Tool catalogue | 254 discoverable catalogue records, private browser-local workspaces, and 72 dedicated local operations across text, email, encoding, data, color, file, and creative utilities. | Catalogue records without a dedicated operation retain the common workspace fallback; additional tool-specific processors are a future catalogue expansion. |
+| Tool catalogue | 255 discoverable catalogue records, private browser-local workspaces, and 73 dedicated local operations across text, email, encoding, data, color, file, and creative utilities. | Catalogue records without a dedicated operation retain the common workspace fallback; additional tool-specific processors are a future catalogue expansion. |
 | Cloud Clipboard | Authenticated cross-device clipboard CRUD with protected persistence. | One-time burn-link delivery is not included in this release. |
 | Cloud Notes | Authenticated note creation, editing, deletion, and owner-scoped revision history. | Full-text search, sharing, export formats, folders/tags/colors, and storage-backed attachments are follow-up features. |
 | AI Suite | Streaming chat, transparent guest/member request limits, safety messaging, and authenticated conversation history. | Standalone text, code, and image helper screens are follow-up interfaces; they are not represented as separately implemented tools. |
-| Tests | `pnpm check` and `pnpm test` passed: **62 assertions in 29 test files**. Coverage includes daily-challenge handling, relay-only WebRTC rules, security headers, privacy helpers, multilingual integrity, catalogue integrity, explicit local-operation execution, email-utility safeguards, game persistence, links and filtered states, short links, password generation, and error recovery. | Additional end-to-end and expanded helper-path coverage can be added as the platform evolves. |
+| Tests | `pnpm check` and `pnpm test` passed: **66 assertions in 32 test files**. Coverage includes daily-challenge handling, relay-only WebRTC rules, security headers, privacy helpers, multilingual integrity, category-specific mobile workspace models, localized/RTL ToolPage rendering, catalogue integrity, explicit local-operation execution, email-utility safeguards, browser-local file-input routing, game persistence, links and filtered states, short links, password generation, and error recovery. | Additional end-to-end and expanded helper-path coverage can be added as the platform evolves. |
 
 ## Social Authentication Limitation
 

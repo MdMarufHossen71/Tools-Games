@@ -8,7 +8,7 @@
 - [x] Build the home page with animated hero, category discovery, popular/new tools, and trending games sections.
 - [x] Build a searchable, filterable catalog representing 200+ client-side tools across Math, Text, Images, PDF, Colors, Date/Time, Encoding/Crypto, Web/Dev, Audio/Video, Fun/Creative, File Utilities, and Numbers.
 - [x] Build reusable tool-page components with bilingual copy, client-side input/output, copy/download, How it works accordion, related tools, and private input persistence rules.
-- [x] Implement high-value functional client-side tools across every category and data-driven entries for the wider catalog; 72 dedicated browser-local operations ship, while catalogue-specific processors beyond the release baseline are documented in `docs/release-scope.md`.
+- [x] Implement high-value functional client-side tools across every category and data-driven entries for the wider catalog; 73 dedicated browser-local operations ship, while catalogue-specific processors beyond the release baseline are documented in `docs/release-scope.md`.
 - [x] Implement secure file sharing with S3-backed uploads, encrypted metadata, share tokens, expiry, password gates, and download management.
 - [x] Implement URL shortener with custom aliases, secure redirect handling, click analytics, UTM builder, QR output, and My Links controls.
 - [x] Implement authenticated cloud clipboard persistence; one-time burn links are explicitly deferred as a post-release enhancement in `docs/release-scope.md`.
@@ -39,7 +39,7 @@
 - [x] Build hidden role-guarded admin console for user oversight, tool visibility, links, file shares, short links, announcements, and platform metrics.
 - [x] Add server-side scheduled daily challenge reset using a secure deployed Heartbeat handler rather than an in-process timer.
 - [x] Add privacy messaging, secure validation, CSP, rate limiting, friendly bilingual 404/500 states, SEO metadata, structured data, sitemap, and robots directives.
-- [x] Add and run the release unit-test baseline: 62 assertions across 29 test files cover representative database/procedure, tool, authentication, scheduled-handler, game, catalogue-integrity, email-utility, and security paths; remaining expansion opportunities are documented in `docs/release-scope.md`.
+- [x] Add and run the release unit-test baseline: 66 assertions across 32 test files cover representative database/procedure, tool, authentication, scheduled-handler, game, catalogue-integrity, email-utility, browser-local file-input, category-model, localized workspace rendering, and security paths; remaining expansion opportunities are documented in `docs/release-scope.md`.
 - [x] Perform desktop and 360px mobile visual checks, functional test flows, type checks, and test suite runs.
 - [x] Push completed source code to MdMarufHossen71/Tools-Games on the server-side branch.
 - [x] Save the verified release checkpoint and guide the user to publish the site from the project interface.
@@ -68,12 +68,12 @@
 - [x] Run and document explicit desktop and 360px mobile functional checks for key guest and authenticated journeys: tools, AI, blog, useful links, My Data, games, multiplayer, and administration.
 - [x] Add a privacy-safe public profile statistics surface, or formally limit profile statistics to authenticated account owners with an explicit product decision.
 - [x] Verify and document role-aware navigation and every My Data control against the profile-and-account completion requirement.
-- [x] Re-audit every ToolsHUB catalogue entry and all playable games for accurate operations, clear states, and reliable desktop/mobile interactions; catalogue integrity tests now verify 254 unique tools, 45 unique games, and the eight playable game routes.
+- [x] Re-audit every ToolsHUB catalogue entry and all playable games for accurate operations, clear states, and reliable desktop/mobile interactions; catalogue integrity tests now verify 255 unique tools, 45 unique games, and the eight playable game routes.
 - [x] Improve mobile and desktop navigation, including a prominent 2,173-link Library route in global navigation, footer, hero, and homepage discovery ribbon, plus a repaired 761–1050px menu behavior.
 - [x] Validate the optimized public catalogue, game routes, and Useful Links access at 1280×720 and 375×812; evidence is recorded in `docs/catalogue-responsive-audit.md`.
 - [x] Verify all eight playable game routes at desktop and phone viewports, recording route-specific interaction checks in `docs/catalogue-responsive-audit.md`.
-- [x] Add explicit regression coverage tying all 72 browser-local operation slugs to concrete catalogue entries and verify catalogue listing, search/filter, workspace, and Useful Links states at desktop and phone widths.
-- [x] Assert the exact 72-operation registry size and prove every registered slug executes a dedicated non-passthrough processor.
+- [x] Add explicit regression coverage tying all 73 browser-local operation slugs to concrete catalogue entries and verify catalogue listing, search/filter, workspace, and Useful Links states at desktop and phone widths.
+- [x] Assert the exact 73-operation registry size and prove every registered slug executes a dedicated non-passthrough processor.
 - [x] Run and document explicit desktop and phone checks for tool listing search/filter behavior, tool workspace output, and Useful Links filtered and empty states.
 - [x] Support Useful Links query parameters so filtered and empty states can be shared and directly verified across desktop and mobile routes.
 - [x] Re-run resolved-data desktop checks for Useful Links filtered and empty search states and record the visible results.
@@ -82,3 +82,18 @@
 - [x] Add an original browser-local Gmail alias variation generator that clearly states it creates aliases only—not new email accounts—and discourages limit evasion or deceptive registration.
 - [x] Implement compatible original browser-local equivalents for the reviewed public catalogue where technically and legally appropriate, with responsive catalogue cards and test coverage.
 - [x] Validate the expanded tools on mobile and desktop, including the alias generator’s safe-use disclosure and output controls.
+- [x] Replace the generic shared tool input with tool-type-specific mobile-first interfaces, beginning with image tools that show a clear upload action and mobile gallery/camera chooser without an irrelevant text area.
+- [x] Add concise, localized per-tool usage guidance, accepted-input examples, validation, processing states, reset behavior, and output actions so visitors know exactly how to use each workspace.
+- [x] Define and implement reusable interaction models for text, image, PDF, media, data/developer, number, and file tool categories while accurately distinguishing implemented processors from guided workspace fallbacks.
+- [x] Verify representative image upload, text conversion, file/PDF, and data utility flows at phone and desktop widths and document remaining category-specific processor work transparently.
+- [x] Correct the discovered PDF route mismatch and re-verify a valid PDF workspace alongside the image, text, and data journeys.
+- [x] Ensure generators and all other tools keep output empty until the visitor explicitly runs or generates a result.
+- [ ] Incrementally add and test further concrete browser-local image, PDF, media, and file transformations beyond Resize, Rotate, and Flip; keep all non-implemented catalogue records explicitly labelled as guided workspaces.
+- [x] Move shared workspace guidance, processing, action, and output strings into all eight locale dictionaries and verify RTL-safe display for Urdu and Arabic.
+- [x] Add and document distinct interaction models for PDF, media, data/developer, number, and file utilities rather than treating them as only generic text/file variants.
+- [x] Add regression coverage for redesigned workspace behavior across non-Bangla locales and every claimed category interaction model.
+- [x] Correct the discovered File to Text route mismatch, then re-verify the Bengali mobile file-tool journey with a valid workspace route.
+- [x] Add a ToolPage/UI regression test for one non-Bangla LTR locale and one RTL locale that verifies localized workspace guidance, action, output, and direction-safe state.
+- [x] Add focused ToolPage regression coverage for PDF/media/file accept types, numeric input mode, and data/developer text-entry behavior.
+- [x] Verify an Arabic or Urdu ToolPage render exposes the shared RTL direction state and direction-safe control ordering used by the workspace layout.
+- [x] Extend ToolPage regression coverage with a generic file utility route that asserts the `*/*` acceptance contract.
