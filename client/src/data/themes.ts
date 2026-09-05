@@ -2,8 +2,12 @@
 export type ThemeTokens = { background: string; surface: string; text: string; primary: string; secondary: string; border: string };
 export type ThemePreset = { id: string; name: string; isDark: boolean; tokens: ThemeTokens; custom?: boolean };
 export const themePresets: ThemePreset[] = [
-  { id: "light", name: "Light", isDark: false, tokens: { background: "#f7f9fc", surface: "#ffffff", text: "#172033", primary: "#2563eb", secondary: "#0ea5e9", border: "#d9e1ef" } },
-  { id: "dark", name: "Dark", isDark: true, tokens: { background: "#101722", surface: "#192333", text: "#e6edf7", primary: "#4f8cff", secondary: "#38bdf8", border: "#2b3b50" } },
+  // The two default presets are the Cobalt Workshop palette from ideas.md: luminous
+  // paper (#f7f6f1), deep ink navy (#0a1025) and Electric Cobalt (#3264ff), with
+  // coral as the sparing playful accent. The dark preset lifts cobalt to #5b85ff so
+  // it still clears 4.5:1 as link and label text on an ink surface.
+  { id: "light", name: "Light", isDark: false, tokens: { background: "#f7f6f1", surface: "#fffefb", text: "#0a1025", primary: "#3264ff", secondary: "#ff6b4a", border: "#dcd8cc" } },
+  { id: "dark", name: "Dark", isDark: true, tokens: { background: "#0a1025", surface: "#131a33", text: "#f4f7ff", primary: "#5b85ff", secondary: "#ff8a5c", border: "#2a3352" } },
   { id: "developer-blue", name: "Developer Blue", isDark: true, tokens: { background: "#1e1e2e", surface: "#29293d", text: "#cdd6f4", primary: "#4dabf7", secondary: "#89b4fa", border: "#45475a" } },
   { id: "developer-green", name: "Developer Green", isDark: true, tokens: { background: "#0d1117", surface: "#161b22", text: "#c9d1d9", primary: "#3fb950", secondary: "#58a6ff", border: "#30363d" } },
   { id: "monokai", name: "Monokai", isDark: true, tokens: { background: "#272822", surface: "#3e3d32", text: "#f8f8f2", primary: "#a6e22e", secondary: "#f92672", border: "#5d5c50" } },

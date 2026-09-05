@@ -1,74 +1,209 @@
 /** Cobalt Workshop design reminder: data actions are calm, explicit and locally scoped, with cobalt for safe actions and red reserved for irreversible clearing. */
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AlertTriangle, Download, FolderUp, HardDrive, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/AppSettingsContext";
-import { clearAllLocalData, downloadDataBundle, mergeDataBundle, parseDataBundle, type DataBundle } from "@/lib/storage";
+import type { TranslationKey } from "@/i18n/translations";
+import { applyDataBundle, clearAppData, downloadDataBundle, parseDataBundle, type DataBundle, type ImportMode, type StorageFailure } from "@/lib/storage";
+
+/** Each validation failure gets its own message so the user knows what to fix. */
+const FAILURE_KEYS: Record<StorageFailure, TranslationKey> = {
+  quota: "data.error.quota",
+  unavailable: "data.error.unavailable",
+  invalid: "data.error.invalid",
+  version: "data.error.version",
+  source: "data.error.source",
+  shape: "data.error.shape",
+  namespace: "data.error.namespace",
+  size: "data.error.size",
+};
+
+type Status = { tone: "ok" | "error"; message: string };
 
 export function DataManager({ compact = false }: { compact?: boolean }) {
-  const { t } = useSettings();
+  const { t, refreshFromStorage } = useSettings();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [pendingImport, setPendingImport] = useState<DataBundle | null>(null);
-  const [clearStage, setClearStage] = useState<0 | 1 | 2>(0);
-  const [status, setStatus] = useState("");
+  // The two confirmation dialogs below are controlled rather than opened by a
+  // `DialogTrigger`, so Radix has no trigger element to hand focus back to when they
+  // close and focus falls to `<body>`. A keyboard user who cancelled a confirmation
+  // would lose their place entirely, even though the outer dialog is still open.
+  // These point at the buttons that opened each one.
+  const importButtonRef = useRef<HTMLButtonElement>(null);
+  const clearButtonRef = useRef<HTMLButtonElement>(null);
+  const [pending, setPending] = useState<{ bundle: DataBundle; name: string } | null>(null);
+  const [mode, setMode] = useState<ImportMode>("merge");
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [status, setStatus] = useState<Status | null>(null);
+
+  /** Sends focus back to the control that opened a confirmation dialog. */
+  const restoreFocus = (target: React.RefObject<HTMLButtonElement | null>) => (event: Event) => {
+    if (!target.current) return;
+    event.preventDefault();
+    target.current.focus();
+  };
+
+  const fail = useCallback((error: StorageFailure) => setStatus({ tone: "error", message: t(FAILURE_KEYS[error]) }), [t]);
+
+  const download = () => {
+    const result = downloadDataBundle();
+    if (!result.ok) return fail(result.error);
+    if (result.value === 0) return setStatus({ tone: "error", message: t("data.empty") });
+    setStatus({ tone: "ok", message: t("data.downloaded", { count: result.value }) });
+  };
 
   const readImport = async (file: File | undefined) => {
+    // Reset the input so re-picking the same file fires `change` again.
+    if (fileRef.current) fileRef.current.value = "";
     if (!file) return;
-    const parsed = parseDataBundle(await file.text());
-    if (!parsed.ok) { setStatus(t("data.invalid")); return; }
-    setPendingImport(parsed.value);
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      setStatus({ tone: "error", message: t("data.error.read") });
+      return;
+    }
+    const parsed = parseDataBundle(text);
+    if (!parsed.ok) return fail(parsed.error);
+    setMode("merge");
+    setStatus(null);
+    setPending({ bundle: parsed.value, name: file.name });
   };
+
   const commitImport = () => {
-    if (!pendingImport) return;
-    const result = mergeDataBundle(pendingImport);
-    setPendingImport(null);
-    setStatus(result.ok ? t("data.imported", { count: result.value }) : t("data.importFailed"));
+    if (!pending) return;
+    const result = applyDataBundle(pending.bundle, mode);
+    setPending(null);
+    if (!result.ok) return fail(result.error);
+    const { imported, removed, unchanged } = result.value;
+    // Settings live in React state as well as storage, so re-read them now rather
+    // than telling the user to reload the page.
+    refreshFromStorage();
+    setStatus({ tone: "ok", message: mode === "replace" ? t("data.report.replace", { imported, removed }) : t("data.report.merge", { imported, unchanged }) });
   };
-  const clearData = () => {
-    if (clearStage === 0) return setClearStage(1);
-    if (clearStage === 1) return setClearStage(2);
-    const cleared = clearAllLocalData();
-    setClearStage(0);
-    setStatus(cleared ? t("data.cleared") : t("data.clearFailed"));
+
+  const commitClear = () => {
+    const result = clearAppData();
+    setConfirmClear(false);
+    if (!result.ok) return fail(result.error);
+    refreshFromStorage();
+    setStatus({ tone: "ok", message: t("data.cleared", { count: result.value }) });
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={compact ? "ghost" : "outline"} className={compact ? "h-auto p-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground" : "border-primary/20 bg-primary/[.04] text-primary hover:bg-primary/10"}>
-          <HardDrive className="mr-2 size-4" />{t("data.title")}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-xl border-border/70 bg-background p-0 shadow-2xl">
-        <div className="border-b border-border bg-[radial-gradient(circle_at_top_right,rgba(50,100,255,.14),transparent_48%)] px-6 py-5">
-          <DialogHeader>
-            <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground"><ShieldCheck className="size-5" /></div>
-            <DialogTitle className="font-display text-2xl">{t("data.title")}</DialogTitle>
-            <DialogDescription className="max-w-md leading-6">{t("data.intro")}</DialogDescription>
-          </DialogHeader>
-        </div>
-        <div className="space-y-3 px-6 py-5">
-          <section className="data-action-card">
-            <div><h3>{t("data.download.title")}</h3><p>{t("data.download.description")}</p></div>
-            <Button onClick={downloadDataBundle}><Download className="mr-2 size-4" />{t("data.download.action")}</Button>
-          </section>
-          <section className="data-action-card">
-            <div><h3>{t("data.import.title")}</h3><p>{t("data.import.description")}</p></div>
-            <Button variant="outline" onClick={() => fileRef.current?.click()}><FolderUp className="mr-2 size-4" />{t("data.import.action")}</Button>
-            <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(event) => readImport(event.target.files?.[0])} />
-          </section>
-          <section className="data-action-card data-action-danger">
-            <div><h3>{t("data.clear.title")}</h3><p>{t("data.clear.description")}</p></div>
-            <Button variant="destructive" onClick={clearData}><Trash2 className="mr-2 size-4" />{clearStage === 0 ? t("data.clear.action") : clearStage === 1 ? t("data.clear.again") : t("data.clear.final")}</Button>
-          </section>
-          {status && <p role="status" className="rounded-xl border border-primary/15 bg-primary/[.05] px-3 py-2 text-sm leading-5 text-foreground">{status}</p>}
-        </div>
-        <DialogFooter className="border-t border-border px-6 py-4 text-left sm:justify-start"><p className="flex items-center gap-2 text-xs text-muted-foreground"><AlertTriangle className="size-3.5" />{t("data.warning")}</p></DialogFooter>
-      </DialogContent>
-      <Dialog open={Boolean(pendingImport)} onOpenChange={(open) => !open && setPendingImport(null)}>
-        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>{t("data.restore.title")}</DialogTitle><DialogDescription>{t("data.restore.description")}</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={() => setPendingImport(null)}>{t("data.cancel")}</Button><Button onClick={commitImport}>{t("data.restore.action")}</Button></DialogFooter></DialogContent>
+    <>
+      <Dialog onOpenChange={(open) => !open && setStatus(null)}>
+        <DialogTrigger asChild>
+          <Button variant={compact ? "ghost" : "outline"} className={compact ? "data-trigger-compact" : "data-trigger"}>
+            <HardDrive className="mr-2 size-4" aria-hidden="true" />
+            {t("data.title")}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="data-dialog">
+          <div className="data-dialog-head">
+            <DialogHeader>
+              <div className="data-dialog-mark" aria-hidden="true">
+                <ShieldCheck className="size-5" />
+              </div>
+              <DialogTitle className="data-dialog-title">{t("data.title")}</DialogTitle>
+              <DialogDescription className="data-dialog-copy">{t("data.intro")}</DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="data-dialog-body">
+            <section className="data-action-card">
+              <div>
+                <h3>{t("data.download.title")}</h3>
+                <p>{t("data.download.description")}</p>
+              </div>
+              <Button onClick={download}>
+                <Download className="mr-2 size-4" aria-hidden="true" />
+                {t("data.download.action")}
+              </Button>
+            </section>
+            <section className="data-action-card">
+              <div>
+                <h3>{t("data.import.title")}</h3>
+                <p>{t("data.import.description")}</p>
+              </div>
+              <Button ref={importButtonRef} variant="outline" onClick={() => fileRef.current?.click()}>
+                <FolderUp className="mr-2 size-4" aria-hidden="true" />
+                {t("data.import.action")}
+              </Button>
+              <input ref={fileRef} type="file" accept="application/json,.json" className="sr-only" aria-label={t("data.import.title")} onChange={(event) => void readImport(event.target.files?.[0])} />
+            </section>
+            <section className="data-action-card data-action-danger">
+              <div>
+                <h3>{t("data.clear.title")}</h3>
+                <p>{t("data.clear.description")}</p>
+              </div>
+              <Button ref={clearButtonRef} variant="destructive" onClick={() => setConfirmClear(true)}>
+                <Trash2 className="mr-2 size-4" aria-hidden="true" />
+                {t("data.clear.action")}
+              </Button>
+            </section>
+            {/* One live region, always mounted, so a screen reader announces every result. */}
+            <p className={status ? (status.tone === "error" ? "data-status data-status-error" : "data-status") : "sr-only"} role="status" aria-live="polite">
+              {status?.message ?? ""}
+            </p>
+          </div>
+          <DialogFooter className="data-dialog-foot">
+            <p className="data-dialog-note">
+              <AlertTriangle className="size-3.5" aria-hidden="true" />
+              {t("data.warning")}
+            </p>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
-    </Dialog>
+
+      {/* Sibling dialogs, not nested: a Dialog inside a DialogContent unmounts with its parent. */}
+      <Dialog open={Boolean(pending)} onOpenChange={(open) => !open && setPending(null)}>
+        <DialogContent className="data-confirm" onCloseAutoFocus={restoreFocus(importButtonRef)}>
+          <DialogHeader>
+            <DialogTitle>{t("data.restore.title")}</DialogTitle>
+            <DialogDescription>{t("data.restore.description")}</DialogDescription>
+          </DialogHeader>
+          {pending && <p className="data-confirm-file">{t("data.selected", { name: pending.name })}</p>}
+          <fieldset className="data-mode">
+            <legend>{t("data.mode.label")}</legend>
+            {(["merge", "replace"] as const).map((value) => (
+              <label key={value} className={mode === value ? "data-mode-option active" : "data-mode-option"}>
+                <input type="radio" name="import-mode" value={value} checked={mode === value} onChange={() => setMode(value)} />
+                <span>
+                  <strong>{t(value === "merge" ? "data.mode.merge" : "data.mode.replace")}</strong>
+                  <small>{t(value === "merge" ? "data.mode.merge.description" : "data.mode.replace.description")}</small>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPending(null)}>
+              {t("data.cancel")}
+            </Button>
+            <Button variant={mode === "replace" ? "destructive" : "default"} onClick={commitImport}>
+              {t(mode === "replace" ? "data.restore.replaceAction" : "data.restore.mergeAction")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Replaces the old three-press button: one explicit, readable confirmation. */}
+      <Dialog open={confirmClear} onOpenChange={setConfirmClear}>
+        <DialogContent className="data-confirm" onCloseAutoFocus={restoreFocus(clearButtonRef)}>
+          <DialogHeader>
+            <DialogTitle>{t("data.clear.confirmTitle")}</DialogTitle>
+            <DialogDescription>{t("data.clear.confirmCopy")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmClear(false)}>
+              {t("data.cancel")}
+            </Button>
+            <Button variant="destructive" onClick={commitClear}>
+              <Trash2 className="mr-2 size-4" aria-hidden="true" />
+              {t("data.clear.confirmAction")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

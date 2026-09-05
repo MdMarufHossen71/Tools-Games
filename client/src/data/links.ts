@@ -1,26 +1,34 @@
-export type UsefulLink = { name: string; url: string; category: string; categoryBn: string; description: { bn: string; en: string }; note: string };
-const make = (category: string, categoryBn: string, name: string, url: string, bn: string): UsefulLink => ({ name, url, category, categoryBn, note: "Official or widely-used free resource", description: { bn, en: bn } });
+/**
+ * Curated outbound directory.
+ *
+ * Every entry carries genuinely separate Bangla and English copy. Previously the
+ * `make` helper set `en: bn`, so an English reader saw Bangla descriptions on all
+ * twenty-two rows while the page looked complete. The helper now requires both
+ * strings, which makes that mistake impossible to repeat silently.
+ */
+export type UsefulLink = { name: string; url: string; category: string; categoryBn: string; description: { bn: string; en: string } };
+const make = (category: string, categoryBn: string, name: string, url: string, bn: string, en: string): UsefulLink => ({ name, url, category, categoryBn, description: { bn, en } });
 export const usefulLinks: UsefulLink[] = [
-  make("Education", "শিক্ষা", "Khan Academy", "https://www.khanacademy.org", "বিনামূল্যে বিষয়ভিত্তিক শেখার প্ল্যাটফর্ম।"),
-  make("Education", "শিক্ষা", "freeCodeCamp", "https://www.freecodecamp.org", "কোডিং শেখা ও প্র্যাকটিসের ফ্রি প্ল্যাটফর্ম।"),
-  make("Education", "শিক্ষা", "MDN Web Docs", "https://developer.mozilla.org", "ওয়েব প্রযুক্তির নির্ভরযোগ্য ডকুমেন্টেশন।"),
-  make("Design", "ডিজাইন", "Figma", "https://www.figma.com", "ইন্টারফেস ডিজাইন ও সহযোগিতার টুল।"),
-  make("Design", "ডিজাইন", "Canva", "https://www.canva.com", "সহজ গ্রাফিক ডিজাইনের ওয়েব অ্যাপ।"),
-  make("Design", "ডিজাইন", "Photopea", "https://www.photopea.com", "ব্রাউজারেই শক্তিশালী ইমেজ এডিটর।"),
-  make("Developer", "ডেভেলপার", "GitHub", "https://github.com", "কোড হোস্টিং ও ওপেন-সোর্স সহযোগিতা।"),
-  make("Developer", "ডেভেলপার", "Stack Overflow", "https://stackoverflow.com", "ডেভেলপার প্রশ্নোত্তরের কমিউনিটি।"),
-  make("Developer", "ডেভেলপার", "DevDocs", "https://devdocs.io", "দ্রুত API ডকুমেন্টেশন সার্চ।"),
-  make("Productivity", "প্রোডাক্টিভিটি", "Google Drive", "https://drive.google.com", "ফাইল ও ডকুমেন্ট ব্যবস্থাপনা।"),
-  make("Productivity", "প্রোডাক্টিভিটি", "Notion", "https://www.notion.so", "নোট ও প্রজেক্ট সংগঠনের ওয়ার্কস্পেস।"),
-  make("AI", "AI সাইট", "ChatGPT", "https://chatgpt.com", "জেনারেল-purpose AI সহকারী।"),
-  make("AI", "AI সাইট", "Google Gemini", "https://gemini.google.com", "Google-এর AI সহকারী।"),
-  make("AI", "AI সাইট", "Hugging Face", "https://huggingface.co", "ওপেন AI মডেল ও কমিউনিটি।"),
-  make("Bangladesh", "বাংলাদেশ", "Education Board Results", "https://eboardresults.gov.bd", "শিক্ষা বোর্ডের ফলাফল দেখুন।"),
-  make("Bangladesh", "বাংলাদেশ", "Bangladesh Railway", "https://railway.gov.bd", "বাংলাদেশ রেলওয়ের অফিসিয়াল তথ্য।"),
-  make("Bangladesh", "বাংলাদেশ", "bKash", "https://www.bkash.com", "বিকাশের অফিসিয়াল ওয়েবসাইট।"),
-  make("Bangladesh", "বাংলাদেশ", "NBR", "https://nbr.gov.bd", "জাতীয় রাজস্ব বোর্ডের অফিসিয়াল পোর্টাল।"),
-  make("Bangladesh", "বাংলাদেশ", "BDjobs", "https://bdjobs.com", "বাংলাদেশের চাকরির পোর্টাল।"),
-  make("Career", "ক্যারিয়ার", "LinkedIn", "https://www.linkedin.com", "পেশাদার নেটওয়ার্ক ও ক্যারিয়ারের সুযোগ।"),
-  make("Media", "মিডিয়া", "Internet Archive", "https://archive.org", "ফ্রি বই, অডিও, ভিডিও ও ওয়েব আর্কাইভ।"),
-  make("Media", "মিডিয়া", "Pexels", "https://www.pexels.com", "ফ্রি ছবি ও ভিডিও।"),
+  make("Education", "শিক্ষা", "Khan Academy", "https://www.khanacademy.org", "বিনামূল্যে বিষয়ভিত্তিক শেখার প্ল্যাটফর্ম।", "Free subject-by-subject lessons and practice, from arithmetic to university physics."),
+  make("Education", "শিক্ষা", "freeCodeCamp", "https://www.freecodecamp.org", "কোডিং শেখা ও প্র্যাকটিসের ফ্রি প্ল্যাটফর্ম।", "Free coding curriculum with in-browser exercises and certification projects."),
+  make("Education", "শিক্ষা", "MDN Web Docs", "https://developer.mozilla.org", "ওয়েব প্রযুক্তির নির্ভরযোগ্য ডকুমেন্টেশন।", "The reference documentation for HTML, CSS, JavaScript and browser APIs."),
+  make("Design", "ডিজাইন", "Figma", "https://www.figma.com", "ইন্টারফেস ডিজাইন ও সহযোগিতার টুল।", "Interface design and prototyping in the browser, with a free personal tier."),
+  make("Design", "ডিজাইন", "Canva", "https://www.canva.com", "সহজ গ্রাফিক ডিজাইনের ওয়েব অ্যাপ।", "Template-driven graphic design for posters, slides and social posts."),
+  make("Design", "ডিজাইন", "Photopea", "https://www.photopea.com", "ব্রাউজারেই শক্তিশালী ইমেজ এডিটর।", "A capable layered image editor that runs entirely in the browser and opens PSD files."),
+  make("Developer", "ডেভেলপার", "GitHub", "https://github.com", "কোড হোস্টিং ও ওপেন-সোর্স সহযোগিতা।", "Code hosting, issue tracking and open-source collaboration, plus free static site hosting."),
+  make("Developer", "ডেভেলপার", "Stack Overflow", "https://stackoverflow.com", "ডেভেলপার প্রশ্নোত্তরের কমিউনিটি।", "Question-and-answer archive for concrete programming problems."),
+  make("Developer", "ডেভেলপার", "DevDocs", "https://devdocs.io", "দ্রুত API ডকুমেন্টেশন সার্চ।", "Fast unified search across API documentation for hundreds of languages and libraries, with offline support."),
+  make("Productivity", "প্রোডাক্টিভিটি", "Google Drive", "https://drive.google.com", "ফাইল ও ডকুমেন্ট ব্যবস্থাপনা।", "Cloud file storage with collaborative documents, spreadsheets and slides."),
+  make("Productivity", "প্রোডাক্টিভিটি", "Notion", "https://www.notion.so", "নোট ও প্রজেক্ট সংগঠনের ওয়ার্কস্পেস।", "Flexible workspace for notes, wikis and lightweight project tracking."),
+  make("AI", "AI সাইট", "ChatGPT", "https://chatgpt.com", "সাধারণ কাজের AI সহকারী।", "General-purpose AI assistant for writing, explaining and drafting code."),
+  make("AI", "AI সাইট", "Google Gemini", "https://gemini.google.com", "Google-এর AI সহকারী।", "Google's AI assistant, with image understanding and Workspace integration."),
+  make("AI", "AI সাইট", "Hugging Face", "https://huggingface.co", "ওপেন AI মডেল ও কমিউনিটি।", "Open model and dataset hub, with runnable demos for most published models."),
+  make("Bangladesh", "বাংলাদেশ", "Education Board Results", "https://eboardresults.gov.bd", "শিক্ষা বোর্ডের ফলাফল দেখুন।", "Official portal for SSC, HSC and other education board results."),
+  make("Bangladesh", "বাংলাদেশ", "Bangladesh Railway", "https://railway.gov.bd", "বাংলাদেশ রেলওয়ের অফিসিয়াল তথ্য।", "Official Bangladesh Railway site for schedules, fares and ticketing information."),
+  make("Bangladesh", "বাংলাদেশ", "bKash", "https://www.bkash.com", "বিকাশের অফিসিয়াল ওয়েবসাইট।", "Official site for the bKash mobile financial service, including charges and agent lookup."),
+  make("Bangladesh", "বাংলাদেশ", "NBR", "https://nbr.gov.bd", "জাতীয় রাজস্ব বোর্ডের অফিসিয়াল পোর্টাল।", "National Board of Revenue portal for tax rates, returns and e-TIN registration."),
+  make("Bangladesh", "বাংলাদেশ", "BDjobs", "https://bdjobs.com", "বাংলাদেশের চাকরির পোর্টাল।", "The largest job board in Bangladesh, covering private and public sector openings."),
+  make("Career", "ক্যারিয়ার", "LinkedIn", "https://www.linkedin.com", "পেশাদার নেটওয়ার্ক ও ক্যারিয়ারের সুযোগ।", "Professional network for contacts, company research and job listings."),
+  make("Media", "মিডিয়া", "Internet Archive", "https://archive.org", "ফ্রি বই, অডিও, ভিডিও ও ওয়েব আর্কাইভ।", "Free books, audio and video, plus the Wayback Machine archive of the web."),
+  make("Media", "মিডিয়া", "Pexels", "https://www.pexels.com", "ফ্রি ছবি ও ভিডিও।", "Free stock photos and video clips, usable without attribution."),
 ];

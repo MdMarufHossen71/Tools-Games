@@ -1,14 +1,31 @@
-import { cn } from "@/lib/utils";
-import { AlertTriangle, RotateCcw } from "lucide-react";
-import { Component, ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
+import { AlertTriangle, Home, RotateCcw } from "lucide-react";
+import { interpolate, translations, type Locale, type TranslationKey } from "@/i18n/translations";
+import { safeGet, settingsKey } from "@/lib/storage";
 
-interface Props {
+type Props = {
   children: ReactNode;
-}
+  /** Route-level boundaries keep the app shell; the root boundary replaces the page. */
+  variant?: "app" | "route";
+};
 
-interface State {
-  hasError: boolean;
-  error: Error | null;
+type State = { hasError: boolean; error: Error | null };
+
+/**
+ * This component sits above `AppSettingsProvider`, so it cannot use the settings
+ * context — if the provider is what threw, the context would be unavailable.
+ * It reads the persisted language directly instead.
+ */
+function translate(key: TranslationKey, values?: Record<string, string | number>) {
+  let locale: Locale = "en";
+  try {
+    const saved = safeGet<unknown>(settingsKey("language"), "en");
+    if (saved === "bn") locale = "bn";
+  } catch {
+    locale = "en";
+  }
+  const template = translations[locale][key] ?? translations.en[key];
+  return typeof template === "string" ? interpolate(template, values) : String(key);
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -21,41 +38,48 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    // Local only: logged to this browser's console, never sent anywhere.
+    if (import.meta.env.DEV) console.error("[ErrorBoundary]", error, info.componentStack);
+  }
+
+  /** Clears the error so the same route can re-render without a full page reload. */
+  private retry = () => this.setState({ hasError: false, error: null });
+
   render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center min-h-screen p-8 bg-background">
-          <div className="flex flex-col items-center w-full max-w-2xl p-8">
-            <AlertTriangle
-              size={48}
-              className="text-destructive mb-6 flex-shrink-0"
-            />
+    if (!this.state.hasError) return this.props.children;
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+    const isRoute = this.props.variant === "route";
+    const stack = this.state.error?.stack ?? this.state.error?.message ?? "";
 
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
-
-            <button
-              onClick={() => window.location.reload()}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg",
-                "bg-primary text-primary-foreground",
-                "hover:opacity-90 cursor-pointer"
-              )}
-            >
-              <RotateCcw size={16} />
-              Reload Page
+    return (
+      <div className={isRoute ? "site-frame page-space" : "error-shell"}>
+        <section className="error-panel" role="alert" aria-labelledby="error-panel-title">
+          <span className="error-panel-mark" aria-hidden="true">
+            <AlertTriangle className="size-6" />
+          </span>
+          <h2 id="error-panel-title">{translate("error.title")}</h2>
+          <p>{translate("error.copy")}</p>
+          {/* Stack traces are developer detail; production users get the plain message. */}
+          {import.meta.env.DEV && stack && (
+            <details className="error-panel-details">
+              <summary>{translate("error.details")}</summary>
+              <pre>{stack}</pre>
+            </details>
+          )}
+          <div className="error-panel-actions">
+            <button type="button" className="error-action error-action-primary" onClick={this.retry}>
+              <RotateCcw className="size-4" aria-hidden="true" />
+              {translate("error.retry")}
             </button>
+            <a className="error-action" href={import.meta.env.BASE_URL || "/"}>
+              <Home className="size-4" aria-hidden="true" />
+              {translate("error.home")}
+            </a>
           </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
+        </section>
+      </div>
+    );
   }
 }
 

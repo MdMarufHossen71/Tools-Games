@@ -4,6 +4,10 @@ import {
   Sparkles, TextCursorInput, WandSparkles,
 } from "lucide-react";
 
+// The `.ts` extension is explicit so `scripts/i18n-parity.mjs` can import this
+// module chain through plain Node ESM as well as through Vite.
+import { toolDescriptions } from "./toolDescriptions.ts";
+
 export type ToolGroup = "text" | "crypto" | "data" | "image" | "color" | "math" | "time" | "random" | "file" | "seo" | "misc" | "ai";
 
 export type Tool = {
@@ -57,12 +61,18 @@ const seeds: Seed[] = [
 
 const titleToSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+/**
+ * Fallback description, used only for a tool with no hand-written entry in
+ * `toolDescriptions`. It is deliberately generic, because a generic sentence is what
+ * this function can honestly produce — it knows a tool's name and group and nothing
+ * about what the tool does. Every tool in the registry currently has a real entry;
+ * this exists so adding a name to `seeds` cannot render an empty card.
+ */
 function describeTool(name: string, group: ToolGroup) {
-  const verb = name.includes("Counter") ? "Measure" : name.includes("Generator") ? "Generate" : name.includes("Converter") ? "Convert" : name.includes("Formatter") || name.includes("Beautifier") ? "Format" : name.includes("Validator") || name.includes("Checker") || name.includes("Analyzer") ? "Inspect" : name.includes("Calculator") ? "Calculate" : name.includes("Random") ? "Create" : name.includes("Image") ? "Process" : name.includes("PDF") ? "Prepare" : name.includes("Encoder") || name.includes("Decode") ? "Encode or decode" : "Work with";
   const localLine = group === "image" || group === "file" ? "Files are handled on this device." : "Your working text stays in this browser.";
   return {
-    en: `${verb} with ${name} in a focused browser workbench. ${localLine}`,
-    bn: `${name} দিয়ে নির্দিষ্ট কাজটি ব্রাউজারেই করুন। আপনার কাজ এই ডিভাইসেই থাকে।`,
+    en: `${name}, in a focused browser workbench. ${localLine}`,
+    bn: `${name} — কাজটি ব্রাউজারেই সারুন। আপনার কাজ এই ডিভাইসেই থাকে।`,
   };
 }
 
@@ -73,7 +83,7 @@ export const toolRegistry: Tool[] = seeds.flatMap((seed) => seed.names.split("|"
   categoryBn: seed.categoryBn,
   group: seed.group,
   featured: seed.featured,
-  description: describeTool(name, seed.group),
+  description: toolDescriptions[name] ?? describeTool(name, seed.group),
   keywords: `${name} ${seed.category} ${seed.categoryBn}`.toLowerCase().split(/\s+/),
 })));
 

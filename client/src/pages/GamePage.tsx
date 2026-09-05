@@ -1,23 +1,68 @@
 /** Cobalt Workshop design reminder: each compact game session is a tactile local cartridge—score, level and progress persist without a leaderboard server. */
-import { ArrowLeft, Gamepad2, RotateCcw, Trophy } from "lucide-react";
+import { Suspense } from "react";
+import { ArrowLeft } from "lucide-react";
 import { Link, useRoute } from "wouter";
-import { Button } from "@/components/ui/button";
-import { findGame } from "@/data/games";
-import { useGamePersistence } from "@/hooks/useGamePersistence";
+import { findGame, type Game } from "@/data/games";
 import { useTranslation } from "@/contexts/AppSettingsContext";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { displaySlug, safeSlug } from "@/lib/slug";
+import ComingSoon from "@/games/ComingSoon";
+import { loadGame } from "@/games/registry";
 import NotFound from "@/pages/NotFound";
 
 export default function GamePage() {
   const [, params] = useRoute("/games/:slug");
-  const game = findGame(params?.slug ?? "");
+  const slug = safeSlug(params?.slug);
+  const game = findGame(slug);
+
+  if (!game) return <NotFound titleKey="game.missing.title" copyKey="game.missing.copy" backHref="/games" backLabelKey="nav.games" detail={displaySlug(slug) || undefined} />;
+
+  // Keyed on the slug so switching games starts from that game's own saved state.
+  // `Switch` reuses the element instead of remounting it when only the param changes.
+  return <GameArena key={game.slug} game={game} />;
+}
+
+/**
+ * The page around the board.
+ *
+ * This component deliberately owns nothing about play. The header, the exit link and
+ * the page title live here; phase, score, persistence, input and the on-screen
+ * controls all belong to `GameShell` inside the game module, so every game gets the
+ * same keyboard and touch behaviour without this file knowing which game it is.
+ */
+function GameArena({ game }: { game: Game }) {
   const { t, language } = useTranslation();
-  const progress = useGamePersistence(game?.slug ?? "unknown");
-  if (!game) return <NotFound />;
+  usePageMeta("games.title", "games.copy", game.name);
   const Icon = game.icon;
-  const play = () => {
-    const points = Math.max(10, Math.floor(Math.random() * 125));
-    const next = progress.save.score + points;
-    progress.update({ score: next, highScore: Math.max(progress.save.highScore, next), level: Math.floor(next / 300) + 1, resources: progress.save.resources + 1 });
-  };
-  return <div className="site-frame page-space"><Link href="/games" className="back-link"><ArrowLeft className="size-4" />{t("game.exit")}</Link><section className="game-arena"><div className="game-arena-head"><div><p className="eyebrow">{language === "bn" ? game.genreBn : game.genre}</p><h1>{game.name}</h1><p>{game.description[language]}</p></div><span className="game-title-icon"><Icon className="size-7" /></span></div><div className="game-playfield"><div className="game-orbit orbit-a" /><div className="game-orbit orbit-b" /><button onClick={play} className="game-action-button"><Gamepad2 className="size-7" /><span>{t("common.play")}</span></button><p>{t("game.instructions")}: {language === "bn" ? "Play চাপুন, দ্রুত score তুলুন ও নিজের সেরা স্কোর ভাঙুন।" : "Press Play, collect points quickly, and beat your personal best."}</p></div><div className="game-stats"><div><small>{t("game.score")}</small><strong>{progress.save.score}</strong></div><div><small>{t("game.best")}</small><strong><Trophy className="game-trophy mr-1 inline size-4" />{progress.save.highScore}</strong></div><div><small>{t("game.level")}</small><strong>{progress.save.level}</strong></div><div><small>{t("game.resources")}</small><strong>{progress.save.resources}</strong></div></div><div className="mt-5 flex gap-2"><Button variant="outline" size="sm" onClick={progress.reset}><RotateCcw className="mr-2 size-4" />{t("common.reset")}</Button>{progress.storageWarning && <p className="my-auto text-xs text-destructive">{t("game.storageFull")}</p>}</div></section></div>;
+  const Game = loadGame(game.slug);
+
+  return (
+    <div className="site-frame page-space">
+      <Link href="/games" className="back-link">
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t("game.exit")}
+      </Link>
+      <section className="game-arena" aria-labelledby="game-arena-title">
+        <div className="game-arena-head">
+          <div>
+            <p className="eyebrow">{language === "bn" ? game.genreBn : game.genre}</p>
+            <h1 id="game-arena-title">{game.name}</h1>
+            <p>{game.description[language]}</p>
+          </div>
+          <span className="game-title-icon" aria-hidden="true">
+            <Icon className="size-7" />
+          </span>
+        </div>
+        {Game ? (
+          // The chunk is small and local, so the fallback is a line of text rather than
+          // a skeleton that would flash for less time than it takes to read.
+          <Suspense fallback={<p className="game-loading">{t("common.loading")}</p>}>
+            <Game slug={game.slug} title={game.name} />
+          </Suspense>
+        ) : (
+          <ComingSoon />
+        )}
+      </section>
+    </div>
+  );
 }
