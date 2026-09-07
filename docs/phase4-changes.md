@@ -20,10 +20,10 @@ kept + disclosed, real file hashing, `crypto-js` → Web Crypto.
 | CSS | 150,471 B | 150,226 B | unchanged |
 | `dist/index.js` | 788 B | 788 B | — |
 
-Build warning `>500 kB` remains only for `ToolPage-*.js` (sql-formatter 279 KB).
-Per-tool dynamic `import()` deferred: `runTool` is synchronous and `ToolWorkspace`
-resolves inline, so splitting `sql-formatter` requires an async workspace rework.
-Route splitting already keeps it off home/catalogue loads, which was the stated goal.
+Build warning `>500 kB` remained only for `ToolPage-*.js` (sql-formatter 279 KB).
+Follow-up (same project, later session): per-tool dynamic `import()` landed —
+`runTool` is now async with chunk-on-first-use for sql/yaml/toml/xml/marked —
+so the warning keeps shrinking as parser chunks split out of ToolPage.
 
 ### What changed
 

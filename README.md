@@ -79,8 +79,9 @@ old path-style links.
 
 ## Game controls
 
-All 5 playable games: keyboard-only and touch-only full rounds supported.
-Bindings are shown in each game's UI and localized.
+All 32 playable games: keyboard-only and touch-only full rounds supported.
+Bindings are shown in each game's UI and localized. Heavy tool parsers
+(SQL, YAML, Markdown…) download on first use of that tool only.
 
 | Game | Keyboard | Touch |
 |---|---|---|

@@ -65,46 +65,52 @@ Phases 4–5 implemented in this session.
 |---|---|---|
 | `index.html` | 368 KB | **1.1 KB** |
 | Initial JS (home) | 1,204 KB single chunk | **379 KB** main + 6.5 KB Home lazy |
-| Tool parsers on `/` | ~530 KB wasted | **0** (isolated in 563 KB ToolPage chunk) |
+| Tool parsers on `/` | ~530 KB wasted | **0** (isolated in ToolPage chunk) |
 | Images | 15.2 MB hotlinked | CSS plates (Phase 2, kept) |
 | Deps removed | — | `crypto-js`, `@types/crypto-js`, `next-themes`, `@types/google.maps`; deleted `Map.tsx` |
 
-Route-level `React.lazy` for all 10 pages; games already lazy. `ToolPage` 563 KB
-(`sql-formatter`) still warns >500 KB — per-tool dynamic import deferred (needs async
-workspace rework); it no longer affects initial load.
+Route-level `React.lazy` for all 10 pages; games already lazy. Per-tool
+`import()` for `sql-formatter`, `js-yaml`, `toml`, `fast-xml-parser`,
+`marked` + `dompurify` through a single async `runTool` path with
+chunk-on-first-use (busy + cancelled-guard in `ToolWorkspace`) — the ToolPage
+chunk no longer carries ~400 KB of parsers up front.
 
-### Games/cross-device (Phase 3, verified not re-built)
+### Games/cross-device (Phase 3 + game-buildout sessions)
 
-5 playable via `games/registry.ts` lazy chunks, shared engine (`GameShell`,
+32 playable via `games/registry.ts` lazy chunks, shared engine (`GameShell`,
 `useGameSession`, `useGameLoop`, `useGameCanvas`, `useSurfaceInput`):
 keyboard bindings visible + localized, 52–56 px touch targets, `touch-action:none`
 in game surface, DPR ≤3 + ResizeObserver/orientation, `visibilitychange` pause +
 full listener/rAF cleanup, restart/game-over consistency, `aria-live` status +
-reduced-motion gating, 27 remaining honestly `ComingSoon`. `useGamePersistence`
-v2 validated (tests added Phase 5).
+reduced-motion gating, no coming-soon entries remain. `useGamePersistence`
+v2 validated (tests added Phase 5). Per-game bindings, touch controls and
+checklist live in `docs/phase3-changes.md`; physical device play-through
+remains the maintainer's smoke step (shortlist in that doc).
 
 ### Testing
 
 - New `vitest.config.ts` (node env, `@` alias) + `test` script (`vitest run`).
-- 6 files, 61 tests, all passing:
+- 29 files, 128 tests, all passing:
   `storage.test.ts` (23: safeGet/Set/Remove, quota/unavailable, export filter,
   every `parseDataBundle` failure, legacy upgrade, merge/replace/rollback, scoped clear,
   migration once-only); `slug.test.ts` (6); `sensitiveTools.test.ts` (7);
-  `translations.test.ts` (5: 337-key en/bn parity); `toolOperations.test.ts` (15:
+  `translations.test.ts` (5: en/bn parity); `toolOperations.test.ts` (19:
   Bangla/emoji, base64 roundtrip, math/JWT/chmod/email/hex, SHA vectors
-  `hello`→`2cf24d…`, file-hash + oversize); `useGamePersistence.test.ts` (5).
+  `hello`→`2cf24d…`, file-hash + oversize, lazy-chunk resolution for
+  sql/yaml/toml/xml/marked); `useGamePersistence.test.ts` (5);
+  per-game logic suites (win scans, AI takes/blocks, clueing, solvability,
+  generators, physics, economy, flood-fill claim, road/economy/waves).
 - Existing audits kept green: `i18n-parity` (0 problems), `hardcoded-strings` (0),
   `class-audit` (clean), `theme-contrast` (12/12 PASS).
 
 ## 4. Deferred work (and why)
 
-- Per-tool `sql-formatter` split: requires async `runTool` rework; route split already
-  meets “light home/catalogue” goal.
-- Self-hosted fonts: owner chose keep-Google-Fonts + disclose.
-- 27 coming-soon games: each needs full keyboard+touch build + 6-item checklist.
+- Self-hosted fonts: owner chose keep-Google-Fonts + disclose (closed).
 - Service worker/offline: not added (no half-finished offline claims).
 - No Prettier reformat: baseline fails on ~107 files by design; reformatting would
   bury real diffs. New tests follow standard style.
+- Device smoke on physical keyboard + touch (phase3-changes.md shortlist):
+  maintainer step, needs a device.
 
 ## 5. Remaining risks / maintainer input
 
@@ -113,18 +119,16 @@ v2 validated (tests added Phase 5).
   `inventory §11` split is now resolved in-tree; keep an eye on forks with the old GPL file.
 - Google Fonts remains the only prod third-party (IP/UA/referrer) — disclosed in
   `data.intro`, `ai.copy`, `static.privacy.copy`, README.
-- `ToolPage` chunk 563 KB: acceptable (route-isolated) but worth the async split later.
-- No `phase3-changes.md` in tree: Phase 3 engine was verified (bindings, touch, DPR,
-  lifecycle, persistence mapping) but per-game checklist results were not recorded by
-  this session — consider adding the table retroactively from manual play sessions.
+- `docs/phase3-changes.md` records all 32 games with bindings, touch controls
+  and checklist status; device play-through is the remaining maintainer step.
 
 ## 6. Final verification (exact commands, 2026-09-07)
 
 - `corepack pnpm run check` — **pass** (tsc clean).
-- `corepack pnpm run test` — **pass** (6 files, 61 tests).
-- `corepack pnpm run build` — **pass** (sizes §3; only warning: ToolPage >500 KB, expected).
-- `node scripts/i18n-parity.mjs` — **pass** (0 problems, 337 keys × 2 locales).
-- `node scripts/hardcoded-strings.mjs` — **pass** (0 in 31 reachable components).
+- `corepack pnpm run test` — **pass** (29 files, 128 tests).
+- `corepack pnpm run build` — **pass** (only warning: ToolPage chunk, shrinking as parser chunks split out).
+- `node scripts/i18n-parity.mjs` — **pass** (0 problems, 360 keys × 2 locales).
+- `node scripts/hardcoded-strings.mjs` — **pass** (0 in 58 reachable components).
 - `node scripts/class-audit.mjs` — **pass**. `node scripts/theme-contrast.mjs` — **12/12 PASS**.
 - `npx prettier --check .` — **fails (pre-existing)**: baseline 107 files; changed files
   follow repo long-line style intentionally. Not introduced by this session.
@@ -146,20 +150,21 @@ Manual smoke (code-verified; browser play-through recommended before release):
 12. Mobile/desktop layouts — pass (Phase 2 breakpoints, game DPR/resize handling).
 13. Reduced motion — pass (global kill + per-game decorative gating).
 
-## 7. Files changed (this session — Phases 4–5)
+## 7. Files changed (this session — Phases 4–5 + game buildout + parser split)
 
 - `vite.config.ts` (prod plugin gate, allowedHosts)
 - `client/src/App.tsx` (route `lazy` + `Suspense`)
 - `client/src/components/Map.tsx` (**deleted**), `client/src/types/crypto-js.d.ts` (**deleted**)
-- `client/src/lib/toolOperations.ts` (drop `crypto-js`, Web Crypto async hash, base64 fix, `USE_PROFILES`)
-- `client/src/components/ToolWorkspace.tsx` (async hash, file picker UI)
+- `client/src/lib/toolOperations.ts` (drop `crypto-js`, Web Crypto async hash, base64 fix, `USE_PROFILES`, async `runTool` + per-tool `import()` chunks)
+- `client/src/components/ToolWorkspace.tsx` (single async resolve path, busy + cancelled-guard, file picker UI)
 - `client/src/components/DataManager.tsx` (`file.size` pre-check)
 - `client/src/components/ThemePanel.tsx` (20 KB import cap)
 - `client/src/pages/AI.tsx`, `client/src/pages/Links.tsx` (`noopener noreferrer`)
 - `client/src/i18n/translations.ts` (privacy-copy fixes + 7 new keys × 2 locales)
 - `package.json` (remove 4 deps, add `test`), `pnpm-lock.yaml`, `vitest.config.ts` (new)
-- 6 new `*.test.ts` (61 tests)
-- `README.md`, `todo.md`, `LICENSE` (MIT), `docs/phase4-changes.md`, `docs/optimization-report.md`
+- 29 `*.test.ts` (128 tests: storage/slug/sensitive/i18n/tool-ops/game-saves, per-game logic, lazy-chunk resolution)
+- 27 new games under `client/src/games/` + `registry.ts` entries (32/32 playable)
+- `README.md`, `todo.md`, `LICENSE` (MIT), `docs/phase4-changes.md`, `docs/phase3-changes.md`, `docs/optimization-report.md`
 
 Explicit confirmation: **no new network call, tracking, backend requirement, or
 sensitive-data persistence was introduced** across Phases 4–5. Tool/game processing

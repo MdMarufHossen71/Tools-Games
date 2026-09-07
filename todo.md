@@ -7,10 +7,10 @@
 - [x] Non-sensitive per-tool input restoration (debounced, 32 KB cap, slug-scoped).
 - [x] Game high-score/progress persistence with validation (v2, clamp, self-heal).
 - [x] Hash routing + per-page titles/meta + route-level error boundary.
-- [x] 5 games keyboard+touch playable; 27 honestly marked coming-soon.
-- [x] Route-level code splitting; Web Crypto hashes; real file hashing.
-- [x] Vitest suite (61 tests): storage, slug, sensitive, i18n, tool ops, game saves.
+- [x] 32 games keyboard+touch playable; no coming-soon entries remain.
+- [x] Route-level code splitting; per-tool lazy parser chunks; Web Crypto hashes; real file hashing.
+- [x] Vitest suite (128 tests): storage, slug, sensitive, i18n, tool ops, game saves, per-game logic, lazy-chunk resolution.
 - [x] README privacy/export/import/clear/GitHub Pages/controls docs; MIT license.
-- [ ] Per-tool dynamic import of `sql-formatter` (deferred: needs async workspace rework).
-- [ ] Self-hosted fonts (deferred: kept Google Fonts + disclosed per owner choice).
-- [ ] Remaining 27 games (deferred: each needs full keyboard+touch build + checklist).
+- [x] Per-tool dynamic import of `sql-formatter` (+ yaml/toml/xml/marked): single async `runTool` path with chunk-on-first-use.
+- [x] Self-hosted fonts decision: kept Google Fonts + disclosed per owner choice.
+- [ ] Device smoke on physical keyboard + touch per phase3-changes.md shortlist (maintainer step).

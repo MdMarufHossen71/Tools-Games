@@ -4,7 +4,7 @@ import { Check, Clipboard, Download, FileUp, History, Play, RotateCcw, ShieldChe
 import { Button } from "@/components/ui/button";
 import { type Tool } from "@/data/tools";
 import { useToolInputMemory } from "@/hooks/useToolInputMemory";
-import { isAsyncTool, isToolImplemented, runHashFile, runHashText, runTool, toolPlaceholder, type ToolResult } from "@/lib/toolOperations";
+import { isToolImplemented, runHashFile, runTool, toolPlaceholder, type ToolResult } from "@/lib/toolOperations";
 import { isSensitiveTool } from "@/lib/sensitiveTools";
 import { useTranslation } from "@/contexts/AppSettingsContext";
 import type { TranslationKey } from "@/i18n/translations";
@@ -29,11 +29,8 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
   const placeholder = toolPlaceholder(tool.slug);
   const memory = useToolInputMemory(tool.slug, placeholder);
   const [option, setOption] = useState("default");
-  const asyncTool = isAsyncTool(tool.slug);
   const isFileHash = tool.slug === "file-hash-calculator";
-  const [output, setOutput] = useState<ToolResult>(() =>
-    asyncTool ? { text: t("tool.result.needsInput") } : runTool(tool.slug, memory.input, option, t),
-  );
+  const [output, setOutput] = useState<ToolResult>(() => ({ text: t("tool.result.needsInput") }));
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,22 +41,15 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
   const built = isToolImplemented(tool.slug);
   const description = tool.description[language] || tool.description.en;
 
-  // Sync tools resolve immediately.
+  // One async path for every tool. `runTool` resolves immediately for light
+  // tools and downloads a parser chunk first for the heavy ones (SQL, YAML,
+  // Markdown…); the cancelled guard keeps fast typing from showing stale
+  // results either way.
   useEffect(() => {
-    if (asyncTool) return;
-    setOutput(runTool(tool.slug, memory.input, option, t));
-  }, [memory.input, option, tool.slug, t, asyncTool]);
-
-  // Text hashing is async (Web Crypto). Guard against out-of-order resolves.
-  useEffect(() => {
-    if (tool.slug !== "hash-generator") return;
-    if (!memory.input.trim()) {
-      setOutput({ text: t("tool.result.needsInput") });
-      return;
-    }
+    if (isFileHash) return;
     let cancelled = false;
     setBusy(true);
-    runHashText(memory.input, t).then((result) => {
+    runTool(tool.slug, memory.input, option, t).then((result) => {
       if (cancelled) return;
       setOutput(result);
       setBusy(false);
@@ -67,7 +57,7 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
     return () => {
       cancelled = true;
     };
-  }, [memory.input, tool.slug, t]);
+  }, [memory.input, option, tool.slug, t, isFileHash]);
 
   // Real file hashing: the file is read only on this device via `arrayBuffer`,
   // never uploaded. Rejects oversize picks before reading where possible.
@@ -239,15 +229,11 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
                   size="sm"
                   disabled={busy}
                   onClick={() => {
-                    if (tool.slug === "hash-generator") {
-                      setBusy(true);
-                      runHashText(memory.input, t).then((result) => {
-                        setOutput(result);
-                        setBusy(false);
-                      });
-                    } else {
-                      setOutput(runTool(tool.slug, memory.input, option, t));
-                    }
+                    setBusy(true);
+                    runTool(tool.slug, memory.input, option, t).then((result) => {
+                      setOutput(result);
+                      setBusy(false);
+                    });
                   }}
                 >
                   <Play className="mr-2 size-3.5" aria-hidden="true" />

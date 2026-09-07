@@ -2,14 +2,21 @@
 import { v4 as uuidv4 } from "uuid";
 import { ulid } from "ulid";
 import { nanoid } from "nanoid";
-import { format as formatSql } from "sql-formatter";
-import * as yaml from "js-yaml";
-import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import toml from "toml";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
 import { MathError, evaluateExpression, formatNumber } from "@/lib/safeMath";
 import type { TranslationKey } from "@/i18n/translations";
+
+/**
+ * Heavy parsers load on demand, not with the tool catalogue. Each dynamic
+ * `import()` becomes its own chunk that downloads only when a tool needing
+ * it actually runs — `sql-formatter` alone is ~279 KB minified. The tiny id
+ * generators above stay static; they cost almost nothing.
+ */
+const loadSqlFormatter = () => import("sql-formatter");
+const loadYaml = () => import("js-yaml");
+const loadXml = () => import("fast-xml-parser");
+const loadToml = () => import("toml");
+const loadMarkdown = () => import("marked");
+const loadSanitizer = () => import("dompurify");
 
 const morse: Record<string, string> = { a: ".-", b: "-...", c: "-.-.", d: "-..", e: ".", f: "..-.", g: "--.", h: "....", i: "..", j: ".---", k: "-.-", l: ".-..", m: "--", n: "-.", o: "---", p: ".--.", q: "--.-", r: ".-.", s: "...", t: "-", u: "..-", v: "...-", w: ".--", x: "-..-", y: "-.--", z: "--..", "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...", "8": "---..", "9": "----.", ".": ".-.-.-", ",": "--..--", "?": "..--..", "!": "-.-.--" };
 const nato: Record<string, string> = { a: "Alfa", b: "Bravo", c: "Charlie", d: "Delta", e: "Echo", f: "Foxtrot", g: "Golf", h: "Hotel", i: "India", j: "Juliett", k: "Kilo", l: "Lima", m: "Mike", n: "November", o: "Oscar", p: "Papa", q: "Quebec", r: "Romeo", s: "Sierra", t: "Tango", u: "Uniform", v: "Victor", w: "Whiskey", x: "X-ray", y: "Yankee", z: "Zulu" };
@@ -68,12 +75,10 @@ function hexOf(buffer: ArrayBuffer): string {
  * `crypto-js` bundle. SHA-256/384/512 + SHA-1 are available there; MD5, SHA3
  * and RIPEMD-160 are intentionally dropped — MD5/SHA-1 are broken for security
  * and must never be presented as password storage, and SHA3 is not in WebCrypto.
+ *
+ * Every tool resolves through the single async `runTool` below (heavy parser
+ * chunks download on first use), so callers never branch on sync-vs-async.
  */
-export const ASYNC_TOOLS: ReadonlySet<string> = new Set(["hash-generator", "file-hash-calculator"]);
-
-export function isAsyncTool(slug: string) {
-  return ASYNC_TOOLS.has(slug);
-}
 
 export async function digestText(algorithm: string, text: string): Promise<string> {
   const data = new TextEncoder().encode(text);
@@ -234,7 +239,7 @@ export function toolPlaceholder(slug: string) {
   return "Paste or type something here…";
 }
 
-export function runTool(slug: string, input: string, option = "default", t: ToolTranslate = identity): ToolResult {
+export async function runTool(slug: string, input: string, option = "default", t: ToolTranslate = identity): Promise<ToolResult> {
   const clean = input.trim();
 
   if (!isToolImplemented(slug)) return { text: "", unavailable: true };
@@ -270,10 +275,11 @@ export function runTool(slug: string, input: string, option = "default", t: Tool
     if (slug === "html-entities") return { text: option === "unescape" ? new DOMParser().parseFromString(input, "text/html").documentElement.textContent ?? "" : escapeHtml(input) };
     if (slug === "email-normalizer") { const [local, domain] = clean.toLowerCase().split("@"); return { text: domain === "gmail.com" ? `${local.split("+")[0].replace(/\./g, "")}@gmail.com` : `${local ?? ""}@${domain ?? ""}` }; }
     if (slug === "html-to-plain-text") return { text: new DOMParser().parseFromString(input, "text/html").body.textContent ?? "" };
-    if (slug === "markdown-to-html" || slug === "markdown-editor") { const html = DOMPurify.sanitize(marked.parse(input) as string, { USE_PROFILES: { html: true } }); return { text: html, html, label: t("tool.result.preview") }; }
-    // Hash tools are async (Web Crypto). The sync entry returns a placeholder;
-    // `ToolWorkspace` resolves the real value via `runHashText` / `runHashFile`.
-    if (slug === "hash-generator" || slug === "file-hash-calculator") return { text: t("tool.result.needsInput"), label: t("tool.hash.note") };
+    if (slug === "markdown-to-html" || slug === "markdown-editor") { const [{ marked }, { default: DOMPurify }] = await Promise.all([loadMarkdown(), loadSanitizer()]); const html = DOMPurify.sanitize(marked.parse(input) as string, { USE_PROFILES: { html: true } }); return { text: html, html, label: t("tool.result.preview") }; }
+    // Hash tools resolve through Web Crypto (see `runHashText`); the file
+    // variant is driven by `runHashFile` from the workspace's file flow.
+    if (slug === "hash-generator") return runHashText(input, t);
+    if (slug === "file-hash-calculator") return { text: t("tool.result.needsInput"), label: t("tool.hash.note") };
     if (slug === "uuid-generator") return { text: Array.from({ length: option === "bulk" ? 10 : 1 }, () => uuidv4()).join("\n") };
     if (slug === "ulid-generator") return { text: ulid() };
     if (slug === "nanoid-generator") return { text: nanoid() };
@@ -293,11 +299,11 @@ export function runTool(slug: string, input: string, option = "default", t: Tool
     }
     if (slug === "json-formatter-validator") return { text: JSON.stringify(JSON.parse(input), null, 2) };
     if (slug === "json-minifier") return { text: JSON.stringify(JSON.parse(input)) };
-    if (slug === "yaml-formatter") return { text: yaml.dump(yaml.load(input)) };
-    if (slug === "toml-formatter") return { text: JSON.stringify(toml.parse(input), null, 2) };
-    if (slug === "xml-formatter") { const parsed = new XMLParser({ ignoreAttributes: false }).parse(input); return { text: new XMLBuilder({ format: true, ignoreAttributes: false }).build(parsed) }; }
-    if (slug === "yaml-json-toml-xml-converter") { const parsed = clean.startsWith("{") ? JSON.parse(input) : yaml.load(input); return { text: option === "xml" ? new XMLBuilder({ format: true }).build(parsed) : option === "yaml" ? yaml.dump(parsed) : JSON.stringify(parsed, null, 2) }; }
-    if (slug === "sql-formatter") return { text: formatSql(input) };
+    if (slug === "yaml-formatter") { const yaml = await loadYaml(); return { text: yaml.dump(yaml.load(input)) }; }
+    if (slug === "toml-formatter") { const { default: toml } = await loadToml(); return { text: JSON.stringify(toml.parse(input), null, 2) }; }
+    if (slug === "xml-formatter") { const { XMLBuilder, XMLParser } = await loadXml(); const parsed = new XMLParser({ ignoreAttributes: false }).parse(input); return { text: new XMLBuilder({ format: true, ignoreAttributes: false }).build(parsed) }; }
+    if (slug === "yaml-json-toml-xml-converter") { const [yaml, { XMLBuilder }] = await Promise.all([loadYaml(), loadXml()]); const parsed = clean.startsWith("{") ? JSON.parse(input) : yaml.load(input); return { text: option === "xml" ? new XMLBuilder({ format: true }).build(parsed) : option === "yaml" ? yaml.dump(parsed) : JSON.stringify(parsed, null, 2) }; }
+    if (slug === "sql-formatter") { const { format: formatSql } = await loadSqlFormatter(); return { text: formatSql(input) }; }
     if (slug === "url-parser") { const url = new URL(clean); return { text: JSON.stringify({ protocol: url.protocol, host: url.host, hostname: url.hostname, port: url.port, pathname: url.pathname, parameters: Object.fromEntries(url.searchParams), hash: url.hash }, null, 2) }; }
     if (slug === "keyword-density-analyzer") { const tokens = words(input); const counts = tokens.reduce<Record<string, number>>((memo, word) => { const key = word.toLowerCase(); memo[key] = (memo[key] ?? 0) + 1; return memo; }, {}); return { text: JSON.stringify(Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([word, count]) => ({ word, count, percentage: `${((count / Math.max(tokens.length, 1)) * 100).toFixed(1)}%` })), null, 2) }; }
     if (slug === "chmod-calculator") { if (!/^[0-7]{3,4}$/.test(clean)) throw new ToolError("tool.error.octal"); const parts = clean.slice(-3).split("").map((digit) => [Number(digit) & 4 ? "r" : "-", Number(digit) & 2 ? "w" : "-", Number(digit) & 1 ? "x" : "-"].join("")); return { text: JSON.stringify({ octal: clean, symbolic: `${parts[0]}${parts[1]}${parts[2]}`, decimal: Number.parseInt(clean, 8) }, null, 2) }; }
