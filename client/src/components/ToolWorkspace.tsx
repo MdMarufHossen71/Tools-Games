@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { type Tool } from "@/data/tools";
 import { useToolInputMemory } from "@/hooks/useToolInputMemory";
 import { isToolImplemented, runHashFile, runTool, toolPlaceholder, type ToolResult } from "@/lib/toolOperations";
+import { defaultFieldValues, getToolSchema, type Field } from "@/lib/toolSchemas";
 import { isSensitiveTool } from "@/lib/sensitiveTools";
 import { useTranslation } from "@/contexts/AppSettingsContext";
 import type { TranslationKey } from "@/i18n/translations";
+import { Input } from "@/components/ui/input";
 
 const needsMode = new Set(["reverse-text", "sort-list", "base64-text", "url-encode-decode", "html-entities", "yaml-json-toml-xml-converter", "random-number-generator", "uuid-generator"]);
 
@@ -24,12 +26,84 @@ const MODE_OPTIONS: Array<{ value: string; key: TranslationKey }> = [
   { value: "unescape", key: "tool.mode.unescape" },
 ];
 
+/** One named form control. Labels are bilingual pairs from the schema. */
+function FieldInput({
+  field,
+  value,
+  language,
+  onChange,
+}: {
+  field: Field;
+  value: string;
+  language: "en" | "bn";
+  onChange: (value: string) => void;
+}) {
+  const label = field.label[language] || field.label.en;
+  if (field.type === "select") {
+    return (
+      <label className="tool-field">
+        <span>{label}</span>
+        <select value={value} onChange={(event) => onChange(event.target.value)} aria-label={label}>
+          {(field.options ?? []).map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label[language] || item.label.en}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
+  if (field.type === "checkbox") {
+    return (
+      <label className="tool-field tool-field-check">
+        <input type="checkbox" checked={value === "on" || value === "true"} onChange={(event) => onChange(event.target.checked ? "on" : "")} />
+        <span>{label}</span>
+      </label>
+    );
+  }
+  if (field.type === "textarea") {
+    return (
+      <label className="tool-field tool-field-wide">
+        <span>{label}</span>
+        <textarea value={value} onChange={(event) => onChange(event.target.value)} className="tool-textarea" spellCheck={false} placeholder={field.placeholder} aria-label={label} />
+      </label>
+    );
+  }
+  if (field.type === "color") {
+    return (
+      <label className="tool-field">
+        <span>{label}</span>
+        <input type="color" value={/^#[0-9a-f]{6}$/i.test(value) ? value : "#3264ff"} onChange={(event) => onChange(event.target.value)} aria-label={label} />
+      </label>
+    );
+  }
+  return (
+    <label className="tool-field">
+      <span>{label}</span>
+      <Input
+        type={field.type}
+        value={value}
+        min={field.min}
+        max={field.max}
+        step={field.step}
+        placeholder={field.placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        aria-label={label}
+      />
+    </label>
+  );
+}
+
 export function ToolWorkspace({ tool }: { tool: Tool }) {
   const { t, language } = useTranslation();
   const placeholder = toolPlaceholder(tool.slug);
   const memory = useToolInputMemory(tool.slug, placeholder);
   const [option, setOption] = useState("default");
   const isFileHash = tool.slug === "file-hash-calculator";
+  const schema = getToolSchema(tool.slug);
+  const formMode = (schema?.fields.length ?? 0) > 0;
+  // Keyed by slug at the call site, so defaults are fresh per tool.
+  const [fields, setFields] = useState<Record<string, string>>(() => defaultFieldValues(tool.slug));
   const [output, setOutput] = useState<ToolResult>(() => ({ text: t("tool.result.needsInput") }));
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
@@ -44,12 +118,20 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
   // One async path for every tool. `runTool` resolves immediately for light
   // tools and downloads a parser chunk first for the heavy ones (SQL, YAML,
   // Markdown…); the cancelled guard keeps fast typing from showing stale
-  // results either way.
+  // results either way. Form tools pass their named fields along.
+  const runNow = () => {
+    setBusy(true);
+    runTool(tool.slug, formMode ? "" : memory.input, formMode ? "default" : option, t, formMode ? { fields } : undefined).then((result) => {
+      setOutput(result);
+      setBusy(false);
+    });
+  };
+
   useEffect(() => {
     if (isFileHash) return;
     let cancelled = false;
     setBusy(true);
-    runTool(tool.slug, memory.input, option, t).then((result) => {
+    runTool(tool.slug, formMode ? "" : memory.input, formMode ? "default" : option, t, formMode ? { fields: { ...fields } } : undefined).then((result) => {
       if (cancelled) return;
       setOutput(result);
       setBusy(false);
@@ -57,7 +139,9 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
     return () => {
       cancelled = true;
     };
-  }, [memory.input, option, tool.slug, t, isFileHash]);
+    // `fields` is compared by identity; every keystroke replaces it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memory.input, option, tool.slug, t, isFileHash, formMode, fields]);
 
   // Real file hashing: the file is read only on this device via `arrayBuffer`,
   // never uploaded. Rejects oversize picks before reading where possible.
@@ -217,24 +301,73 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
                   {t("tool.file.selected", { name: file.name, size: formatSize(file.size) })}
                   {busy ? ` — ${t("common.loading")}` : ""}
                 </p>
-              ) : (
+          ) : formMode && schema ? (
+            <>
+              <div className="tool-form">
+                {schema.fields.map((item) => (
+                  <FieldInput
+                    key={item.key}
+                    field={item}
+                    value={fields[item.key] ?? ""}
+                    language={language}
+                    onChange={(value) => setFields((current) => ({ ...current, [item.key]: value }))}
+                  />
+                ))}
+              </div>
+              <div className="bench-actions">
+                <Button size="sm" disabled={busy} onClick={runNow}>
+                  <Play className="mr-2 size-3.5" aria-hidden="true" />
+                  {busy ? t("common.loading") : t("tool.run")}
+                </Button>
+                {schema.example && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (schema.example?.fields) setFields((current) => ({ ...current, ...schema.example?.fields }));
+                      if (schema.example?.text !== undefined) memory.setInput(schema.example.text);
+                    }}
+                  >
+                    {t("common.example")}
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={() => setFields(defaultFieldValues(tool.slug))}>
+                  <RotateCcw className="mr-2 size-3.5" aria-hidden="true" />
+                  {t("common.reset")}
+                </Button>
+              </div>
+            </>
+          ) : (
                 <p className="tool-note" role="status">{t("tool.file.noFile")}</p>
               )}
             </>
           ) : (
             <>
-              <textarea value={memory.input} onChange={(event) => memory.setInput(event.target.value)} className="tool-textarea" spellCheck={false} placeholder={placeholder} aria-label={t("tool.inputLabel", { name: tool.name })} />
+              <textarea
+                value={memory.input}
+                onChange={(event) => memory.setInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+                    event.preventDefault();
+                    runNow();
+                  }
+                }}
+                className="tool-textarea"
+                spellCheck={false}
+                placeholder={placeholder}
+                aria-label={t("tool.inputLabel", { name: tool.name })}
+              />
+              <p className="tool-note" aria-live="off">
+                {t("tool.stats", {
+                  words: (memory.input.match(/[A-Za-z0-9ঀ-৿']+/g) ?? []).length,
+                  chars: memory.input.length,
+                })}
+              </p>
               <div className="bench-actions">
                 <Button
                   size="sm"
                   disabled={busy}
-                  onClick={() => {
-                    setBusy(true);
-                    runTool(tool.slug, memory.input, option, t).then((result) => {
-                      setOutput(result);
-                      setBusy(false);
-                    });
-                  }}
+                  onClick={runNow}
                 >
                   <Play className="mr-2 size-3.5" aria-hidden="true" />
                   {busy ? t("common.loading") : t("tool.run")}
@@ -272,6 +405,58 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
             <pre className={output.error ? "tool-output tool-output-error" : "tool-output"} role="status" aria-live="polite">
               {output.text}
             </pre>
+          )}
+          {output.image && (
+            <img src={output.image} alt="" className="tool-image-preview" />
+          )}
+          {output.table && output.table.rows.length > 0 && (
+            <div className="tool-table-wrap">
+              <table className="tool-table">
+                <thead>
+                  <tr>
+                    {output.table.head.map((cell) => (
+                      <th key={cell} scope="col">
+                        {cell}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {output.table.rows.map((row, i) => (
+                    <tr key={i}>
+                      {row.map((cell, j) => (
+                        <td key={j}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {output.artifacts && output.artifacts.length > 0 && (
+            <div className="bench-actions">
+              {output.artifacts.map((item) => (
+                <Button
+                  key={item.name}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const anchor = document.createElement("a");
+                    anchor.href = item.dataUrl;
+                    anchor.download = item.name;
+                    anchor.rel = "noopener";
+                    anchor.style.display = "none";
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    anchor.remove();
+                    setNotice(t("tool.downloaded"));
+                  }}
+                >
+                  <Download className="mr-2 size-3.5" aria-hidden="true" />
+                  {item.name}
+                </Button>
+              ))}
+            </div>
           )}
           <div className="bench-actions">
             <Button variant="outline" size="sm" onClick={copy}>

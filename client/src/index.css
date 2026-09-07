@@ -400,6 +400,32 @@ button { transition: transform 150ms cubic-bezier(.23,1,.32,1), background-color
 }
 .tool-note-warning svg { color: var(--danger); }
 
+/* --- Tool forms: named fields for schema-driven tools --------------------- */
+.tool-form { display: grid; gap: 10px; padding: 14px; }
+.tool-field { display: grid; gap: 5px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); }
+.tool-field-wide { grid-column: 1 / -1; }
+.tool-field .tool-textarea { min-height: 120px; border: 1px solid var(--border); border-radius: 8px; }
+.tool-field select {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--foreground);
+  font: 600 14px/1 var(--font-ui);
+}
+.tool-field input[type="color"] { width: 100%; min-height: 44px; padding: 2px 4px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-raised); cursor: pointer; }
+.tool-field-check { display: flex; align-items: center; gap: 9px; min-height: 44px; cursor: pointer; }
+.tool-field-check input { width: 20px; height: 20px; accent-color: var(--primary); }
+
+/* --- Rich tool output: images, tables ------------------------------------ */
+.tool-image-preview { display: block; max-width: 100%; margin: 0 auto; border: 1px solid var(--border); border-radius: 8px; }
+.tool-table-wrap { max-height: 460px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.tool-table { width: 100%; border-collapse: collapse; font: 400 13px/1.5 var(--font-code); }
+.tool-table th, .tool-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: start; vertical-align: top; }
+.tool-table thead th { position: sticky; top: 0; background: var(--surface-raised); font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-foreground); }
+.tool-table tbody tr:last-child td { border-bottom: 0; }
+
 /* --- Data manager -------------------------------------------------------- */
 
 .data-trigger,

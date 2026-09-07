@@ -4,6 +4,16 @@ import { ulid } from "ulid";
 import { nanoid } from "nanoid";
 import { MathError, evaluateExpression, formatNumber } from "@/lib/safeMath";
 import type { TranslationKey } from "@/i18n/translations";
+import { runTextTools } from "@/lib/tools/textTools";
+import { runMathTools } from "@/lib/tools/mathTools";
+import { runTimeTools } from "@/lib/tools/timeTools";
+import { runSeoTools } from "@/lib/tools/seoTools";
+import { runMiscTools } from "@/lib/tools/miscTools";
+import { runCryptoTools } from "@/lib/tools/cryptoTools";
+import { runDataTools } from "@/lib/tools/dataTools";
+import { runColorTools } from "@/lib/tools/colorTools";
+import { runRandomTools } from "@/lib/tools/randomTools";
+import { runFileTools } from "@/lib/tools/fileTools";
 
 /**
  * Heavy parsers load on demand, not with the tool catalogue. Each dynamic
@@ -136,10 +146,28 @@ export type ToolResult = {
   error?: boolean;
   /** Set when the tool has no implementation yet. */
   unavailable?: boolean;
+  /** Data-URL preview (charts, swatches, generated images). */
+  image?: string;
+  /** Tabular data rendered as a real table, not monospaced text. */
+  table?: { head: string[]; rows: string[][] };
+  /** Downloadable files (images, PDFs, ZIPs) as data URLs. */
+  artifacts?: Array<{ name: string; mime: string; dataUrl: string }>;
 };
 
+/** Named form values + picked files for schema-driven tools. */
+export type ToolExtra = {
+  fields?: Record<string, string>;
+  files?: File[];
+};
+
+/** Read a named field with a fallback. Branches stay one-liners. */
+export function field(extra: ToolExtra | undefined, key: string, fallback = ""): string {
+  const value = extra?.fields?.[key];
+  return value === undefined || value === "" ? fallback : value;
+}
+
 /** Thrown by a tool branch to surface a localized, specific reason. */
-class ToolError extends Error {
+export class ToolError extends Error {
   readonly key: TranslationKey;
   constructor(key: TranslationKey) {
     super(key);
@@ -147,6 +175,15 @@ class ToolError extends Error {
     this.key = key;
   }
 }
+
+/** Signature every wave-runner module implements. */
+export type ToolRunner = (
+  slug: string,
+  input: string,
+  option: string,
+  t: ToolTranslate,
+  extra: ToolExtra | undefined,
+) => Promise<ToolResult | null>;
 
 export async function runHashText(input: string, t: ToolTranslate = identity): Promise<ToolResult> {
   if (!input.trim()) return { text: t("tool.result.needsInput") };
@@ -204,6 +241,11 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "slug-generator", "text-to-nato-alphabet", "text-to-ascii", "text-to-binary", "text-to-hex",
   "morse-code", "rot13-caesar-cipher", "base64-text", "url-encode-decode", "html-entities",
   "email-normalizer", "html-to-plain-text", "markdown-to-html",
+  "text-repeater", "find-replace", "filter-lines", "add-text-to-each-line", "tabs-to-spaces",
+  "comma-inserter", "text-splitter", "space-remover", "character-remover", "string-obfuscator",
+  "text-censor", "text-to-unicode", "zalgo-text-generator", "numeronym-generator",
+  "lorem-ipsum-generator", "random-sentence-generator", "regex-replacer",
+  "emoji-kaomoji-picker", "unicode-character-finder",
   // Crypto & security
   "hash-generator", "uuid-generator", "ulid-generator", "nanoid-generator", "secure-token-generator",
   "jwt-decoder-debugger",
@@ -215,12 +257,27 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "hex-rgb-hsl-hsv-converter", "color-picker",
   // Calculators
   "basic-calculator", "scientific-calculator", "percentage-calculator", "bmi-calculator",
+  "area-calculator", "rule-of-three", "trigonometry-calculator", "radians-degrees-converter",
+  "age-calculator", "date-difference-calculator", "tip-calculator", "ratio-calculator",
+  "unit-converter", "temperature-converter", "fibonacci-generator", "prime-checker-generator",
+  "number-base-converter", "binary-hex-octal-converter", "roman-numeral-converter",
+  "average-min-max", "number-list-generator", "number-to-words", "percentage-fraction-decimal",
+  "gpa-calculator", "discount-calculator", "loan-emi-calculator", "bangla-calendar-converter",
+  // Date & time
+  "add-subtract-date", "unix-timestamp-converter", "date-formatter", "julian-date",
+  "days-between-dates", "working-days-calculator", "timezone-converter",
   // Random & generators
   "random-number-generator", "random-string-generator", "email-validator",
   // File
   "file-hash-calculator",
   // Misc
   "notes-pad",
+  "age-in-seconds", "dog-cat-years-converter", "love-calculator",
+  "aspect-ratio-calculator", "aspect-ratio-cropper", "event-countdown",
+  "screen-resolution-detector",
+  // SEO & web
+  "htaccess-redirect-generator", "html-entity-table", "seo-word-counter",
+  "twitter-card-info", "website-text-extractor",
 ]);
 
 export function isToolImplemented(slug: string) {
@@ -239,7 +296,7 @@ export function toolPlaceholder(slug: string) {
   return "Paste or type something here…";
 }
 
-export async function runTool(slug: string, input: string, option = "default", t: ToolTranslate = identity): Promise<ToolResult> {
+export async function runTool(slug: string, input: string, option = "default", t: ToolTranslate = identity, extra?: ToolExtra): Promise<ToolResult> {
   const clean = input.trim();
 
   if (!isToolImplemented(slug)) return { text: "", unavailable: true };
@@ -323,6 +380,12 @@ export async function runTool(slug: string, input: string, option = "default", t
     if (slug === "email-validator") return { text: JSON.stringify({ email: clean, valid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean) }, null, 2) };
     if (slug === "hex-rgb-hsl-hsv-converter" || slug === "color-picker") { const hex = clean.replace("#", ""); if (!/^[0-9a-f]{6}$/i.test(hex)) throw new ToolError("tool.error.hex"); const [r, g, b] = [0, 2, 4].map((index) => Number.parseInt(hex.slice(index, index + 2), 16)); return { text: JSON.stringify({ hex: `#${hex.toUpperCase()}`, rgb: `rgb(${r}, ${g}, ${b})`, decimal: { r, g, b } }, null, 2) }; }
     if (slug === "notes-pad") return { text: input, label: t("tool.result.notesHint") };
+    // Wave runners: each returns a result or null when the slug is not theirs.
+    // They throw ToolError like the branches above; the catch below localizes.
+    for (const runner of [runTextTools, runMathTools, runTimeTools, runSeoTools, runMiscTools, runCryptoTools, runDataTools, runColorTools, runRandomTools, runFileTools]) {
+      const result = await runner(slug, input, option, t, extra);
+      if (result) return result;
+    }
     return { text: "", unavailable: true };
   } catch (error) {
     if (error instanceof ToolError) return { text: t(error.key), error: true };
