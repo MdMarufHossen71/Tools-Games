@@ -1270,6 +1270,393 @@ const schemas: Record<string, ToolSchema> = {
   "compress-pdf": {
     fields: [], accept: "application/pdf", multiple: false, example: {},
   },
+
+  // -- Image Studio (Wave 4) --------------------------------------------------
+  "image-resize": {
+    fields: [
+      { key: "width", type: "number", label: t("Width (0 = auto)", "প্রস্থ"), default: "800", min: "0", max: "1920" },
+      { key: "height", type: "number", label: t("Height (0 = auto)", "উচ্চতা"), default: "0", min: "0", max: "1920" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-crop": {
+    fields: [
+      { key: "x", type: "number", label: t("Left", "বাম"), default: "0", min: "0" },
+      { key: "y", type: "number", label: t("Top", "উপর"), default: "0", min: "0" },
+      { key: "w", type: "number", label: t("Width", "প্রস্থ"), default: "400", min: "1" },
+      { key: "h", type: "number", label: t("Height", "উচ্চতা"), default: "400", min: "1" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-rotate": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "90", en: "90° clockwise", bn: "৯০° ডানে" },
+          { value: "180", en: "180°", bn: "১৮০°" },
+          { value: "270", en: "90° counter-clockwise", bn: "৯০° বামে" },
+        ],
+        "90",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-flip": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "h", en: "Horizontal", bn: "আনুভূমিক" },
+          { value: "v", en: "Vertical", bn: "উল্লম্ব" },
+        ],
+        "h",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-format-converter": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "jpeg", en: "JPEG", bn: "JPEG" },
+          { value: "png", en: "PNG", bn: "PNG" },
+          { value: "webp", en: "WebP", bn: "WebP" },
+        ],
+        "jpeg",
+      ),
+      { key: "quality", type: "number", label: t("Quality %", "মান %"), default: "90", min: "1", max: "100" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-compressor": {
+    fields: [
+      { key: "quality", type: "number", label: t("Quality %", "মান %"), default: "80", min: "1", max: "100" },
+      { key: "maxdim", type: "number", label: t("Max side px (0 = keep)", "সর্বোচ্চ পার্শ্ব"), default: "1600", min: "0", max: "4000" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "brightness-contrast": {
+    fields: [
+      { key: "brightness", type: "number", label: t("Brightness -100…100", "উজ্জ্বলতা"), default: "10", min: "-100", max: "100" },
+      { key: "contrast", type: "number", label: t("Contrast -100…100", "কনট্রাস্ট"), default: "10", min: "-100", max: "100" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "saturation-vibrance": {
+    fields: [
+      { key: "saturation", type: "number", label: t("Saturation -100…100", "সম্পৃক্তি"), default: "20", min: "-100", max: "100" },
+      { key: "vibrance", type: "number", label: t("Vibrance 0…100", "প্রাণবন্ততা"), default: "20", min: "0", max: "100" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "exposure-gamma": {
+    fields: [
+      { key: "exposure", type: "number", label: t("Exposure stops", "এক্সপোজার"), default: "0.5", min: "-3", max: "3", step: "0.1" },
+      { key: "gamma", type: "number", label: t("Gamma", "গামা"), default: "1", min: "0.1", max: "3", step: "0.1" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "hue-hsl-adjust": {
+    fields: [
+      { key: "hue", type: "number", label: t("Hue shift°", "হিউ"), default: "30", min: "-180", max: "180" },
+      { key: "sat", type: "number", label: t("Saturation %", "সম্পৃক্তি %"), default: "0" },
+      { key: "light", type: "number", label: t("Lightness %", "উজ্জ্বলতা %"), default: "0" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "rgb-channels": {
+    fields: [
+      { key: "r", type: "number", label: t("Red ×", "লাল"), default: "1", min: "0", max: "2", step: "0.1" },
+      { key: "g", type: "number", label: t("Green ×", "সবুজ"), default: "1", min: "0", max: "2", step: "0.1" },
+      { key: "b", type: "number", label: t("Blue ×", "নীল"), default: "1", min: "0", max: "2", step: "0.1" },
+      MODE_FIELD(
+        [
+          { value: "none", en: "Keep color", bn: "রঙিন রাখুন" },
+          { value: "r", en: "Red channel only", bn: "শুধু লাল" },
+          { value: "g", en: "Green channel only", bn: "শুধু সবুজ" },
+          { value: "b", en: "Blue channel only", bn: "শুধু নীল" },
+        ],
+        "none",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "grayscale-sepia-invert": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "gray", en: "Grayscale", bn: "সাদা-কালো" },
+          { value: "sepia", en: "Sepia", bn: "সেপিয়া" },
+          { value: "invert", en: "Invert", bn: "উল্টান" },
+        ],
+        "gray",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "colorize-duotone": {
+    fields: [
+      { key: "dark", type: "color", label: t("Shadows", "ছায়া"), default: "#0a1025" },
+      { key: "light", type: "color", label: t("Highlights", "আলো"), default: "#f7f6f1" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "blur-sharpen": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "blur", en: "Blur", bn: "ঝাপসা" },
+          { value: "sharpen", en: "Sharpen", bn: "তীক্ষ্ণ" },
+        ],
+        "blur",
+      ),
+      { key: "amount", type: "number", label: t("Amount 1…10", "পরিমাণ"), default: "3", min: "1", max: "10" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "noise-pixelate": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "pixelate", en: "Pixelate", bn: "পিক্সেলেট" },
+          { value: "noise", en: "Film grain", bn: "গ্রেইন" },
+        ],
+        "pixelate",
+      ),
+      { key: "amount", type: "number", label: t("Amount", "পরিমাণ"), default: "8", min: "1", max: "64" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "posterize-solarize-threshold": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "posterize", en: "Posterize", bn: "পোস্টারাইজ" },
+          { value: "solarize", en: "Solarize", bn: "সোলারাইজ" },
+          { value: "threshold", en: "Threshold", bn: "থ্রেশহোল্ড" },
+        ],
+        "posterize",
+      ),
+      { key: "levels", type: "number", label: t("Levels / cutoff", "লেভেল"), default: "4", min: "2", max: "16" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "vignette-glow": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "vignette", en: "Vignette", bn: "ভিগনেট" },
+          { value: "glow", en: "Glow", bn: "আভা" },
+        ],
+        "vignette",
+      ),
+      { key: "strength", type: "number", label: t("Strength %", "তীব্রতা %"), default: "50", min: "0", max: "100" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "emboss-clip-effect": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "emboss", en: "Emboss", bn: "এমবস" },
+          { value: "clip", en: "High-contrast clip", bn: "কনট্রাস্ট ক্লিপ" },
+        ],
+        "emboss",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "equalize": { fields: [], accept: "image/*", multiple: false, example: {} },
+  "edge-detection": { fields: [], accept: "image/*", multiple: false, example: {} },
+  "tilt-shift": {
+    fields: [
+      { key: "focus", type: "number", label: t("Focus band center %", "ফোকাস %"), default: "50", min: "0", max: "100" },
+      { key: "blur", type: "number", label: t("Blur", "ঝাপসা"), default: "4", min: "1", max: "12" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "vintage-instant-lomo": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "vintage", en: "Vintage", bn: "ভিনটেজ" },
+          { value: "instant", en: "Instant film", bn: "ইনস্ট্যান্ট" },
+          { value: "lomo", en: "Lomo", bn: "লোমো" },
+        ],
+        "vintage",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "blend-colors-into-image": {
+    fields: [
+      { key: "color", type: "color", label: t("Color", "রং"), default: "#3264ff" },
+      { key: "opacity", type: "number", label: t("Opacity %", "অস্বচ্ছতা %"), default: "30", min: "0", max: "100" },
+      MODE_FIELD(
+        [
+          { value: "multiply", en: "Multiply", bn: "মাল্টিপ্লাই" },
+          { value: "screen", en: "Screen", bn: "স্ক্রিন" },
+          { value: "overlay", en: "Overlay", bn: "ওভারলে" },
+        ],
+        "multiply",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "merge-images": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "side", en: "Side by side", bn: "পাশাপাশি" },
+          { value: "stack", en: "Stacked", bn: "একটার নিচে একটা" },
+        ],
+        "side",
+      ),
+    ],
+    accept: "image/*", multiple: true, example: {},
+  },
+  "overlay-images": {
+    fields: [
+      { key: "x", type: "number", label: t("Offset X", "X অফসেট"), default: "20" },
+      { key: "y", type: "number", label: t("Offset Y", "Y অফসেট"), default: "20" },
+      { key: "opacity", type: "number", label: t("Opacity %", "অস্বচ্ছতা %"), default: "80", min: "0", max: "100" },
+    ],
+    accept: "image/*", multiple: true, example: {},
+  },
+  "split-image": {
+    fields: [
+      { key: "rows", type: "number", label: t("Rows", "সারি"), default: "2", min: "1", max: "8" },
+      { key: "cols", type: "number", label: t("Columns", "কলাম"), default: "2", min: "1", max: "8" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "round-corners": {
+    fields: [{ key: "radius", type: "number", label: t("Radius %", "ব্যাসার্ধ %"), default: "15", min: "1", max: "50" }],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "add-border-frame": {
+    fields: [
+      { key: "thickness", type: "number", label: t("Thickness %", "পুরুত্ব %"), default: "5", min: "1", max: "25" },
+      { key: "color", type: "color", label: t("Color", "রং"), default: "#0a1025" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "text-watermark-image": {
+    fields: [
+      { key: "text", type: "text", label: t("Text", "লেখা"), default: "© Tools & Games BD" },
+      { key: "size", type: "number", label: t("Size % of width", "সাইজ %"), default: "6", min: "2", max: "30" },
+      { key: "opacity", type: "number", label: t("Opacity %", "অস্বচ্ছতা %"), default: "60", min: "5", max: "100" },
+      MODE_FIELD(
+        [
+          { value: "bottom-right", en: "Bottom right", bn: "নিচে ডানে" },
+          { value: "bottom-left", en: "Bottom left", bn: "নিচে বামে" },
+          { value: "center", en: "Center", bn: "মাঝখানে" },
+          { value: "top-left", en: "Top left", bn: "উপরে বামে" },
+        ],
+        "bottom-right",
+      ),
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-color-picker": {
+    fields: [{ key: "colors", type: "number", label: t("Swatches", "রং সংখ্যা"), default: "5", min: "1", max: "10" }],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "palette-extractor": {
+    fields: [{ key: "colors", type: "number", label: t("Swatches", "রং সংখ্যা"), default: "8", min: "1", max: "12" }],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-gradient-generator": {
+    fields: [
+      { key: "a", type: "color", label: t("From", "থেকে"), default: "#3264ff" },
+      { key: "b", type: "color", label: t("To", "পর্যন্ত"), default: "#22d3ee" },
+      { key: "angle", type: "number", label: t("Angle", "কোণ"), default: "135" },
+      { key: "w", type: "number", label: t("Width", "প্রস্থ"), default: "800", min: "16", max: "2000" },
+      { key: "h", type: "number", label: t("Height", "উচ্চতা"), default: "600", min: "16", max: "2000" },
+    ],
+    example: {},
+  },
+  "random-bitmap-generator": {
+    fields: [
+      { key: "w", type: "number", label: t("Width", "প্রস্থ"), default: "64", min: "8", max: "512" },
+      { key: "h", type: "number", label: t("Height", "উচ্চতা"), default: "64", min: "8", max: "512" },
+      { key: "cells", type: "number", label: t("Cell px", "সেল px"), default: "8", min: "1", max: "64" },
+      { key: "colors", type: "number", label: t("Colors", "রং"), default: "4", min: "2", max: "8" },
+    ],
+    example: {},
+  },
+  "svg-png-converter": {
+    fields: [
+      { key: "text", type: "textarea", label: t("SVG", "SVG"), default: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="40" fill="#3264ff"/></svg>' },
+      { key: "scale", type: "number", label: t("Scale ×", "স্কেল"), default: "2", min: "1", max: "8" },
+    ],
+    example: {},
+  },
+  "blurred-background-frame": {
+    fields: [{ key: "blur", type: "number", label: t("Blur", "ঝাপসা"), default: "8", min: "1", max: "20" }],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "image-censor": {
+    fields: [
+      { key: "x", type: "number", label: t("Left %", "বাম %"), default: "30", min: "0", max: "100" },
+      { key: "y", type: "number", label: t("Top %", "উপর %"), default: "30", min: "0", max: "100" },
+      { key: "w", type: "number", label: t("Width %", "প্রস্থ %"), default: "40", min: "1", max: "100" },
+      { key: "h", type: "number", label: t("Height %", "উচ্চতা %"), default: "40", min: "1", max: "100" },
+      { key: "blocks", type: "number", label: t("Blocks", "ব্লক"), default: "12", min: "2", max: "60" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "gif-toolkit": {
+    fields: [], accept: ".gif", multiple: false, example: {},
+  },
+  "video-thumbnail-extractor": {
+    fields: [{ key: "time", type: "number", label: t("Seconds in", "সেকেন্ড"), default: "1", min: "0", max: "3600" }],
+    accept: "video/*", multiple: false, example: {},
+  },
+  "background-remover": {
+    fields: [
+      { key: "color", type: "color", label: t("Key color", "মূল রং"), default: "#00ff00" },
+      { key: "threshold", type: "number", label: t("Tolerance", "সহনশীলতা"), default: "60", min: "1", max: "200" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "batch-image-processing": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "grayscale", en: "Grayscale all", bn: "সাদা-কালো" },
+          { value: "half", en: "Resize to half", bn: "অর্ধেক সাইজ" },
+          { value: "thumb", en: "256px thumbnails", bn: "থাম্বনেইল" },
+        ],
+        "grayscale",
+      ),
+    ],
+    accept: "image/*", multiple: true, example: {},
+  },
+  "screenshot-capture": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "screen", en: "Full screen", bn: "পুরো স্ক্রিন" },
+          { value: "window", en: "Window / tab", bn: "উইন্ডো / ট্যাব" },
+        ],
+        "screen",
+      ),
+    ],
+    example: {},
+  },
+  "meme-generator": {
+    fields: [
+      { key: "top", type: "text", label: t("Top text", "উপরের লেখা"), default: "WHEN THE BUILD" },
+      { key: "bottom", type: "text", label: t("Bottom text", "নিচের লেখা"), default: "PASSES FIRST TRY" },
+    ],
+    accept: "image/*", multiple: false, example: {},
+  },
+  "favicon-multi-size": {
+    fields: [], accept: "image/*", multiple: false, example: {},
+  },
+  "image-base64": {
+    fields: [], accept: "image/*", multiple: false, example: {},
+  },
 };
 
 export function getToolSchema(slug: string): ToolSchema | null {

@@ -14,6 +14,7 @@ import { runDataTools } from "@/lib/tools/dataTools";
 import { runColorTools } from "@/lib/tools/colorTools";
 import { runRandomTools } from "@/lib/tools/randomTools";
 import { runFileTools } from "@/lib/tools/fileTools";
+import { runImageTools } from "@/lib/tools/imageTools";
 
 /**
  * Heavy parsers load on demand, not with the tool catalogue. Each dynamic
@@ -299,6 +300,18 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "batch-file-rename", "text-to-file-download", "zip-creator-extractor",
   "pdf-merge", "pdf-split", "pdf-rotate", "pdf-page-reorder", "pdf-watermark",
   "images-to-pdf", "svg-optimizer", "exif-viewer", "pdf-to-images", "compress-pdf",
+  // Image Studio
+  "image-resize", "image-crop", "image-rotate", "image-flip", "image-format-converter",
+  "image-compressor", "brightness-contrast", "saturation-vibrance", "exposure-gamma",
+  "hue-hsl-adjust", "rgb-channels", "grayscale-sepia-invert", "colorize-duotone",
+  "blur-sharpen", "noise-pixelate", "posterize-solarize-threshold", "vignette-glow",
+  "emboss-clip-effect", "equalize", "edge-detection", "tilt-shift", "vintage-instant-lomo",
+  "blend-colors-into-image", "merge-images", "overlay-images", "split-image",
+  "round-corners", "add-border-frame", "text-watermark-image", "image-color-picker",
+  "image-gradient-generator", "random-bitmap-generator", "svg-png-converter",
+  "blurred-background-frame", "image-censor", "gif-toolkit", "video-thumbnail-extractor",
+  "background-remover", "batch-image-processing", "screenshot-capture", "meme-generator",
+  "favicon-multi-size", "image-base64", "palette-extractor",
   // Misc
   "notes-pad",
   "age-in-seconds", "dog-cat-years-converter", "love-calculator",
@@ -411,7 +424,7 @@ export async function runTool(slug: string, input: string, option = "default", t
     if (slug === "notes-pad") return { text: input, label: t("tool.result.notesHint") };
     // Wave runners: each returns a result or null when the slug is not theirs.
     // They throw ToolError like the branches above; the catch below localizes.
-    for (const runner of [runTextTools, runMathTools, runTimeTools, runSeoTools, runMiscTools, runCryptoTools, runDataTools, runColorTools, runRandomTools, runFileTools]) {
+    for (const runner of [runTextTools, runMathTools, runTimeTools, runSeoTools, runMiscTools, runCryptoTools, runDataTools, runColorTools, runRandomTools, runFileTools, runImageTools]) {
       const result = await runner(slug, input, option, t, extra);
       if (result) return result;
     }
