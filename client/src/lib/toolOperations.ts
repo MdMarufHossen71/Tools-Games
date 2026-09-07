@@ -133,6 +133,7 @@ const englishFallback: Record<string, string> = {
   "tool.file.hashNote": "Files are read only on this device to compute hashes. Nothing is uploaded.",
   "tool.file.noFile": "Choose a file to compute its SHA hashes locally.",
   "tool.hash.note": "Hashes are computed locally with Web Crypto. MD5/SHA-1 are checksums only — never use them to store passwords.",
+  "tool.private.note": "Private keys never leave this browser. Nothing is uploaded or stored.",
 };
 
 const identity: ToolTranslate = (key) => englishFallback[key] ?? key;
@@ -249,12 +250,28 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   // Crypto & security
   "hash-generator", "uuid-generator", "ulid-generator", "nanoid-generator", "secure-token-generator",
   "jwt-decoder-debugger",
+  "hmac-generator", "bcrypt-hash-compare", "encrypt-decrypt-text", "rsa-key-pair-generator",
+  "password-generator", "password-strength-analyzer", "passphrase-generator", "totp-otp-generator",
+  "basic-auth-header", "file-to-base64", "outlook-safelink-decoder", "bip39-mnemonic-generator",
+  "pdf-signature-checker",
   // Developer & data
   "markdown-editor", "json-formatter-validator", "json-minifier", "yaml-formatter", "toml-formatter",
   "xml-formatter", "yaml-json-toml-xml-converter", "sql-formatter", "url-parser",
   "keyword-density-analyzer", "chmod-calculator", "math-evaluator",
+  "json-to-csv-tsv", "csv-converter", "csv-sorter", "json-diff", "compare-files",
+  "regex-tester", "url-builder", "open-graph-generator", "twitter-card-generator",
+  "meta-tags-generator", "robots-txt-generator", "xml-sitemap-generator",
+  "device-information", "user-agent-parser", "http-status-codes", "mime-types-lookup",
+  "git-cheatsheet", "random-port-generator", "mac-address-generator",
+  "ipv4-subnet-calculator", "ipv4-address-converter", "ipv4-range-expander",
+  "ipv6-ula-generator", "eta-calculator", "svg-placeholder-generator",
+  "docker-run-converter", "crontab-generator",
   // Colour
   "hex-rgb-hsl-hsv-converter", "color-picker",
+  "css-named-colors", "lighten-darken-color", "saturation-shift", "greyscale-color",
+  "invert-color", "hue-shift-color", "random-color-generator", "color-scheme-generator",
+  "color-blender", "gradient-generator", "gradient-palette", "contrast-checker",
+  "color-blindness-simulator", "shades-tints-generator",
   // Calculators
   "basic-calculator", "scientific-calculator", "percentage-calculator", "bmi-calculator",
   "area-calculator", "rule-of-three", "trigonometry-calculator", "radians-degrees-converter",
@@ -268,8 +285,16 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "days-between-dates", "working-days-calculator", "timezone-converter",
   // Random & generators
   "random-number-generator", "random-string-generator", "email-validator",
+  "gaussian-generator", "coin-flipper", "dice-roller", "random-team-generator",
+  "random-name-generator", "mock-data-generator", "random-file-generator",
+  "qr-code-generator", "barcode-generator", "iban-validator", "credit-card-validator",
+  "phone-number-parser", "vin-checker", "isbn-validator",
   // File
   "file-hash-calculator",
+  "split-file", "join-files", "file-type-detector", "file-size-converter",
+  "batch-file-rename", "text-to-file-download", "zip-creator-extractor",
+  "pdf-merge", "pdf-split", "pdf-rotate", "pdf-page-reorder", "pdf-watermark",
+  "images-to-pdf",
   // Misc
   "notes-pad",
   "age-in-seconds", "dog-cat-years-converter", "love-calculator",

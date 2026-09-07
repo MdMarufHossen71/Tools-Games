@@ -110,6 +110,9 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
   const [busy, setBusy] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Generic multi-file picker for schema tools (ZIP, PDF, batch…).
+  const [pickedFiles, setPickedFiles] = useState<File[]>([]);
+  const pickerRef = useRef<HTMLInputElement>(null);
 
   const sensitive = isSensitiveTool(tool.slug);
   const built = isToolImplemented(tool.slug);
@@ -121,7 +124,7 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
   // results either way. Form tools pass their named fields along.
   const runNow = () => {
     setBusy(true);
-    runTool(tool.slug, formMode ? "" : memory.input, formMode ? "default" : option, t, formMode ? { fields } : undefined).then((result) => {
+    runTool(tool.slug, formMode ? "" : memory.input, formMode ? "default" : option, t, { fields, files: pickedFiles }).then((result) => {
       setOutput(result);
       setBusy(false);
     });
@@ -131,7 +134,7 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
     if (isFileHash) return;
     let cancelled = false;
     setBusy(true);
-    runTool(tool.slug, formMode ? "" : memory.input, formMode ? "default" : option, t, formMode ? { fields: { ...fields } } : undefined).then((result) => {
+    runTool(tool.slug, formMode ? "" : memory.input, formMode ? "default" : option, t, { fields: { ...fields }, files: pickedFiles }).then((result) => {
       if (cancelled) return;
       setOutput(result);
       setBusy(false);
@@ -141,7 +144,7 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
     };
     // `fields` is compared by identity; every keystroke replaces it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memory.input, option, tool.slug, t, isFileHash, formMode, fields]);
+  }, [memory.input, option, tool.slug, t, isFileHash, formMode, fields, pickedFiles]);
 
   // Real file hashing: the file is read only on this device via `arrayBuffer`,
   // never uploaded. Rejects oversize picks before reading where possible.
@@ -314,6 +317,53 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
                   />
                 ))}
               </div>
+              {schema.accept && (
+                <>
+                  <div className="bench-actions">
+                    <Button size="sm" variant="outline" onClick={() => pickerRef.current?.click()} disabled={busy}>
+                      {t("tool.file.choose")} ({pickedFiles.length})
+                    </Button>
+                    {pickedFiles.length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={() => { setPickedFiles([]); if (pickerRef.current) pickerRef.current.value = ""; }}>
+                        {t("common.clear")}
+                      </Button>
+                    )}
+                  </div>
+                  <input
+                    ref={pickerRef}
+                    type="file"
+                    accept={schema.accept}
+                    multiple={schema.multiple ?? false}
+                    className="sr-only"
+                    aria-label={t("tool.file.choose")}
+                    onChange={(event) => {
+                      const list = event.target.files ? Array.from(event.target.files) : [];
+                      if (pickerRef.current) pickerRef.current.value = "";
+                      if (list.length > 0) {
+                        setPickedFiles(schema.multiple ? [...pickedFiles, ...list] : list.slice(0, 1));
+                        setNotice("");
+                      }
+                    }}
+                  />
+                  {pickedFiles.length > 0 && (
+                    <ul className="tool-file-list">
+                      {pickedFiles.map((item) => (
+                        <li key={`${item.name}-${item.size}`}>
+                          {item.name} ({formatSize(item.size)})
+                          <button
+                            type="button"
+                            className="tool-file-remove"
+                            aria-label={`${t("common.clear")}: ${item.name}`}
+                            onClick={() => setPickedFiles((current) => current.filter((other) => other !== item))}
+                          >
+                            <X className="size-3.5" aria-hidden="true" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
               <div className="bench-actions">
                 <Button size="sm" disabled={busy} onClick={runNow}>
                   <Play className="mr-2 size-3.5" aria-hidden="true" />

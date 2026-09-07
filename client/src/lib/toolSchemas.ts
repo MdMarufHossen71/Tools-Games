@@ -608,6 +608,562 @@ const schemas: Record<string, ToolSchema> = {
     example: { fields: { date: "2027-01-01" } },
   },
   "screen-resolution-detector": { fields: [], example: {} },
+
+  // -- Crypto & Security (Wave 2) -------------------------------------------
+  "hmac-generator": {
+    fields: [
+      { key: "text", type: "textarea", label: t("Message", "বার্তা"), default: "hello" },
+      { key: "key", type: "text", label: t("Secret key", "গোপন key"), default: "secret" },
+      MODE_FIELD(
+        [
+          { value: "SHA-256", en: "HMAC-SHA-256", bn: "HMAC-SHA-256" },
+          { value: "SHA-384", en: "HMAC-SHA-384", bn: "HMAC-SHA-384" },
+          { value: "SHA-512", en: "HMAC-SHA-512", bn: "HMAC-SHA-512" },
+          { value: "SHA-1", en: "HMAC-SHA-1", bn: "HMAC-SHA-1" },
+        ],
+        "SHA-256",
+      ),
+    ],
+    example: { fields: { text: "hello", key: "secret", mode: "SHA-256" } },
+  },
+  "bcrypt-hash-compare": {
+    fields: [
+      { key: "text", type: "text", label: t("Password", "পাসওয়ার্ড"), default: "correct-horse" },
+      { key: "hash", type: "text", label: t("Hash to compare (empty = hash)", "মিলিয়ে দেখুন (খালি = hash করুন)"), default: "" },
+      { key: "rounds", type: "number", label: t("Cost", "কস্ট"), default: "10", min: "4", max: "14" },
+    ],
+    example: { fields: { text: "correct-horse" } },
+  },
+  "encrypt-decrypt-text": {
+    fields: [
+      { key: "text", type: "textarea", label: t("Text", "টেক্সট"), default: "secret message" },
+      { key: "password", type: "text", label: t("Password", "পাসওয়ার্ড"), default: "s3cr3t!" },
+      MODE_FIELD(
+        [
+          { value: "encrypt", en: "Encrypt (AES-GCM)", bn: "এনক্রিপ্ট" },
+          { value: "decrypt", en: "Decrypt", bn: "ডিক্রিপ্ট" },
+        ],
+        "encrypt",
+      ),
+    ],
+    example: { fields: { text: "secret message", password: "s3cr3t!", mode: "encrypt" } },
+  },
+  "rsa-key-pair-generator": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "2048", en: "2048-bit", bn: "2048-বিট" },
+          { value: "4096", en: "4096-bit", bn: "4096-বিট" },
+        ],
+        "2048",
+      ),
+    ],
+    example: { fields: { mode: "2048" } },
+  },
+  "password-generator": {
+    fields: [
+      { key: "length", type: "number", label: t("Length", "দৈর্ঘ্য"), default: "20", min: "4", max: "128" },
+      { key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "5", min: "1", max: "50" },
+      { key: "symbols", type: "checkbox", label: t("Symbols", "চিহ্ন"), default: "on" },
+      { key: "ambiguous", type: "checkbox", label: t("Skip ambiguous (0OIl1)", "দ্ব্যর্থক বাদ"), default: "" },
+    ],
+    example: { fields: { length: "20", count: "5", symbols: "on" } },
+  },
+  "password-strength-analyzer": {
+    fields: [{ key: "text", type: "text", label: t("Password", "পাসওয়ার্ড"), default: "Tr7!xQ9#mZ" }],
+    example: {},
+  },
+  "passphrase-generator": {
+    fields: [
+      { key: "words", type: "number", label: t("Words", "শব্দ"), default: "5", min: "3", max: "12" },
+      { key: "separator", type: "text", label: t("Separator", "বিভাজক"), default: "-" },
+    ],
+    example: { fields: { words: "5", separator: "-" } },
+  },
+  "totp-otp-generator": {
+    fields: [
+      { key: "secret", type: "text", label: t("Secret (base32)", "সিক্রেট"), default: "JBSWY3DPEHPK3PXP" },
+      { key: "digits", type: "number", label: t("Digits", "সংখ্যা"), default: "6", min: "6", max: "8" },
+      { key: "period", type: "number", label: t("Period (s)", "মেয়াদ"), default: "30", min: "10", max: "120" },
+    ],
+    example: { fields: { secret: "JBSWY3DPEHPK3PXP" } },
+  },
+  "basic-auth-header": {
+    fields: [
+      { key: "user", type: "text", label: t("Username", "ইউজারনেম"), default: "admin" },
+      { key: "pass", type: "text", label: t("Password", "পাসওয়ার্ড"), default: "secret" },
+    ],
+    example: { fields: { user: "admin", pass: "secret" } },
+  },
+  "file-to-base64": {
+    fields: [], accept: "*/*", multiple: false,
+    example: {},
+  },
+  "outlook-safelink-decoder": {
+    fields: [{ key: "text", type: "textarea", label: t("SafeLink URL", "SafeLink URL"), default: "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fexample.com%2F&data=1" }],
+    example: {},
+  },
+  "pdf-signature-checker": {
+    fields: [], accept: "application/pdf", multiple: false, example: {},
+  },
+
+  // -- Developer & Data (Wave 2) ----------------------------------------------
+  "json-to-csv-tsv": {
+    fields: [
+      { key: "text", type: "textarea", label: t("JSON array", "JSON অ্যারে"), default: '[{"name":"Amina","city":"Dhaka"},{"name":"Rahim","city":"CTG"}]' },
+      MODE_FIELD(
+        [
+          { value: "csv", en: "CSV", bn: "CSV" },
+          { value: "tsv", en: "TSV", bn: "TSV" },
+        ],
+        "csv",
+      ),
+    ],
+    example: {},
+  },
+  "csv-converter": {
+    fields: [
+      { key: "text", type: "textarea", label: t("CSV", "CSV"), default: "name,city\nAmina,Dhaka" },
+      MODE_FIELD(
+        [
+          { value: "json", en: "CSV → JSON", bn: "CSV → JSON" },
+          { value: "tsv", en: "CSV → TSV", bn: "CSV → TSV" },
+          { value: "md", en: "CSV → Markdown table", bn: "CSV → Markdown" },
+        ],
+        "json",
+      ),
+    ],
+    example: {},
+  },
+  "csv-sorter": {
+    fields: [
+      { key: "text", type: "textarea", label: t("CSV (header row first)", "CSV"), default: "name,score\nRahim,80\nAmina,95" },
+      { key: "column", type: "text", label: t("Column", "কলাম"), default: "score" },
+      MODE_FIELD(
+        [
+          { value: "asc", en: "Ascending", bn: "ঊর্ধ্বক্রম" },
+          { value: "desc", en: "Descending", bn: "অধঃক্রম" },
+        ],
+        "desc",
+      ),
+    ],
+    example: { fields: { column: "score", mode: "desc" } },
+  },
+  "json-diff": {
+    fields: [
+      { key: "text", type: "textarea", label: t("First JSON", "প্রথম JSON"), default: '{"a":1,"b":2}' },
+      { key: "text2", type: "textarea", label: t("Second JSON", "দ্বিতীয় JSON"), default: '{"a":1,"b":3}' },
+    ],
+    example: {},
+  },
+  "compare-files": {
+    fields: [
+      { key: "text", type: "textarea", label: t("First text", "প্রথম টেক্সট"), default: "line one\nline two" },
+      { key: "text2", type: "textarea", label: t("Second text", "দ্বিতীয় টেক্সট"), default: "line one\nline 2" },
+    ],
+    example: {},
+  },
+  "regex-tester": {
+    fields: [
+      { key: "pattern", type: "text", label: t("Pattern", "প্যাটার্ন"), default: "\\b\\w+@\\w+\\.\\w+\\b" },
+      { key: "flags", type: "text", label: t("Flags", "ফ্ল্যাগ"), default: "gi" },
+      { key: "text", type: "textarea", label: t("Test text", "টেক্সট"), default: "mail me at hi@example.com or ops@example.org" },
+    ],
+    example: {},
+  },
+  "url-builder": {
+    fields: [
+      { key: "base", type: "text", label: t("Base URL", "বেস URL"), default: "https://example.com/search" },
+      { key: "params", type: "textarea", label: t("Params (key=value per line)", "প্যারাম"), default: "q=hello world\npage=2" },
+    ],
+    example: {},
+  },
+  "open-graph-generator": {
+    fields: [
+      { key: "title", type: "text", label: t("Title", "শিরোনাম"), default: "My page" },
+      { key: "desc", type: "text", label: t("Description", "বর্ণনা"), default: "A short description." },
+      { key: "url", type: "text", label: t("URL", "URL"), default: "https://example.com/page" },
+      { key: "image", type: "text", label: t("Image URL", "ছবির URL"), default: "https://example.com/og.png" },
+    ],
+    example: {},
+  },
+  "twitter-card-generator": {
+    fields: [
+      { key: "title", type: "text", label: t("Title", "শিরোনাম"), default: "My page" },
+      { key: "desc", type: "text", label: t("Description", "বর্ণনা"), default: "A short description." },
+      { key: "image", type: "text", label: t("Image URL", "ছবির URL"), default: "https://example.com/card.png" },
+    ],
+    example: {},
+  },
+  "meta-tags-generator": {
+    fields: [
+      { key: "title", type: "text", label: t("Title", "শিরোনাম"), default: "My page" },
+      { key: "desc", type: "text", label: t("Description", "বর্ণনা"), default: "A short description." },
+      { key: "keywords", type: "text", label: t("Keywords", "কীওয়ার্ড"), default: "tools, bangladesh" },
+    ],
+    example: {},
+  },
+  "robots-txt-generator": {
+    fields: [
+      { key: "sitemap", type: "text", label: t("Sitemap URL", "সাইটম্যাপ URL"), default: "https://example.com/sitemap.xml" },
+      { key: "disallow", type: "text", label: t("Disallow paths (comma)", "নিষেধ পাথ"), default: "/admin, /private" },
+    ],
+    example: {},
+  },
+  "xml-sitemap-generator": {
+    fields: [
+      { key: "text", type: "textarea", label: t("URLs (one per line)", "URL প্রতি লাইনে"), default: "https://example.com/\nhttps://example.com/about" },
+    ],
+    example: {},
+  },
+  "device-information": { fields: [], example: {} },
+  "user-agent-parser": {
+    fields: [{ key: "text", type: "textarea", label: t("User-Agent", "User-Agent"), default: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" }],
+    example: {},
+  },
+  "http-status-codes": {
+    fields: [{ key: "query", type: "text", label: t("Search", "খুঁজুন"), default: "404" }],
+    example: { fields: { query: "" } },
+  },
+  "mime-types-lookup": {
+    fields: [{ key: "query", type: "text", label: t("Extension or type", "এক্সটেনশন"), default: "pdf" }],
+    example: { fields: { query: "pdf" } },
+  },
+  "git-cheatsheet": {
+    fields: [{ key: "query", type: "text", label: t("Search", "খুঁজুন"), default: "commit" }],
+    example: { fields: { query: "" } },
+  },
+  "random-port-generator": {
+    fields: [
+      { key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "5", min: "1", max: "50" },
+      { key: "registered", type: "checkbox", label: t("Unprivileged only (>1023)", "শুধু >1023"), default: "on" },
+    ],
+    example: { fields: { count: "5" } },
+  },
+  "mac-address-generator": {
+    fields: [
+      { key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "3", min: "1", max: "50" },
+      { key: "sep", type: "text", label: t("Separator", "বিভাজক"), default: ":" },
+    ],
+    example: { fields: { count: "3" } },
+  },
+  "ipv4-subnet-calculator": {
+    fields: [{ key: "cidr", type: "text", label: t("CIDR (e.g. 192.168.1.0/24)", "CIDR"), default: "192.168.1.0/24" }],
+    example: { fields: { cidr: "192.168.1.0/24" } },
+  },
+  "ipv4-address-converter": {
+    fields: [{ key: "value", type: "text", label: t("IPv4 or integer", "IPv4 বা সংখ্যা"), default: "192.168.1.1" }],
+    example: { fields: { value: "192.168.1.1" } },
+  },
+  "ipv4-range-expander": {
+    fields: [{ key: "cidr", type: "text", label: t("CIDR (max /24 shown)", "CIDR"), default: "192.168.1.0/30" }],
+    example: { fields: { cidr: "192.168.1.0/30" } },
+  },
+  "ipv6-ula-generator": {
+    fields: [{ key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "3", min: "1", max: "20" }],
+    example: { fields: { count: "3" } },
+  },
+  "eta-calculator": {
+    fields: [
+      { key: "done", type: "number", label: t("Done", "সম্পন্ন"), default: "40" },
+      { key: "total", type: "number", label: t("Total", "মোট"), default: "100" },
+      { key: "elapsed", type: "number", label: t("Elapsed minutes", "গত মিনিট"), default: "20" },
+    ],
+    example: { fields: { done: "40", total: "100", elapsed: "20" } },
+  },
+  "svg-placeholder-generator": {
+    fields: [
+      { key: "w", type: "number", label: t("Width", "প্রস্থ"), default: "600" },
+      { key: "h", type: "number", label: t("Height", "উচ্চতা"), default: "400" },
+      { key: "label", type: "text", label: t("Label", "লেখা"), default: "600×400" },
+      { key: "bg", type: "color", label: t("Background", "ব্যাকগ্রাউন্ড"), default: "#e5e7eb" },
+      { key: "fg", type: "color", label: t("Text color", "লেখার রং"), default: "#374151" },
+    ],
+    example: {},
+  },
+  "docker-run-converter": {
+    fields: [{ key: "text", type: "textarea", label: t("docker run command", "docker run"), default: "docker run -d --name web -p 8080:80 -v data:/data -e NODE_ENV=production nginx:alpine" }],
+    example: {},
+  },
+  "crontab-generator": {
+    fields: [
+      { key: "minute", type: "text", label: t("Minute", "মিনিট"), default: "*/5" },
+      { key: "hour", type: "text", label: t("Hour", "ঘণ্টা"), default: "*" },
+      { key: "dom", type: "text", label: t("Day of month", "মাসের দিন"), default: "*" },
+      { key: "month", type: "text", label: t("Month", "মাস"), default: "*" },
+      { key: "dow", type: "text", label: t("Day of week", "সপ্তাহের দিন"), default: "*" },
+      { key: "cmd", type: "text", label: t("Command", "কমান্ড"), default: "/usr/bin/backup.sh" },
+    ],
+    example: {},
+  },
+
+  // -- Color Lab (Wave 2, colord) ---------------------------------------------
+  "css-named-colors": {
+    fields: [{ key: "query", type: "text", label: t("Search", "খুঁজুন"), default: "blue" }],
+    example: { fields: { query: "" } },
+  },
+  "lighten-darken-color": {
+    fields: [
+      { key: "color", type: "color", label: t("Color", "রং"), default: "#3264ff" },
+      { key: "amount", type: "number", label: t("Amount % (-100…100)", "পরিমাণ %"), default: "20", min: "-100", max: "100" },
+    ],
+    example: {},
+  },
+  "saturation-shift": {
+    fields: [
+      { key: "color", type: "color", label: t("Color", "রং"), default: "#3264ff" },
+      { key: "amount", type: "number", label: t("Amount % (-100…100)", "পরিমাণ %"), default: "30", min: "-100", max: "100" },
+    ],
+    example: {},
+  },
+  "greyscale-color": {
+    fields: [{ key: "color", type: "color", label: t("Color", "রং"), default: "#3264ff" }],
+    example: {},
+  },
+  "invert-color": {
+    fields: [{ key: "color", type: "color", label: t("Color", "রং"), default: "#3264ff" }],
+    example: {},
+  },
+  "hue-shift-color": {
+    fields: [
+      { key: "color", type: "color", label: t("Color", "রং"), default: "#3264ff" },
+      { key: "degrees", type: "number", label: t("Degrees", "ডিগ্রি"), default: "90" },
+    ],
+    example: {},
+  },
+  "random-color-generator": {
+    fields: [{ key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "5", min: "1", max: "30" }],
+    example: { fields: { count: "5" } },
+  },
+  "color-scheme-generator": {
+    fields: [
+      { key: "color", type: "color", label: t("Base", "মূল রং"), default: "#3264ff" },
+      MODE_FIELD(
+        [
+          { value: "analogous", en: "Analogous", bn: "সদৃশ" },
+          { value: "triadic", en: "Triadic", bn: "ত্রয়ী" },
+          { value: "split", en: "Split-complementary", bn: "বিভক্ত-পরিপূরক" },
+          { value: "tetradic", en: "Tetradic", bn: "চতুর্মুখী" },
+        ],
+        "analogous",
+      ),
+    ],
+    example: {},
+  },
+  "color-blender": {
+    fields: [
+      { key: "a", type: "color", label: t("First", "প্রথম"), default: "#3264ff" },
+      { key: "b", type: "color", label: t("Second", "দ্বিতীয়"), default: "#ff6b4a" },
+      { key: "amount", type: "number", label: t("Mix % toward second", "মিশ্রণ %"), default: "50", min: "0", max: "100" },
+    ],
+    example: {},
+  },
+  "gradient-generator": {
+    fields: [
+      { key: "a", type: "color", label: t("From", "থেকে"), default: "#3264ff" },
+      { key: "b", type: "color", label: t("To", "পর্যন্ত"), default: "#22d3ee" },
+      { key: "angle", type: "number", label: t("Angle", "কোণ"), default: "135" },
+    ],
+    example: {},
+  },
+  "gradient-palette": {
+    fields: [
+      { key: "a", type: "color", label: t("From", "থেকে"), default: "#3264ff" },
+      { key: "b", type: "color", label: t("To", "পর্যন্ত"), default: "#22d3ee" },
+      { key: "steps", type: "number", label: t("Steps", "ধাপ"), default: "5", min: "2", max: "20" },
+    ],
+    example: {},
+  },
+  "contrast-checker": {
+    fields: [
+      { key: "a", type: "color", label: t("Foreground", "সামনের রং"), default: "#0a1025" },
+      { key: "b", type: "color", label: t("Background", "পেছনের রং"), default: "#f7f6f1" },
+    ],
+    example: {},
+  },
+  "color-blindness-simulator": {
+    fields: [{ key: "color", type: "color", label: t("Color", "রং"), default: "#22aa55" }],
+    example: {},
+  },
+  "shades-tints-generator": {
+    fields: [
+      { key: "color", type: "color", label: t("Base", "মূল রং"), default: "#3264ff" },
+      { key: "steps", type: "number", label: t("Steps each way", "ধাপ"), default: "4", min: "1", max: "10" },
+    ],
+    example: {},
+  },
+
+  // -- Random & Generators (Wave 2) --------------------------------------------
+  "gaussian-generator": {
+    fields: [
+      { key: "mean", type: "number", label: t("Mean", "গড়"), default: "0" },
+      { key: "dev", type: "number", label: t("Std dev", "বিচ্যুতি"), default: "1" },
+      { key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "5", min: "1", max: "100" },
+    ],
+    example: {},
+  },
+  "coin-flipper": {
+    fields: [{ key: "count", type: "number", label: t("Flips", "টস"), default: "5", min: "1", max: "100" }],
+    example: { fields: { count: "5" } },
+  },
+  "dice-roller": {
+    fields: [
+      { key: "dice", type: "number", label: t("Dice", "ছক্কা"), default: "2", min: "1", max: "20" },
+      { key: "sides", type: "number", label: t("Sides", "পার্শ্ব"), default: "6", min: "2", max: "100" },
+    ],
+    example: {},
+  },
+  "random-team-generator": {
+    fields: [
+      { key: "text", type: "textarea", label: t("Names (one per line)", "নাম প্রতি লাইনে"), default: "Amina\nRahim\nSadia\nKarim" },
+      { key: "teams", type: "number", label: t("Teams", "দল"), default: "2", min: "2", max: "20" },
+    ],
+    example: {},
+  },
+  "random-name-generator": {
+    fields: [
+      { key: "count", type: "number", label: t("Count", "সংখ্যা"), default: "5", min: "1", max: "50" },
+      MODE_FIELD(
+        [
+          { value: "bn", en: "Bangla", bn: "বাংলা" },
+          { value: "en", en: "English", bn: "English" },
+        ],
+        "bn",
+      ),
+    ],
+    example: {},
+  },
+  "mock-data-generator": {
+    fields: [
+      { key: "count", type: "number", label: t("Rows", "সারি"), default: "5", min: "1", max: "100" },
+      MODE_FIELD(
+        [
+          { value: "person", en: "People", bn: "মানুষ" },
+          { value: "address", en: "Addresses", bn: "ঠিকানা" },
+        ],
+        "person",
+      ),
+    ],
+    example: {},
+  },
+  "random-file-generator": {
+    fields: [
+      { key: "size", type: "number", label: t("Size KB", "সাইজ KB"), default: "100", min: "1", max: "5120" },
+      { key: "name", type: "text", label: t("File name", "ফাইল নাম"), default: "random.bin" },
+    ],
+    example: {},
+  },
+  "qr-code-generator": {
+    fields: [
+      { key: "text", type: "textarea", label: t("Text / URL", "টেক্সট / URL"), default: "https://example.com" },
+      { key: "size", type: "number", label: t("Size px", "সাইজ"), default: "256", min: "128", max: "1024" },
+    ],
+    example: {},
+  },
+  "barcode-generator": {
+    fields: [
+      { key: "text", type: "text", label: t("Value (CODE128)", "মান"), default: "123456789012" },
+      MODE_FIELD(
+        [
+          { value: "CODE128", en: "CODE128", bn: "CODE128" },
+          { value: "EAN13", en: "EAN-13", bn: "EAN-13" },
+          { value: "CODE39", en: "CODE39", bn: "CODE39" },
+        ],
+        "CODE128",
+      ),
+    ],
+    example: {},
+  },
+  "iban-validator": {
+    fields: [{ key: "text", type: "text", label: t("IBAN", "IBAN"), default: "DE89370400440532013000" }],
+    example: {},
+  },
+  "credit-card-validator": {
+    fields: [{ key: "text", type: "text", label: t("Card number", "কার্ড নম্বর"), default: "4111111111111111" }],
+    example: {},
+  },
+  "phone-number-parser": {
+    fields: [
+      { key: "text", type: "text", label: t("Number", "নম্বর"), default: "+8801712345678" },
+      { key: "country", type: "text", label: t("Default country (e.g. BD)", "দেশ কোড"), default: "BD" },
+    ],
+    example: {},
+  },
+  "vin-checker": {
+    fields: [{ key: "text", type: "text", label: t("VIN (17 chars)", "VIN"), default: "1HGCM82633A004352" }],
+    example: {},
+  },
+  "isbn-validator": {
+    fields: [{ key: "text", type: "text", label: t("ISBN", "ISBN"), default: "978-3-16-148410-0" }],
+    example: {},
+  },
+
+  // -- File & PDF (Wave 2; readers need picked files) ---------------------------
+  "split-file": {
+    fields: [{ key: "parts", type: "number", label: t("Parts", "ভাগ"), default: "3", min: "2", max: "99" }],
+    accept: "*/*", multiple: false, example: {},
+  },
+  "join-files": {
+    fields: [], accept: "*/*", multiple: true, example: {},
+  },
+  "file-type-detector": {
+    fields: [], accept: "*/*", multiple: false, example: {},
+  },
+  "file-size-converter": {
+    fields: [{ key: "value", type: "number", label: t("Value", "মান"), default: "1536" },
+      { key: "unit", type: "select", label: t("From unit", "একক"), default: "KB",
+        options: ["B", "KB", "MB", "GB", "TB"].map((u) => ({ value: u, label: t(u, u) })) }],
+    example: {},
+  },
+  "batch-file-rename": {
+    fields: [
+      { key: "pattern", type: "text", label: t("Name pattern ({n} = number)", "প্যাটার্ন"), default: "photo-{n}" },
+      { key: "start", type: "number", label: t("Start number", "শুরু"), default: "1", min: "0" },
+    ],
+    accept: "*/*", multiple: true, example: {},
+  },
+  "text-to-file-download": {
+    fields: [
+      { key: "text", type: "textarea", label: t("Text", "টেক্সট"), default: "Hello!" },
+      { key: "name", type: "text", label: t("File name", "ফাইল নাম"), default: "notes.txt" },
+    ],
+    example: {},
+  },
+  "zip-creator-extractor": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "create", en: "Create ZIP", bn: "ZIP বানান" },
+          { value: "extract", en: "List ZIP contents", bn: "ZIP তালিকা" },
+        ],
+        "create",
+      ),
+      { key: "name", type: "text", label: t("ZIP name", "ZIP নাম"), default: "files.zip" },
+    ],
+    accept: "*/*", multiple: true, example: {},
+  },
+  "pdf-merge": {
+    fields: [], accept: "application/pdf", multiple: true, example: {},
+  },
+  "pdf-split": {
+    fields: [{ key: "ranges", type: "text", label: t("Pages (e.g. 1-3,5)", "পেজ"), default: "1-2" }],
+    accept: "application/pdf", multiple: false, example: {},
+  },
+  "pdf-rotate": {
+    fields: [{ key: "degrees", type: "number", label: t("Degrees", "ডিগ্রি"), default: "90", min: "0", max: "360", step: "90" }],
+    accept: "application/pdf", multiple: false, example: {},
+  },
+  "pdf-page-reorder": {
+    fields: [{ key: "order", type: "text", label: t("New order (e.g. 3,1,2)", "নতুন ক্রম"), default: "" }],
+    accept: "application/pdf", multiple: false, example: {},
+  },
+  "pdf-watermark": {
+    fields: [{ key: "text", type: "text", label: t("Watermark", "ওয়াটারমার্ক"), default: "DRAFT" }],
+    accept: "application/pdf", multiple: false, example: {},
+  },
+  "images-to-pdf": {
+    fields: [], accept: "image/*", multiple: true, example: {},
+  },
 };
 
 export function getToolSchema(slug: string): ToolSchema | null {
