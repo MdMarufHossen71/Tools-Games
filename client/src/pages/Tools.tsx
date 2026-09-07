@@ -86,7 +86,21 @@ export default function Tools() {
           </div>
         </>
       ) : (
-        <div className="empty-state">{t("tools.empty")}</div>
+        <div className="empty-state" role="status">
+          <p>{t("tools.empty")}</p>
+          <div className="bench-actions" style={{ justifyContent: "center", border: 0, background: "transparent" }}>
+            <button
+              type="button"
+              className="filter-chip"
+              onClick={() => {
+                setQuery("");
+                setGroup("all");
+              }}
+            >
+              {t("common.clearSearch")}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -14,6 +14,18 @@ import { Input } from "@/components/ui/input";
 
 const needsMode = new Set(["reverse-text", "sort-list", "base64-text", "url-encode-decode", "html-entities", "yaml-json-toml-xml-converter", "random-number-generator", "uuid-generator"]);
 
+/** Only the modes that make sense for each tool — never the full generic list. */
+const MODES_FOR_SLUG: Record<string, string[]> = {
+  "reverse-text": ["default", "words", "lines"],
+  "sort-list": ["default", "desc"],
+  "base64-text": ["default", "decode"],
+  "url-encode-decode": ["default", "decode"],
+  "html-entities": ["default", "unescape"],
+  "yaml-json-toml-xml-converter": ["default", "yaml", "xml"],
+  "random-number-generator": ["default", "bulk"],
+  "uuid-generator": ["default", "bulk"],
+};
+
 /** Mode values are stable identifiers; their labels come from the dictionary. */
 const MODE_OPTIONS: Array<{ value: string; key: TranslationKey }> = [
   { value: "default", key: "tool.mode.default" },
@@ -283,7 +295,7 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
             <span id="tool-input-label">{t("tool.input")}</span>
             {needsMode.has(tool.slug) && (
               <select value={option} onChange={(event) => setOption(event.target.value)} aria-label={t("tool.mode.label")}>
-                {MODE_OPTIONS.map((item) => (
+                {MODE_OPTIONS.filter((item) => (MODES_FOR_SLUG[tool.slug] ?? [item.value]).includes(item.value)).map((item) => (
                   <option key={item.value} value={item.value}>
                     {t(item.key)}
                   </option>
@@ -456,20 +468,18 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
         <div className="bench-panel bench-result">
           <div className="bench-label">
             <span>{output.label ?? t("tool.output")}</span>
-            <div className="bench-label-actions">
-              <Button size="icon" variant="ghost" onClick={copy} aria-label={t("common.copy")}>
-                {copied ? <Check className="size-4 bench-check" aria-hidden="true" /> : <Clipboard className="size-4" aria-hidden="true" />}
-              </Button>
-              <Button size="icon" variant="ghost" onClick={download} aria-label={t("common.download")}>
-                <Download className="size-4" aria-hidden="true" />
-              </Button>
-            </div>
           </div>
           {output.html ? (
             <div className="tool-html-preview" dangerouslySetInnerHTML={{ __html: output.html }} />
           ) : (
             // `role="status"` so a recomputed result is announced, not just repainted.
-            <pre className={output.error ? "tool-output tool-output-error" : "tool-output"} role="status" aria-live="polite">
+            // An untouched prompt renders muted so empty is never mistaken for output.
+            <pre
+              className={output.error ? "tool-output tool-output-error" : "tool-output"}
+              data-empty={!formMode && !isFileHash && memory.input.trim() === ""}
+              role="status"
+              aria-live="polite"
+            >
               {output.text}
             </pre>
           )}
@@ -537,10 +547,13 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
           </div>
         </div>
       </div>
-      {/* Copy and download give no visual result of their own, so announce them. */}
-      <p className="sr-only" role="status" aria-live="polite">
-        {notice}
-      </p>
+      {/* Copy and download confirm visibly as well as to assistive tech. */}
+      {notice ? (
+        <p className="tool-note" role="status" aria-live="polite">
+          <Check className="size-4" aria-hidden="true" />
+          {notice}
+        </p>
+      ) : null}
       {sensitive ? (
         <p className="tool-note">
           <ShieldCheck className="size-4" aria-hidden="true" />

@@ -431,6 +431,20 @@ button { transition: transform 150ms cubic-bezier(.23,1,.32,1), background-color
 .tool-table thead th { position: sticky; top: 0; background: var(--surface-raised); font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-foreground); }
 .tool-table tbody tr:last-child td { border-bottom: 0; }
 
+/* An untouched prompt renders muted so empty is never mistaken for output. */
+.tool-output[data-empty="true"] { color: var(--muted-foreground); font-style: italic; }
+
+/* Even card rows share a tidy three-line clamp for comparable cards. */
+.game-card p, .tool-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* The filter rail sticks under the header so results stay reachable. */
+.filter-rail { position: sticky; top: 74px; z-index: 20; padding-block: 8px; background: var(--background); }
+
 /* --- Data manager -------------------------------------------------------- */
 
 .data-trigger,

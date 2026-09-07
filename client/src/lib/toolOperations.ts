@@ -139,7 +139,7 @@ const englishFallback: Record<string, string> = {
   "tool.live.wait": "Wait for green…", "tool.live.tapNow": "TAP!", "tool.live.tooSoon": "Too soon — wait for green.",
   "tool.live.winner": "Winner", "tool.live.spin": "Spin", "tool.live.pressKey": "Press any key…",
   "tool.live.allow": "Allow access to continue.", "tool.live.options": "Options",
-  "tool.live.text": "Text", "tool.live.emoji": "Emoji", "tool.live.minutes": "Minutes", "tool.live.work": "Focus", "tool.live.measure": "Measure", "tool.live.fullscreenNote": "Press Esc to leave.", "tool.live.board": "Drawing board", "tool.live.ruler": "Measuring ruler", "tool.live.workload": "Workload", "tool.live.opsSec": "ops/sec", "tool.live.batchMs": "batch ms", "tool.live.bold": "Bold", "tool.live.italic": "Italic", "tool.live.list": "Bulleted list", "tool.live.link": "Insert link", "tool.live.linkUrl": "Link URL", "tool.live.preview": "Preview", "tool.live.stop": "Stop", "tool.live.format": "Format",
+  "tool.live.text": "Text", "tool.live.emoji": "Emoji", "tool.live.minutes": "Minutes", "tool.live.work": "Focus", "tool.live.measure": "Measure", "tool.live.fullscreenNote": "Press Esc to leave.", "tool.live.board": "Drawing board", "tool.live.ruler": "Measuring ruler", "tool.live.workload": "Workload", "tool.live.opsSec": "ops/sec", "tool.live.batchMs": "batch ms", "tool.live.bold": "Bold", "tool.live.italic": "Italic", "tool.live.list": "Bulleted list", "tool.live.link": "Insert link", "tool.live.linkUrl": "Link URL", "tool.live.preview": "Preview", "tool.live.stop": "Stop", "tool.live.format": "Format", "home.recent": "Recently used", "home.recentCopy": "Jump back in where you left off.",
 };
 
 const identity: ToolTranslate = (key) => englishFallback[key] ?? key;

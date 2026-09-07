@@ -245,7 +245,9 @@ export const runFileTools: ToolRunner = async (slug, input, _option, _t, extra) 
     };
   }
   if (slug === "svg-optimizer") {
-    const { optimize } = await import("svgo");
+    // The `/browser` entry: same optimizer without the node shims the
+    // default entry drags in (fs/os/path warnings, +300 KB of dead weight).
+    const { optimize } = await import("svgo/browser");
     const source = F("text", input);
     if (!source.includes("<svg")) throw new ToolError("tool.error.generic");
     try {
