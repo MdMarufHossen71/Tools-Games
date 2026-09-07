@@ -6,6 +6,7 @@ import { type Tool } from "@/data/tools";
 import { useToolInputMemory } from "@/hooks/useToolInputMemory";
 import { isToolImplemented, runHashFile, runTool, toolPlaceholder, type ToolResult } from "@/lib/toolOperations";
 import { defaultFieldValues, getToolSchema, type Field } from "@/lib/toolSchemas";
+import { getLiveTool } from "@/components/tools/live";
 import { isSensitiveTool } from "@/lib/sensitiveTools";
 import { useTranslation } from "@/contexts/AppSettingsContext";
 import type { TranslationKey } from "@/i18n/translations";
@@ -246,6 +247,22 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
         <div className="bench-panel bench-unavailable" role="note">
           <h2>{t("tool.unavailable.title")}</h2>
           <p>{t("tool.unavailable.copy")}</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Live tools own their UI (timers, canvas, recorders) instead of the
+  // input/output bench. They still sit under the same header and privacy chip.
+  const LiveTool = getLiveTool(tool.slug);
+  if (LiveTool) {
+    return (
+      <section className="workbench" aria-labelledby="workbench-title">
+        {header}
+        <div className="bench-grid" style={{ gridTemplateColumns: "1fr" }}>
+          <div className="bench-panel">
+            <LiveTool />
+          </div>
         </div>
       </section>
     );

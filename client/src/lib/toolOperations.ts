@@ -135,6 +135,11 @@ const englishFallback: Record<string, string> = {
   "tool.file.noFile": "Choose a file to compute its SHA hashes locally.",
   "tool.hash.note": "Hashes are computed locally with Web Crypto. MD5/SHA-1 are checksums only — never use them to store passwords.",
   "tool.private.note": "Private keys never leave this browser. Nothing is uploaded or stored.",
+  "tool.live.lap": "Lap", "tool.live.wpm": "WPM", "tool.live.accuracy": "Accuracy",
+  "tool.live.wait": "Wait for green…", "tool.live.tapNow": "TAP!", "tool.live.tooSoon": "Too soon — wait for green.",
+  "tool.live.winner": "Winner", "tool.live.spin": "Spin", "tool.live.pressKey": "Press any key…",
+  "tool.live.allow": "Allow access to continue.", "tool.live.options": "Options",
+  "tool.live.text": "Text", "tool.live.emoji": "Emoji", "tool.live.minutes": "Minutes", "tool.live.work": "Focus", "tool.live.measure": "Measure", "tool.live.fullscreenNote": "Press Esc to leave.", "tool.live.board": "Drawing board", "tool.live.ruler": "Measuring ruler", "tool.live.workload": "Workload", "tool.live.opsSec": "ops/sec", "tool.live.batchMs": "batch ms", "tool.live.bold": "Bold", "tool.live.italic": "Italic", "tool.live.list": "Bulleted list", "tool.live.link": "Insert link", "tool.live.linkUrl": "Link URL", "tool.live.preview": "Preview", "tool.live.stop": "Stop", "tool.live.format": "Format",
 };
 
 const identity: ToolTranslate = (key) => englishFallback[key] ?? key;
@@ -271,6 +276,8 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "html-beautifier", "css-beautifier-minifier", "javascript-beautifier-minifier",
   "code-syntax-highlighter", "json-schema-validator", "html-minifier", "css-minifier",
   "js-minifier", "xlsx-json-converter",
+  "keycode-info", "benchmark-builder", "favicon-generator", "html-wysiwyg-editor",
+  "camera-recorder", "screen-audio-recorder",
   // Colour
   "hex-rgb-hsl-hsv-converter", "color-picker",
   "css-named-colors", "lighten-darken-color", "saturation-shift", "greyscale-color",
@@ -288,12 +295,13 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   // Date & time
   "add-subtract-date", "unix-timestamp-converter", "date-formatter", "julian-date",
   "days-between-dates", "working-days-calculator", "timezone-converter",
+  "countdown-timer", "stopwatch", "world-clock", "timer-with-alarm",
   // Random & generators
   "random-number-generator", "random-string-generator", "email-validator",
   "gaussian-generator", "coin-flipper", "dice-roller", "random-team-generator",
   "random-name-generator", "mock-data-generator", "random-file-generator",
   "qr-code-generator", "barcode-generator", "iban-validator", "credit-card-validator",
-  "phone-number-parser", "vin-checker", "isbn-validator",
+  "phone-number-parser", "vin-checker", "isbn-validator", "list-wheel-picker",
   // File
   "file-hash-calculator",
   "split-file", "join-files", "file-type-detector", "file-size-converter",
@@ -317,6 +325,8 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "age-in-seconds", "dog-cat-years-converter", "love-calculator",
   "aspect-ratio-calculator", "aspect-ratio-cropper", "event-countdown",
   "screen-resolution-detector",
+  "typing-speed-test", "reaction-time-test", "decision-wheel",
+  "screen-ruler", "fullscreen-dead-pixel-test", "whiteboard", "pomodoro-timer",
   // SEO & web
   "htaccess-redirect-generator", "html-entity-table", "seo-word-counter",
   "twitter-card-info", "website-text-extractor",

@@ -43,6 +43,9 @@ const INTENTIONALLY_SHARED = new Set([
   // The label printed on the physical key. Bangla keyboards ship the same cap, and a
   // transliteration would stop matching the hardware the player is looking at.
   "key.escape",
+  // Unit acronyms used identically in Bangla technical writing.
+  "tool.live.wpm",
+  "tool.live.opsSec",
 ]);
 
 /**
