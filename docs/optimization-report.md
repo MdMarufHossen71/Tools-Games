@@ -90,16 +90,12 @@ remains the maintainer's smoke step (shortlist in that doc).
 ### Testing
 
 - New `vitest.config.ts` (node env, `@` alias) + `test` script (`vitest run`).
-- 29 files, 128 tests, all passing:
-  `storage.test.ts` (23: safeGet/Set/Remove, quota/unavailable, export filter,
-  every `parseDataBundle` failure, legacy upgrade, merge/replace/rollback, scoped clear,
-  migration once-only); `slug.test.ts` (6); `sensitiveTools.test.ts` (7);
-  `translations.test.ts` (5: en/bn parity); `toolOperations.test.ts` (19:
-  Bangla/emoji, base64 roundtrip, math/JWT/chmod/email/hex, SHA vectors
-  `hello`→`2cf24d…`, file-hash + oversize, lazy-chunk resolution for
-  sql/yaml/toml/xml/marked); `useGamePersistence.test.ts` (5);
-  per-game logic suites (win scans, AI takes/blocks, clueing, solvability,
-  generators, physics, economy, flood-fill claim, road/economy/waves).
+- 35 files, 170 tests, all passing:
+  `storage.test.ts` (23); `slug.test.ts` (6); `sensitiveTools.test.ts` (7);
+  `translations.test.ts` (5: en/bn parity); `toolOperations.test.ts` (19);
+  `useGamePersistence.test.ts` (5); per-game logic suites; wave suites
+  (`wave1`/`wave2`/`wave3`/`wave4` incl. lazy-chunk resolution); `recent.test.ts`;
+  `live.test.ts` (spin fairness, clock format).
 - Existing audits kept green: `i18n-parity` (0 problems), `hardcoded-strings` (0),
   `class-audit` (clean), `theme-contrast` (12/12 PASS).
 
@@ -111,6 +107,8 @@ remains the maintainer's smoke step (shortlist in that doc).
   bury real diffs. New tests follow standard style.
 - Device smoke on physical keyboard + touch (phase3-changes.md shortlist):
   maintainer step, needs a device.
+- 12 AI tools: excluded by owner decision (network + keys vs browser-only design);
+  the AI page stays a setup guide.
 
 ## 5. Remaining risks / maintainer input
 
@@ -125,10 +123,10 @@ remains the maintainer's smoke step (shortlist in that doc).
 ## 6. Final verification (exact commands, 2026-09-07)
 
 - `corepack pnpm run check` — **pass** (tsc clean).
-- `corepack pnpm run test` — **pass** (29 files, 128 tests).
-- `corepack pnpm run build` — **pass** (only warning: ToolPage chunk, shrinking as parser chunks split out).
-- `node scripts/i18n-parity.mjs` — **pass** (0 problems, 360 keys × 2 locales).
-- `node scripts/hardcoded-strings.mjs` — **pass** (0 in 58 reachable components).
+- `corepack pnpm run test` — **pass** (35 files, 170 tests).
+- `corepack pnpm run build` — **pass** (only warning: lazy vendor chunks like pdfjs/svgo; route chunks all small).
+- `node scripts/i18n-parity.mjs` — **pass** (0 problems, 394 keys × 2 locales).
+- `node scripts/hardcoded-strings.mjs` — **pass** (0 in 71 reachable components).
 - `node scripts/class-audit.mjs` — **pass**. `node scripts/theme-contrast.mjs` — **12/12 PASS**.
 - `npx prettier --check .` — **fails (pre-existing)**: baseline 107 files; changed files
   follow repo long-line style intentionally. Not introduced by this session.
@@ -150,19 +148,23 @@ Manual smoke (code-verified; browser play-through recommended before release):
 12. Mobile/desktop layouts — pass (Phase 2 breakpoints, game DPR/resize handling).
 13. Reduced motion — pass (global kill + per-game decorative gating).
 
-## 7. Files changed (this session — Phases 4–5 + game buildout + parser split)
+## 7. Files changed (this session — Phases 4–5 + game buildout + parser split + tool waves)
 
 - `vite.config.ts` (prod plugin gate, allowedHosts)
 - `client/src/App.tsx` (route `lazy` + `Suspense`)
 - `client/src/components/Map.tsx` (**deleted**), `client/src/types/crypto-js.d.ts` (**deleted**)
-- `client/src/lib/toolOperations.ts` (drop `crypto-js`, Web Crypto async hash, base64 fix, `USE_PROFILES`, async `runTool` + per-tool `import()` chunks)
-- `client/src/components/ToolWorkspace.tsx` (single async resolve path, busy + cancelled-guard, file picker UI)
+- `client/src/lib/toolOperations.ts` (drop `crypto-js`, Web Crypto async hash, base64 fix, `USE_PROFILES`, async `runTool` + per-tool `import()` chunks, wave dispatch, 271 implemented slugs)
+- `client/src/lib/toolSchemas.ts` (new: per-tool form schemas, examples, file accepts)
+- `client/src/lib/tools/` (new: text/math/time/seo/misc/crypto/data/color/random/file/image runners + wave/live/recent tests)
+- `client/src/components/ToolWorkspace.tsx` (single async resolve path, forms, example, counts, Ctrl+Enter, file picker, image/table/artifact output, live tools, per-tool modes, visible notices)
+- `client/src/components/tools/live/` (new: timers, typing, reaction, wheels, ruler, pixel test, whiteboard, keycode, benchmark, favicon, wysiwyg, recorders)
+- `client/src/lib/recent.ts` (new: recent-tools strip source)
 - `client/src/components/DataManager.tsx` (`file.size` pre-check)
 - `client/src/components/ThemePanel.tsx` (20 KB import cap)
 - `client/src/pages/AI.tsx`, `client/src/pages/Links.tsx` (`noopener noreferrer`)
 - `client/src/i18n/translations.ts` (privacy-copy fixes + 7 new keys × 2 locales)
-- `package.json` (remove 4 deps, add `test`), `pnpm-lock.yaml`, `vitest.config.ts` (new)
-- 29 `*.test.ts` (128 tests: storage/slug/sensitive/i18n/tool-ops/game-saves, per-game logic, lazy-chunk resolution)
+- `package.json` (remove 4 deps, add `test`, Wave-3 tool deps), `pnpm-lock.yaml`, `vitest.config.ts` (new)
+- 35 `*.test.ts` (170 tests)
 - 27 new games under `client/src/games/` + `registry.ts` entries (32/32 playable)
 - `README.md`, `todo.md`, `LICENSE` (MIT), `docs/phase4-changes.md`, `docs/phase3-changes.md`, `docs/optimization-report.md`
 

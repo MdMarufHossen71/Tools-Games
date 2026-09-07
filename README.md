@@ -6,7 +6,7 @@
 
 | Area | What is included |
 |---|---|
-| Tools | A searchable browser-side directory across text, crypto, developer, image, color, calculator, time, file, SEO, and generator categories. 53 tools fully implemented; the rest show an honest “Not built yet” state instead of fake output. |
+| Tools | A searchable browser-side directory across text, crypto, developer, image, color, calculator, time, file, SEO, and generator categories. 271 tools fully implemented (12 AI tools excluded by design — no network tools); the rest show an honest “Not built yet” state instead of fake output. |
 | Games | 32 playable games with keyboard + touch controls and local high-score persistence. |
 | Localization | **Default language is English; full Bangla UI is available via the language toggle.** Tool names remain in English for familiar search and SEO, while descriptions are supplied in both English and Bangla. |
 | Appearance | Light, Dark, and 10 developer-inspired presets, plus a six-token custom-theme builder with import, export, edit, and delete controls. |
