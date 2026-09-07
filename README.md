@@ -7,7 +7,7 @@
 | Area | What is included |
 |---|---|
 | Tools | A searchable browser-side directory across text, crypto, developer, image, color, calculator, time, file, SEO, and generator categories. 53 tools fully implemented; the rest show an honest “Not built yet” state instead of fake output. |
-| Games | 30 playable games with keyboard + touch controls and local high-score persistence. 2 further games are listed as “Coming soon”. |
+| Games | 32 playable games with keyboard + touch controls and local high-score persistence. |
 | Localization | **Default language is English; full Bangla UI is available via the language toggle.** Tool names remain in English for familiar search and SEO, while descriptions are supplied in both English and Bangla. |
 | Appearance | Light, Dark, and 10 developer-inspired presets, plus a six-token custom-theme builder with import, export, edit, and delete controls. |
 | Privacy | No account requirement, server-side tool processing, or user tracking logic is built into the app. Fonts load from Google Fonts (standard request data); everything else runs locally. |
@@ -114,10 +114,11 @@ Bindings are shown in each game's UI and localized.
 | Fruit Merge | ←→ aim, Space drop, Esc/P pause, R restart | Drag to aim, release to drop |
 | Hill Rider | →/↑ throttle, ←/↓ brake, Esc/P pause, R restart | 4-way d-pad (held) |
 | Pocket Pool | ←→ aim, ↑↓ power, Space shoot, Esc/P pause, R restart | Pull-back drag to shoot, tap to aim |
+| Territory Loop | Arrows/WASD steer, Esc/P pause, R restart | 4-way d-pad + swipe |
+| Tower Guard | Arrows move cursor, Enter build/select, F upgrade, Backspace sell, Esc/P pause, R restart | Tap shop buttons: tower type, wave, upgrade, sell |
 
 Games pause on tab switch, survive resize/rotate, reset cleanly on double
-restart, and persist best score locally. The remaining 2 games show a localized
-“Coming soon” state until they pass the same checklist.
+restart, and persist best score locally.
 
 ## Technology
 

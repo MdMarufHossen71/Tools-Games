@@ -58,6 +58,8 @@ const modules = {
   "fruit-merge": lazy(() => import("./fruit-merge")),
   "hill-rider": lazy(() => import("./hill-rider")),
   "pocket-pool": lazy(() => import("./pocket-pool")),
+  "territory-loop": lazy(() => import("./territory-loop")),
+  "tower-guard": lazy(() => import("./tower-guard")),
 } satisfies Record<string, GameComponent>;
 
 type PlayableSlug = keyof typeof modules;
