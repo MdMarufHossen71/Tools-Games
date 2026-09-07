@@ -758,6 +758,50 @@ button { transition: transform 150ms cubic-bezier(.23,1,.32,1), background-color
 .game-letters { display: grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 6px; width: 100%; }
 .game-letter-key { min-width: 44px; min-height: 44px; font-size: 15px; }
 
+/* DOM boards for turn-based games. Real buttons in a grid with a single tab stop
+   (roving tabindex from `useBoardNavigation`); cells stay 56px minimum targets. */
+.game-board { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(56px, 84px)); gap: 8px; justify-content: center; width: 100%; max-width: 560px; }
+.game-cell { min-width: 56px; min-height: 56px; aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-raised); color: var(--foreground); font: 700 24px/1 var(--font-ui); cursor: pointer; }
+.game-cell[data-played="false"]:hover { border-color: var(--primary); }
+.game-cell[data-win="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.game-cell[data-blank="true"] { background: transparent; border-style: dashed; cursor: default; }
+.game-cell[data-face-down="true"] { font-size: 20px; color: var(--muted-foreground); }
+.game-cell:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.game-column-row { display: grid; grid-template-columns: repeat(7, minmax(40px, 1fr)); gap: 8px; width: 100%; max-width: 560px; }
+.game-column-pick { min-height: 52px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-raised); color: var(--foreground); font: 700 16px/1 var(--font-ui); cursor: pointer; }
+.game-column-pick[data-active="true"] { border-color: var(--primary); color: var(--primary); }
+.game-column-pick:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.game-turn { margin: 0; color: var(--muted-foreground); font-size: 13px; text-align: center; }
+.game-mode-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.game-choice-list { display: grid; gap: 8px; width: 100%; max-width: 560px; }
+.game-choice { min-height: 52px; padding: 10px 14px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-raised); color: var(--foreground); font: 600 15px/1.4 var(--font-ui); text-align: start; cursor: pointer; }
+.game-choice[data-correct="true"] { border-color: var(--primary); }
+.game-choice[data-wrong="true"] { opacity: 0.55; }
+.game-choice:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.game-entry { min-height: 56px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-sunken); color: var(--foreground); font: 700 26px/1 var(--font-code); letter-spacing: 0.1em; width: 100%; max-width: 340px; }
+.game-quiz-question { margin: 0; font-size: clamp(19px, 3vw, 24px); letter-spacing: -0.02em; text-align: center; }
+.game-hangman-word { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.game-hangman-word span { display: grid; place-items: center; min-width: 34px; min-height: 44px; border-bottom: 2px solid var(--border-strong); font: 700 22px/1 var(--font-ui); }
+/* Dense boards (Sudoku 9×9, Minesweeper 9×9): fluid cells that fit a 320px
+   viewport. Numeric entry still comes from the large engine keypad, so the
+   small tap targets here are a second path, not the only one. */
+.game-board-dense { display: grid; grid-template-columns: repeat(var(--cols, 9), minmax(0, 1fr)); gap: 4px; width: 100%; max-width: 480px; }
+.game-board-dense .game-cell { min-width: 0; min-height: 0; border-radius: 6px; font-size: 16px; }
+.game-cell[data-given="true"] { font-weight: 800; }
+.game-cell[data-bad="true"] { border-color: var(--danger); color: var(--danger); }
+/* Checkerboard light squares: quiet board, never a target. */
+.game-cell[data-dark="false"] { background: var(--surface-sunken); border-color: transparent; cursor: default; }
+.game-cell[data-selected="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+/* Water-sort tubes: the button is the tube, liquids stack from the bottom. */
+.game-tube-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.game-tube { width: 54px; min-height: 52px; padding: 8px 7px 12px; border: 1px solid var(--border-strong); border-top: none; border-radius: 0 0 12px 12px; background: var(--surface-sunken); display: flex; flex-direction: column-reverse; gap: 2px; cursor: pointer; }
+.game-tube[data-active="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.game-tube:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.game-liquid { height: 22px; border-radius: 4px; }
+.game-jumble { margin: 0; font: 700 clamp(28px, 6vw, 44px)/1.2 var(--font-ui); letter-spacing: 0.18em; text-align: center; }
+.game-found-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.game-found-list [data-found="true"] { text-decoration: line-through; color: var(--muted-foreground); }
+
 /* The key bindings, printed under the board rather than hidden behind a help button
    nobody opens. `<kbd>` is drawn as a physical cap so it reads as a key, not a word. */
 .game-legend { border: 1px solid var(--border); background: var(--card); padding: 14px 16px; }
