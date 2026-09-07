@@ -434,8 +434,7 @@ export const runDataTools: ToolRunner = async (slug, input, _option, _t, extra) 
     if (service.command) lines.push(`    command: ${service.command}`);
     return { text: lines.join("\n") };
   }
-  if (slug === "crontab-generator") {
-    const validateModule = await import("cron-validate");
+  if (slug === "crontab-generator") {    const validateModule = await import("cron-validate");
     const nested = (validateModule.default as unknown as { default?: unknown }).default;
     const validate = (typeof nested === "function" ? nested : validateModule.default) as unknown as (expr: string) => { isValid: () => boolean };
     const { default: cronstrue } = await import("cronstrue");
@@ -444,6 +443,129 @@ export const runDataTools: ToolRunner = async (slug, input, _option, _t, extra) 
     const checked = validate(schedule);
     if (!checked.isValid()) throw new ToolError("tool.error.generic");
     return { text: `${schedule} ${F("cmd")}\n# ${cronstrue.toString(schedule)}` };
+  }
+  if (slug === "html-beautifier" || slug === "css-beautifier-minifier" || slug === "javascript-beautifier-minifier") {
+    const { js_beautify, css_beautify, html_beautify } = await import("js-beautify");
+    const text = F("text", input);
+    if (!text.trim()) throw new ToolError("tool.error.generic");
+    if (slug === "html-beautifier") return { text: html_beautify(text, { indent_size: 2, wrap_line_length: 100 }) };
+    if (F("mode", "beautify") === "minify") {
+      if (slug === "css-beautifier-minifier") {
+        const cssoModule = await import("csso");
+        const csso = ((cssoModule as { default?: unknown }).default ?? cssoModule) as { minify: (source: string) => { css: string } };
+        return { text: csso.minify(text).css };
+      }
+      const { minify } = await import("terser");
+      try {
+        const result = await minify(text);
+        if (!result.code) throw new Error();
+        return { text: result.code };
+      } catch {
+        throw new ToolError("tool.error.generic");
+      }
+    }
+    if (slug === "css-beautifier-minifier") return { text: css_beautify(text) };
+    return { text: js_beautify(text, { indent_size: 2 }) };
+  }
+  if (slug === "code-syntax-highlighter") {
+    if (typeof document === "undefined") {
+      const hljs = (await import("highlight.js/lib/core")).default;
+      const { default: javascript } = await import("highlight.js/lib/languages/javascript");
+      hljs.registerLanguage("javascript", javascript);
+      const highlighted = hljs.highlight(F("text", input).slice(0, 50000), { language: "javascript" }).value;
+      return { text: highlighted.replace(/<[^>]+>/g, ""), html: `<pre class="hljs">${highlighted}</pre>` };
+    }
+    const hljs = (await import("highlight.js/lib/core")).default;
+    // Static loader map so Vite splits one chunk per language. A variable
+    // `import(path)` would be left for the browser to resolve — and fail.
+    const loaders: Record<string, () => Promise<{ default: unknown }>> = {
+      javascript: () => import("highlight.js/lib/languages/javascript"),
+      typescript: () => import("highlight.js/lib/languages/typescript"),
+      xml: () => import("highlight.js/lib/languages/xml"),
+      css: () => import("highlight.js/lib/languages/css"),
+      json: () => import("highlight.js/lib/languages/json"),
+      bash: () => import("highlight.js/lib/languages/bash"),
+      yaml: () => import("highlight.js/lib/languages/yaml"),
+      sql: () => import("highlight.js/lib/languages/sql"),
+      markdown: () => import("highlight.js/lib/languages/markdown"),
+      python: () => import("highlight.js/lib/languages/python"),
+    };
+    for (const [name, load] of Object.entries(loaders)) {
+      hljs.registerLanguage(name, (await load()).default as Parameters<typeof hljs.registerLanguage>[1]);
+    }
+    const lang = F("lang", "javascript");
+    const code = F("text", input).slice(0, 50000);
+    let highlighted: string;
+    try {
+      highlighted = hljs.highlight(code, { language: hljs.getLanguage(lang) ? lang : "plaintext" }).value;
+    } catch {
+      highlighted = hljs.highlightAuto(code).value;
+    }
+    return { text: highlighted.replace(/<[^>]+>/g, ""), html: `<pre class="hljs">${highlighted}</pre>` };
+  }
+  if (slug === "json-schema-validator") {
+    const { default: Ajv } = await import("ajv");
+    let data: unknown;
+    let schema: unknown;
+    try {
+      data = JSON.parse(F("text", input));
+      schema = JSON.parse(F("schema"));
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+    if (typeof schema !== "object" || schema === null) throw new ToolError("tool.error.generic");
+    try {
+      const validate = new Ajv({ allErrors: true, strict: false }).compile(schema as object);
+      const valid = validate(data);
+      return {
+        text: JSON.stringify({ valid, errors: validate.errors ?? [] }, null, 2),
+        table: { head: ["Path", "Message"], rows: (validate.errors ?? []).map((e) => [e.instancePath || "/", e.message ?? ""]) },
+      };
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+  }
+  if (slug === "html-minifier") {
+    const { minify } = await import("html-minifier-terser");
+    try {
+      const out = await minify(F("text", input), { collapseWhitespace: true, removeComments: true, removeRedundantAttributes: true, minifyCSS: true, minifyJS: true });
+      return { text: out };
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+  }
+  if (slug === "css-minifier") {
+    const cssoModule = await import("csso");
+    // CJS/ESM interop differs between Vite and node: take whichever shape.
+    const csso = ((cssoModule as { default?: unknown }).default ?? cssoModule) as { minify: (source: string) => { css: string } };
+    try {
+      return { text: csso.minify(F("text", input)).css };
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+  }
+  if (slug === "js-minifier") {
+    const { minify } = await import("terser");
+    try {
+      const result = await minify(F("text", input));
+      if (!result.code) throw new Error();
+      return { text: result.code };
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+  }
+  if (slug === "xlsx-json-converter") {
+    const file = extra?.files?.[0];
+    if (!file) throw new ToolError("tool.error.generic");
+    const XLSX = await import("xlsx");
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    if (!sheet) throw new ToolError("tool.error.generic");
+    if (F("mode", "to-json") === "to-csv") {
+      return { text: XLSX.utils.sheet_to_csv(sheet) };
+    }
+    return { text: JSON.stringify(XLSX.utils.sheet_to_json(sheet), null, 2) };
   }
   return null;
 };

@@ -221,5 +221,26 @@ export const runTextTools: ToolRunner = async (slug, input, _option, t, extra) =
       table: { head: ["Char", "Code", "Name"], rows },
     };
   }
+  if (slug === "ascii-art-text-generator") {
+    const text = F("text", "Hi").replace(/[^A-Za-z0-9 !?.,'-]/g, "").slice(0, 20);
+    if (!text.trim()) throw new ToolError("tool.error.generic");
+    const font = ["Standard", "Small", "Big"].includes(F("mode", "Standard")) ? F("mode", "Standard") : "Standard";
+    const figlet = (await import("figlet")).default;
+    // Browser bundles cannot read the .flf files off disk; the importable
+    // font modules carry the same data as JS for dynamic loading.
+    const fontData = (await import(`figlet/importable-fonts/${font}.js`)) as { default: string };
+    figlet.parseFont(font, fontData.default);
+    return { text: figlet.textSync(text, { font }) };
+  }
+  if (slug === "text-diff-checker") {
+    const { diffLines } = await import("diff");
+    const parts = diffLines(F("text", input), F("text2"));
+    const added = parts.filter((p: { added?: boolean }) => p.added).reduce((n: number, p: { count?: number }) => n + (p.count ?? 0), 0);
+    const removed = parts.filter((p: { removed?: boolean }) => p.removed).reduce((n: number, p: { count?: number }) => n + (p.count ?? 0), 0);
+    return {
+      text: parts.map((part: { added?: boolean; removed?: boolean; value: string }) => (part.added ? "+ " : part.removed ? "- " : "  ") + part.value).join(""),
+      table: { head: ["Metric", "Lines"], rows: [["Added", String(added)], ["Removed", String(removed)]] },
+    };
+  }
   return null;
 };

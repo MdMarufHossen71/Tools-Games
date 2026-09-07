@@ -55,7 +55,7 @@ const MAGIC: Array<[string, number[], string]> = [
   ["SQLite database", [0x53, 0x51, 0x4c, 0x69], "application/x-sqlite3"],
 ];
 
-export const runFileTools: ToolRunner = async (slug, _input, _option, _t, extra) => {
+export const runFileTools: ToolRunner = async (slug, input, _option, _t, extra) => {
   const F = (key: string, fallback = "") => field(extra, key, fallback);
 
   if (slug === "split-file") {
@@ -225,8 +225,7 @@ export const runFileTools: ToolRunner = async (slug, _input, _option, _t, extra)
       };
     }
     // pdf-watermark
-    const doc = source;
-    const font = await doc.embedFont(StandardFonts.HelveticaBold);
+    const doc = source;    const font = await doc.embedFont(StandardFonts.HelveticaBold);
     for (const page of doc.getPages()) {
       const { width, height } = page.getSize();
       page.drawText(F("text", "DRAFT"), {
@@ -243,6 +242,92 @@ export const runFileTools: ToolRunner = async (slug, _input, _option, _t, extra)
     return {
       text: JSON.stringify({ pages: total, watermark: F("text", "DRAFT") }, null, 2),
       artifacts: [downloadArtifact("watermarked.pdf", "application/pdf", bytes)],
+    };
+  }
+  if (slug === "svg-optimizer") {
+    const { optimize } = await import("svgo");
+    const source = F("text", input);
+    if (!source.includes("<svg")) throw new ToolError("tool.error.generic");
+    try {
+      const result = optimize(source, { multipass: true });
+      const before = new TextEncoder().encode(source).length;
+      const after = new TextEncoder().encode(result.data).length;
+      return {
+        text: result.data,
+        html: result.data,
+        artifacts: [{ name: "optimized.svg", mime: "image/svg+xml", dataUrl: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(result.data)}` }],
+        label: `${before} → ${after} bytes`,
+      };
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+  }
+  if (slug === "exif-viewer") {
+    const [file] = needFiles(extra, 1);
+    const { default: exifr } = await import("exifr");
+    let tags: Record<string, unknown>;
+    try {
+      tags = (await exifr.parse(await file.arrayBuffer())) ?? {};
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+    const rows = Object.entries(tags).slice(0, 200).map(([key, value]) => [key, String(value).slice(0, 200)]);
+    return {
+      text: rows.length === 0 ? JSON.stringify({ exif: "none found" }) : JSON.stringify(Object.fromEntries(rows), null, 2),
+      table: { head: ["Tag", "Value"], rows },
+    };
+  }
+  if (slug === "pdf-to-images") {
+    if (typeof document === "undefined") throw new ToolError("tool.error.generic");
+    const [file] = needFiles(extra, 1, "application/pdf");
+    const pdfjs = await import("pdfjs-dist");
+    const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default as string;
+    pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+    const pages = Math.min(Math.max(parseInt(F("pages", "2"), 10) || 2, 1), 5);
+    let doc;
+    try {
+      doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+    } catch {
+      throw new ToolError("tool.error.generic");
+    }
+    const artifacts: Array<{ name: string; mime: string; dataUrl: string }> = [];
+    const count = Math.min(doc.numPages, pages);
+    const previews: string[] = [];
+    for (let i = 1; i <= count; i += 1) {
+      const page = await doc.getPage(i);
+      const viewport = page.getViewport({ scale: 2 });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      const context = canvas.getContext("2d");
+      if (!context) throw new ToolError("tool.error.generic");
+      // pdf.js v6 renders into `canvas`, not a 2d context handle.
+      await page.render({ canvas, viewport } as unknown as Parameters<typeof page.render>[0]).promise;
+      const dataUrl = canvas.toDataURL("image/png");
+      artifacts.push({ name: `${file.name.replace(/\.pdf$/i, "")}-p${i}.png`, mime: "image/png", dataUrl });
+      // The first page doubles as the preview; the rest ride as downloads.
+      if (i === 1) previews.push(dataUrl);
+    }
+    if (typeof (doc as unknown as { cleanup?: unknown }).cleanup === "function") {
+      (doc as unknown as { cleanup: () => void }).cleanup();
+    }
+    return {
+      text: JSON.stringify({ file: file.name, pages: count, of: doc.numPages }, null, 2),
+      image: previews[0],
+      artifacts,
+    };
+  }
+  if (slug === "compress-pdf") {
+    // Honest boundary: no browser library truly downsamples embedded images
+    // without a PostScript engine. This re-saves with object streams (a small
+    // lossless win) and reports both sizes instead of pretending otherwise.
+    const [file] = needFiles(extra, 1, "application/pdf");
+    const { PDFDocument } = await import("pdf-lib");
+    const source = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+    const bytes = await source.save({ useObjectStreams: true });
+    return {
+      text: JSON.stringify({ before: file.size, after: bytes.length, saved: file.size - bytes.length }, null, 2),
+      artifacts: [downloadArtifact("compressed.pdf", "application/pdf", bytes)],
     };
   }
   return null;

@@ -247,6 +247,7 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "text-censor", "text-to-unicode", "zalgo-text-generator", "numeronym-generator",
   "lorem-ipsum-generator", "random-sentence-generator", "regex-replacer",
   "emoji-kaomoji-picker", "unicode-character-finder",
+  "ascii-art-text-generator", "text-diff-checker",
   // Crypto & security
   "hash-generator", "uuid-generator", "ulid-generator", "nanoid-generator", "secure-token-generator",
   "jwt-decoder-debugger",
@@ -266,6 +267,9 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "ipv4-subnet-calculator", "ipv4-address-converter", "ipv4-range-expander",
   "ipv6-ula-generator", "eta-calculator", "svg-placeholder-generator",
   "docker-run-converter", "crontab-generator",
+  "html-beautifier", "css-beautifier-minifier", "javascript-beautifier-minifier",
+  "code-syntax-highlighter", "json-schema-validator", "html-minifier", "css-minifier",
+  "js-minifier", "xlsx-json-converter",
   // Colour
   "hex-rgb-hsl-hsv-converter", "color-picker",
   "css-named-colors", "lighten-darken-color", "saturation-shift", "greyscale-color",
@@ -294,7 +298,7 @@ export const IMPLEMENTED_TOOLS: ReadonlySet<string> = new Set([
   "split-file", "join-files", "file-type-detector", "file-size-converter",
   "batch-file-rename", "text-to-file-download", "zip-creator-extractor",
   "pdf-merge", "pdf-split", "pdf-rotate", "pdf-page-reorder", "pdf-watermark",
-  "images-to-pdf",
+  "images-to-pdf", "svg-optimizer", "exif-viewer", "pdf-to-images", "compress-pdf",
   // Misc
   "notes-pad",
   "age-in-seconds", "dog-cat-years-converter", "love-calculator",

@@ -215,6 +215,27 @@ const schemas: Record<string, ToolSchema> = {
     ],
     example: { fields: { query: "", mode: "bengali" } },
   },
+  "ascii-art-text-generator": {
+    fields: [
+      { key: "text", type: "text", label: t("Text (A–Z 0–9)", "টেক্সট"), default: "Hi" },
+      MODE_FIELD(
+        [
+          { value: "Standard", en: "Standard", bn: "Standard" },
+          { value: "Small", en: "Small", bn: "Small" },
+          { value: "Big", en: "Big", bn: "Big" },
+        ],
+        "Standard",
+      ),
+    ],
+    example: { fields: { text: "Hi", mode: "Standard" } },
+  },
+  "text-diff-checker": {
+    fields: [
+      { key: "text", type: "textarea", label: t("First text", "প্রথম টেক্সট"), default: "line one\nline two" },
+      { key: "text2", type: "textarea", label: t("Second text", "দ্বিতীয় টেক্সট"), default: "line one\nline 2" },
+    ],
+    example: {},
+  },
 
   // -- Math & calculators --------------------------------------------------
   "area-calculator": {
@@ -896,6 +917,77 @@ const schemas: Record<string, ToolSchema> = {
     ],
     example: {},
   },
+  "html-beautifier": {
+    fields: [{ key: "text", type: "textarea", label: t("HTML", "HTML"), default: "<div><p>hi</p></div>" }],
+    example: {},
+  },
+  "css-beautifier-minifier": {
+    fields: [
+      { key: "text", type: "textarea", label: t("CSS", "CSS"), default: "a{color:red}" },
+      MODE_FIELD(
+        [
+          { value: "beautify", en: "Beautify", bn: "সাজান" },
+          { value: "minify", en: "Minify", bn: "ছোট করুন" },
+        ],
+        "beautify",
+      ),
+    ],
+    example: {},
+  },
+  "javascript-beautifier-minifier": {
+    fields: [
+      { key: "text", type: "textarea", label: t("JavaScript", "JavaScript"), default: "function f(a){return a+1}" },
+      MODE_FIELD(
+        [
+          { value: "beautify", en: "Beautify", bn: "সাজান" },
+          { value: "minify", en: "Minify (terser)", bn: "ছোট করুন" },
+        ],
+        "beautify",
+      ),
+    ],
+    example: {},
+  },
+  "code-syntax-highlighter": {
+    fields: [
+      { key: "text", type: "textarea", label: t("Code", "কোড"), default: "const greeting = \"hello\";" },
+      {
+        key: "lang", type: "select", label: t("Language", "ভাষা"), default: "javascript",
+        options: ["javascript", "typescript", "xml", "css", "json", "bash", "yaml", "sql", "markdown", "python"].map((l) => ({ value: l, label: t(l, l) })),
+      },
+    ],
+    example: {},
+  },
+  "json-schema-validator": {
+    fields: [
+      { key: "text", type: "textarea", label: t("JSON", "JSON"), default: '{"age":30}' },
+      { key: "schema", type: "textarea", label: t("Schema", "স্কিমা"), default: '{"type":"object","properties":{"age":{"type":"number"}},"required":["age"]}' },
+    ],
+    example: {},
+  },
+  "html-minifier": {
+    fields: [{ key: "text", type: "textarea", label: t("HTML", "HTML"), default: "<div>\n  <p>hi</p>\n</div>" }],
+    example: {},
+  },
+  "css-minifier": {
+    fields: [{ key: "text", type: "textarea", label: t("CSS", "CSS"), default: "a {\n  color: red;\n}" }],
+    example: {},
+  },
+  "js-minifier": {
+    fields: [{ key: "text", type: "textarea", label: t("JavaScript", "JavaScript"), default: "function add(a, b) {\n  return a + b;\n}" }],
+    example: {},
+  },
+  "xlsx-json-converter": {
+    fields: [
+      MODE_FIELD(
+        [
+          { value: "to-json", en: "XLSX → JSON", bn: "XLSX → JSON" },
+          { value: "to-csv", en: "XLSX → CSV", bn: "XLSX → CSV" },
+        ],
+        "to-json",
+      ),
+    ],
+    accept: ".xlsx,.xls", multiple: false, example: {},
+  },
 
   // -- Color Lab (Wave 2, colord) ---------------------------------------------
   "css-named-colors": {
@@ -1163,6 +1255,20 @@ const schemas: Record<string, ToolSchema> = {
   },
   "images-to-pdf": {
     fields: [], accept: "image/*", multiple: true, example: {},
+  },
+  "svg-optimizer": {
+    fields: [{ key: "text", type: "textarea", label: t("SVG", "SVG"), default: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><g><rect width="10" height="10" fill="red"/></g></svg>' }],
+    example: {},
+  },
+  "exif-viewer": {
+    fields: [], accept: "image/*", multiple: false, example: {},
+  },
+  "pdf-to-images": {
+    fields: [{ key: "pages", type: "number", label: t("Pages (max 5)", "পেজ"), default: "2", min: "1", max: "5" }],
+    accept: "application/pdf", multiple: false, example: {},
+  },
+  "compress-pdf": {
+    fields: [], accept: "application/pdf", multiple: false, example: {},
   },
 };
 

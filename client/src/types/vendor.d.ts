@@ -15,3 +15,12 @@ declare module "iban" {
   const IBAN: { isValid(input: string): boolean };
   export default IBAN;
 }
+
+declare module "csso" {
+  const csso: { minify(source: string): { css: string } };
+  export default csso;
+}
+
+declare module "html-minifier-terser" {
+  export function minify(source: string, options?: Record<string, unknown>): Promise<string>;
+}
