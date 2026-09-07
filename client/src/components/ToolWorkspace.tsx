@@ -1,10 +1,10 @@
 /** Cobalt Workshop design reminder: the workbench presents input, output and actions as a fast visual loop; every result is local and inspectable. */
-import { useEffect, useState } from "react";
-import { Check, Clipboard, Download, History, Play, RotateCcw, ShieldCheck, Trash2, TriangleAlert, Wrench } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Clipboard, Download, FileUp, History, Play, RotateCcw, ShieldCheck, Trash2, TriangleAlert, Wrench, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type Tool } from "@/data/tools";
 import { useToolInputMemory } from "@/hooks/useToolInputMemory";
-import { isToolImplemented, runTool, toolPlaceholder } from "@/lib/toolOperations";
+import { isAsyncTool, isToolImplemented, runHashFile, runHashText, runTool, toolPlaceholder, type ToolResult } from "@/lib/toolOperations";
 import { isSensitiveTool } from "@/lib/sensitiveTools";
 import { useTranslation } from "@/contexts/AppSettingsContext";
 import type { TranslationKey } from "@/i18n/translations";
@@ -29,17 +29,77 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
   const placeholder = toolPlaceholder(tool.slug);
   const memory = useToolInputMemory(tool.slug, placeholder);
   const [option, setOption] = useState("default");
-  const [output, setOutput] = useState(() => runTool(tool.slug, memory.input, option, t));
+  const asyncTool = isAsyncTool(tool.slug);
+  const isFileHash = tool.slug === "file-hash-calculator";
+  const [output, setOutput] = useState<ToolResult>(() =>
+    asyncTool ? { text: t("tool.result.needsInput") } : runTool(tool.slug, memory.input, option, t),
+  );
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const sensitive = isSensitiveTool(tool.slug);
   const built = isToolImplemented(tool.slug);
   const description = tool.description[language] || tool.description.en;
 
+  // Sync tools resolve immediately.
   useEffect(() => {
+    if (asyncTool) return;
     setOutput(runTool(tool.slug, memory.input, option, t));
-  }, [memory.input, option, tool.slug, t]);
+  }, [memory.input, option, tool.slug, t, asyncTool]);
+
+  // Text hashing is async (Web Crypto). Guard against out-of-order resolves.
+  useEffect(() => {
+    if (tool.slug !== "hash-generator") return;
+    if (!memory.input.trim()) {
+      setOutput({ text: t("tool.result.needsInput") });
+      return;
+    }
+    let cancelled = false;
+    setBusy(true);
+    runHashText(memory.input, t).then((result) => {
+      if (cancelled) return;
+      setOutput(result);
+      setBusy(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [memory.input, tool.slug, t]);
+
+  // Real file hashing: the file is read only on this device via `arrayBuffer`,
+  // never uploaded. Rejects oversize picks before reading where possible.
+  useEffect(() => {
+    if (!isFileHash) return;
+    if (!file) {
+      setOutput({ text: t("tool.file.noFile"), label: t("tool.file.hashNote") });
+      return;
+    }
+    let cancelled = false;
+    setBusy(true);
+    runHashFile(file, t).then((result) => {
+      if (cancelled) return;
+      setOutput(result);
+      setBusy(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [file, isFileHash, t]);
+
+  const pickFile = (next: File | undefined) => {
+    if (!next) return;
+    setFile(next);
+    setNotice("");
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   // Clear a transient confirmation without leaving a timer behind on unmount.
   useEffect(() => {
@@ -137,23 +197,75 @@ export function ToolWorkspace({ tool }: { tool: Tool }) {
               </select>
             )}
           </div>
-          <textarea value={memory.input} onChange={(event) => memory.setInput(event.target.value)} className="tool-textarea" spellCheck={false} placeholder={placeholder} aria-label={t("tool.inputLabel", { name: tool.name })} />
-          <div className="bench-actions">
-            <Button size="sm" onClick={() => setOutput(runTool(tool.slug, memory.input, option, t))}>
-              <Play className="mr-2 size-3.5" aria-hidden="true" />
-              {t("tool.run")}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => memory.setInput("")}>
-              <RotateCcw className="mr-2 size-3.5" aria-hidden="true" />
-              {t("common.clear")}
-            </Button>
-            {memory.canRemember && memory.restoreAvailable && (
-              <Button variant="ghost" size="sm" onClick={memory.forget}>
-                <Trash2 className="mr-2 size-3.5" aria-hidden="true" />
-                {t("memory.forget")}
-              </Button>
-            )}
-          </div>
+          {isFileHash ? (
+            <>
+              <p className="tool-note">{t("tool.file.hashNote")}</p>
+              <div className="bench-actions">
+                <Button size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
+                  <FileUp className="mr-2 size-3.5" aria-hidden="true" />
+                  {t("tool.file.choose")}
+                </Button>
+                {file && (
+                  <Button variant="ghost" size="sm" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ""; }}>
+                    <X className="mr-2 size-3.5" aria-hidden="true" />
+                    {t("tool.file.cancel")}
+                  </Button>
+                )}
+              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                className="sr-only"
+                aria-label={t("tool.file.choose")}
+                onChange={(event) => {
+                  pickFile(event.target.files?.[0]);
+                  if (fileRef.current) fileRef.current.value = "";
+                }}
+              />
+              {file ? (
+                <p className="tool-note" role="status">
+                  {t("tool.file.selected", { name: file.name, size: formatSize(file.size) })}
+                  {busy ? ` — ${t("common.loading")}` : ""}
+                </p>
+              ) : (
+                <p className="tool-note" role="status">{t("tool.file.noFile")}</p>
+              )}
+            </>
+          ) : (
+            <>
+              <textarea value={memory.input} onChange={(event) => memory.setInput(event.target.value)} className="tool-textarea" spellCheck={false} placeholder={placeholder} aria-label={t("tool.inputLabel", { name: tool.name })} />
+              <div className="bench-actions">
+                <Button
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => {
+                    if (tool.slug === "hash-generator") {
+                      setBusy(true);
+                      runHashText(memory.input, t).then((result) => {
+                        setOutput(result);
+                        setBusy(false);
+                      });
+                    } else {
+                      setOutput(runTool(tool.slug, memory.input, option, t));
+                    }
+                  }}
+                >
+                  <Play className="mr-2 size-3.5" aria-hidden="true" />
+                  {busy ? t("common.loading") : t("tool.run")}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => memory.setInput("")}>
+                  <RotateCcw className="mr-2 size-3.5" aria-hidden="true" />
+                  {t("common.clear")}
+                </Button>
+                {memory.canRemember && memory.restoreAvailable && (
+                  <Button variant="ghost" size="sm" onClick={memory.forget}>
+                    <Trash2 className="mr-2 size-3.5" aria-hidden="true" />
+                    {t("memory.forget")}
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
         </div>
         <div className="bench-panel bench-result">
           <div className="bench-label">

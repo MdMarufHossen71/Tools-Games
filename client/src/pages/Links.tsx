@@ -27,7 +27,7 @@ export default function Links() {
       {categories.map((item) => <button key={item} type="button" className={category === item ? "filter-chip active" : "filter-chip"} aria-pressed={category === item} onClick={() => setCategory(item)}>{categoryLabel(item)}</button>)}
     </div>
     {/* Every row leaves the site, so each one says so in text rather than relying on
-        the icon alone. `rel="noreferrer"` also keeps the referrer off the target. */}
-    {results.length ? <ul className="links-list">{results.map((link) => <li key={link.url}><a className="link-directory-row" href={link.url} target="_blank" rel="noreferrer"><div><span>{categoryLabel(link.category)}</span><h2>{link.name}</h2><p>{link.description[language]}</p></div><div className="link-go"><small>{t("links.visit")}</small><ExternalLink className="size-4" aria-hidden="true" /><span className="sr-only">{t("links.newTab")}</span></div></a></li>)}</ul> : <p className="empty-state" role="status">{t("links.empty")}</p>}
+        the icon alone. `noopener noreferrer` covers old browsers and automated checks. */}
+    {results.length ? <ul className="links-list">{results.map((link) => <li key={link.url}><a className="link-directory-row" href={link.url} target="_blank" rel="noopener noreferrer"><div><span>{categoryLabel(link.category)}</span><h2>{link.name}</h2><p>{link.description[language]}</p></div><div className="link-go"><small>{t("links.visit")}</small><ExternalLink className="size-4" aria-hidden="true" /><span className="sr-only">{t("links.newTab")}</span></div></a></li>)}</ul> : <p className="empty-state" role="status">{t("links.empty")}</p>}
   </div>;
 }

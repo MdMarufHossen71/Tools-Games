@@ -1,20 +1,33 @@
+import { Suspense, lazy } from "react";
 import { Route, Router, Switch, useLocation } from "wouter";
 import { useHashPath, useHashSearch } from "@/lib/hashLocation";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteShell } from "@/components/SiteShell";
 import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
-import AI from "@/pages/AI";
-import GamePage from "@/pages/GamePage";
-import Games from "@/pages/Games";
-import InfoPage from "@/pages/InfoPage";
-import Links from "@/pages/Links";
-import NotFound from "@/pages/NotFound";
-import Settings from "@/pages/Settings";
-import ToolPage from "@/pages/ToolPage";
-import Tools from "@/pages/Tools";
 import ErrorBoundary from "./components/ErrorBoundary";
-import Home from "./pages/Home";
+
+// Route-level splitting: the home shell stays light — tool parsers and game
+// engines load only when their route is visited. Games themselves split
+// further via `games/registry.ts` dynamic imports.
+const Home = lazy(() => import("./pages/Home"));
+const Tools = lazy(() => import("./pages/Tools"));
+const ToolPage = lazy(() => import("./pages/ToolPage"));
+const Games = lazy(() => import("./pages/Games"));
+const GamePage = lazy(() => import("./pages/GamePage"));
+const Links = lazy(() => import("./pages/Links"));
+const AI = lazy(() => import("./pages/AI"));
+const Settings = lazy(() => import("./pages/Settings"));
+const InfoPage = lazy(() => import("./pages/InfoPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+function RouteFallback() {
+  return (
+    <p className="page-space" role="status" aria-live="polite">
+      Loading… / লোড হচ্ছে…
+    </p>
+  );
+}
 
 function AppRoutes() {
   return (
@@ -46,7 +59,9 @@ function RoutedContent() {
   const [location] = useLocation();
   return (
     <ErrorBoundary key={location} variant="route">
-      <AppRoutes />
+      <Suspense fallback={<RouteFallback />}>
+        <AppRoutes />
+      </Suspense>
     </ErrorBoundary>
   );
 }

@@ -1,5 +1,4 @@
 /** Cobalt Workshop design reminder: results are immediate, useful, and soberly formatted; never simulate a server or collect an input. */
-import CryptoJS from "crypto-js";
 import { v4 as uuidv4 } from "uuid";
 import { ulid } from "ulid";
 import { nanoid } from "nanoid";
@@ -43,6 +42,49 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 /**
+ * Unicode-safe Base64 encode without the deprecated `unescape` idiom.
+ * Chunked so a large input cannot blow the argument-length limit.
+ */
+export function base64EncodeUnicode(input: string): string {
+  const bytes = new TextEncoder().encode(input);
+  let binary = "";
+  const CHUNK = 8192;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    const end = Math.min(i + CHUNK, bytes.length);
+    for (let j = i; j < end; j += 1) binary += String.fromCharCode(bytes[j]);
+  }
+  return btoa(binary);
+}
+
+/** Hex-encode a digest buffer. */
+function hexOf(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Hash tools run through Web Crypto (`crypto.subtle`), not the unmaintained
+ * `crypto-js` bundle. SHA-256/384/512 + SHA-1 are available there; MD5, SHA3
+ * and RIPEMD-160 are intentionally dropped — MD5/SHA-1 are broken for security
+ * and must never be presented as password storage, and SHA3 is not in WebCrypto.
+ */
+export const ASYNC_TOOLS: ReadonlySet<string> = new Set(["hash-generator", "file-hash-calculator"]);
+
+export function isAsyncTool(slug: string) {
+  return ASYNC_TOOLS.has(slug);
+}
+
+export async function digestText(algorithm: string, text: string): Promise<string> {
+  const data = new TextEncoder().encode(text);
+  const out = await crypto.subtle.digest(algorithm, data);
+  return hexOf(out);
+}
+
+/** Largest file we will hash in-browser (50 MB). Larger picks are rejected with a localized error. */
+export const MAX_FILE_HASH_BYTES = 50 * 1024 * 1024;
+
+/**
  * Translator injected by the caller so result prose can be localized. Falls back
  * to English when the function is used outside React (tests, direct calls).
  */
@@ -70,6 +112,12 @@ const englishFallback: Record<string, string> = {
   "tool.error.math.badArgs": "That function was given the wrong number of arguments.",
   "tool.error.math.notFinite": "The result is not a finite number.",
   "tool.error.math.tooLong": "The expression is too long.",
+  "tool.error.fileTooLarge": "That file is too large to hash in the browser (max 50 MB).",
+  "tool.file.choose": "Choose file",
+  "tool.file.selected": "Selected file: {name} ({size})",
+  "tool.file.hashNote": "Files are read only on this device to compute hashes. Nothing is uploaded.",
+  "tool.file.noFile": "Choose a file to compute its SHA hashes locally.",
+  "tool.hash.note": "Hashes are computed locally with Web Crypto. MD5/SHA-1 are checksums only — never use them to store passwords.",
 };
 
 const identity: ToolTranslate = (key) => englishFallback[key] ?? key;
@@ -92,6 +140,49 @@ class ToolError extends Error {
     super(key);
     this.name = "ToolError";
     this.key = key;
+  }
+}
+
+export async function runHashText(input: string, t: ToolTranslate = identity): Promise<ToolResult> {
+  if (!input.trim()) return { text: t("tool.result.needsInput") };
+  if (!crypto.subtle) return { text: t("tool.error.generic"), error: true };
+  try {
+    const [sha1, sha256, sha384, sha512] = await Promise.all([
+      digestText("SHA-1", input),
+      digestText("SHA-256", input),
+      digestText("SHA-384", input),
+      digestText("SHA-512", input),
+    ]);
+    return {
+      text: JSON.stringify({ SHA1: sha1, SHA256: sha256, SHA384: sha384, SHA512: sha512 }, null, 2),
+      label: t("tool.hash.note"),
+    };
+  } catch {
+    return { text: t("tool.error.generic"), error: true };
+  }
+}
+
+export async function runHashFile(file: File, t: ToolTranslate = identity): Promise<ToolResult> {
+  if (file.size > MAX_FILE_HASH_BYTES) return { text: t("tool.error.fileTooLarge"), error: true };
+  if (!crypto.subtle) return { text: t("tool.error.generic"), error: true };
+  try {
+    const data = await file.arrayBuffer();
+    const [sha1, sha256, sha384, sha512] = await Promise.all([
+      crypto.subtle.digest("SHA-1", data).then(hexOf),
+      crypto.subtle.digest("SHA-256", data).then(hexOf),
+      crypto.subtle.digest("SHA-384", data).then(hexOf),
+      crypto.subtle.digest("SHA-512", data).then(hexOf),
+    ]);
+    return {
+      text: JSON.stringify(
+        { file: file.name, size: file.size, type: file.type || "unknown", SHA1: sha1, SHA256: sha256, SHA384: sha384, SHA512: sha512 },
+        null,
+        2,
+      ),
+      label: t("tool.hash.note"),
+    };
+  } catch {
+    return { text: t("tool.error.generic"), error: true };
   }
 }
 
@@ -174,13 +265,15 @@ export function runTool(slug: string, input: string, option = "default", t: Tool
       return { text: isMorse ? input.split(" / ").map((word) => word.split(" ").map((code) => reverseMorse[code] ?? "?").join("")).join(" ") : input.toLowerCase().split(" ").map((word) => word.split("").map((char) => morse[char] ?? char).join(" ")).join(" / ") };
     }
     if (slug === "rot13-caesar-cipher") return { text: input.replace(/[a-z]/gi, (char) => String.fromCharCode((char <= "Z" ? 65 : 97) + (char.charCodeAt(0) - (char <= "Z" ? 65 : 97) + 13) % 26)) };
-    if (slug === "base64-text") return { text: option === "decode" ? new TextDecoder().decode(Uint8Array.from(atob(input), (char) => char.charCodeAt(0))) : btoa(unescape(encodeURIComponent(input))) };
+    if (slug === "base64-text") return { text: option === "decode" ? new TextDecoder().decode(Uint8Array.from(atob(input), (char) => char.charCodeAt(0))) : base64EncodeUnicode(input) };
     if (slug === "url-encode-decode") return { text: option === "decode" ? decodeURIComponent(input) : encodeURIComponent(input) };
     if (slug === "html-entities") return { text: option === "unescape" ? new DOMParser().parseFromString(input, "text/html").documentElement.textContent ?? "" : escapeHtml(input) };
     if (slug === "email-normalizer") { const [local, domain] = clean.toLowerCase().split("@"); return { text: domain === "gmail.com" ? `${local.split("+")[0].replace(/\./g, "")}@gmail.com` : `${local ?? ""}@${domain ?? ""}` }; }
     if (slug === "html-to-plain-text") return { text: new DOMParser().parseFromString(input, "text/html").body.textContent ?? "" };
-    if (slug === "markdown-to-html" || slug === "markdown-editor") { const html = DOMPurify.sanitize(marked.parse(input) as string); return { text: html, html, label: t("tool.result.preview") }; }
-    if (slug === "hash-generator" || slug === "file-hash-calculator") return { text: JSON.stringify({ MD5: CryptoJS.MD5(input).toString(), SHA1: CryptoJS.SHA1(input).toString(), SHA256: CryptoJS.SHA256(input).toString(), SHA3: CryptoJS.SHA3(input).toString(), RIPEMD160: CryptoJS.RIPEMD160(input).toString() }, null, 2) };
+    if (slug === "markdown-to-html" || slug === "markdown-editor") { const html = DOMPurify.sanitize(marked.parse(input) as string, { USE_PROFILES: { html: true } }); return { text: html, html, label: t("tool.result.preview") }; }
+    // Hash tools are async (Web Crypto). The sync entry returns a placeholder;
+    // `ToolWorkspace` resolves the real value via `runHashText` / `runHashFile`.
+    if (slug === "hash-generator" || slug === "file-hash-calculator") return { text: t("tool.result.needsInput"), label: t("tool.hash.note") };
     if (slug === "uuid-generator") return { text: Array.from({ length: option === "bulk" ? 10 : 1 }, () => uuidv4()).join("\n") };
     if (slug === "ulid-generator") return { text: ulid() };
     if (slug === "nanoid-generator") return { text: nanoid() };

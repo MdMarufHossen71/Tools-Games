@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useSettings } from "@/contexts/AppSettingsContext";
 import type { TranslationKey } from "@/i18n/translations";
-import { applyDataBundle, clearAppData, downloadDataBundle, parseDataBundle, type DataBundle, type ImportMode, type StorageFailure } from "@/lib/storage";
+import { applyDataBundle, clearAppData, downloadDataBundle, MAX_BUNDLE_BYTES, parseDataBundle, type DataBundle, type ImportMode, type StorageFailure } from "@/lib/storage";
 
 /** Each validation failure gets its own message so the user knows what to fix. */
 const FAILURE_KEYS: Record<StorageFailure, TranslationKey> = {
@@ -56,6 +56,8 @@ export function DataManager({ compact = false }: { compact?: boolean }) {
     // Reset the input so re-picking the same file fires `change` again.
     if (fileRef.current) fileRef.current.value = "";
     if (!file) return;
+    // Reject an obviously oversize pick before reading it into memory.
+    if (file.size > MAX_BUNDLE_BYTES) return fail("size");
     let text: string;
     try {
       text = await file.text();

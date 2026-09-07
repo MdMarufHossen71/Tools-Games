@@ -203,7 +203,16 @@ function vitePluginStorageProxy(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
+const isProd = process.env.NODE_ENV === "production";
+
+// Production ships only the runtime essentials. Dev-only instrumentation
+// (manus runtime, jsx-loc source paths, debug collector, storage proxy) is
+// serve-only so it never inflates `dist/` or leaks internal paths.
+const plugins = [
+  react(),
+  tailwindcss(),
+  ...(isProd ? [] : [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()]),
+];
 
 export default defineConfig({
   base: "./",
@@ -226,11 +235,6 @@ export default defineConfig({
     strictPort: false, // Will find next available port if 3000 is busy
     host: true,
     allowedHosts: [
-      ".manuspre.computer",
-      ".manus.computer",
-      ".manus-asia.computer",
-      ".manuscomputer.ai",
-      ".manusvm.computer",
       "localhost",
       "127.0.0.1",
     ],
