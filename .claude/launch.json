@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "tools-games-dev",
+      "name": "toolshub-dev",
       "runtimeExecutable": "corepack",
       "runtimeArgs": ["pnpm", "run", "dev"],
       "port": 3000

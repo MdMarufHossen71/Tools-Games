@@ -154,7 +154,7 @@ export const runCryptoTools: ToolRunner = async (slug, _input, _option, t, extra
     if (!/^[A-Z2-7]+=*$/.test(secret) || secret.length < 8) throw new ToolError("tool.error.generic");
     const digits = Math.min(Math.max(parseInt(F("digits", "6"), 10) || 6, 6), 8);
     const period = Math.min(Math.max(parseInt(F("period", "30"), 10) || 30, 10), 120);
-    const totp = new TOTP({ issuer: "ToolsGamesBD", label: "account", algorithm: "SHA1", digits, period, secret });
+    const totp = new TOTP({ issuer: "ToolsHub", label: "account", algorithm: "SHA1", digits, period, secret });
     const remaining = period - Math.floor((Date.now() / 1000) % period);
     return { text: JSON.stringify({ code: totp.generate(), secondsLeft: remaining, uri: totp.toString() }, null, 2) };
   }

@@ -1,4 +1,4 @@
-# Optimization Report — Tools & Games BD (Phases 0–5)
+# Optimization Report — ToolsHub (Phases 0–5)
 
 Date: 2026-09-07. Toolchain: **corepack pnpm 10.4.1**, Node v24.16.0, Vitest 2.1.9 (runner) / ^2.1.4 (declared).
 Phases 0–2 by prior sessions (`docs/inventory.md`, `phase1-changes.md`, `phase2-changes.md`);

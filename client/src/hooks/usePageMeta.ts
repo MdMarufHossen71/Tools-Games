@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useTranslation } from "@/contexts/AppSettingsContext";
 import type { TranslationKey } from "@/i18n/translations";
 
-const BRAND = "Tools & Games BD";
+const BRAND = "ToolsHub";
 
 function upsertMeta(selector: string, attribute: "name" | "property", key: string, content: string) {
   let element = document.head.querySelector<HTMLMetaElement>(selector);

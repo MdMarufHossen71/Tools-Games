@@ -337,7 +337,7 @@ export function isToolImplemented(slug: string) {
 }
 
 export function toolPlaceholder(slug: string) {
-  if (slug.includes("json")) return '{\n  "hello": "world",\n  "tool": "Tools & Games BD"\n}';
+  if (slug.includes("json")) return '{\n  "hello": "world",\n  "tool": "ToolsHub"\n}';
   if (slug.includes("csv")) return "name,city\nAmina,Dhaka\nRahim,Chattogram";
   if (slug.includes("url")) return "https://example.com/path?source=tools#demo";
   if (slug.includes("markdown")) return "# Hello\n\nWrite **Markdown** and see the result.";

@@ -41,7 +41,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <a href="#main-content" className="skip-link">{t("a11y.skip")}</a>
     <header className="site-header">
       <div className="header-inner">
-        <Link href="/" className="brand" aria-label={t("a11y.home")}><span className="brand-mark" aria-hidden="true" /><span aria-hidden="true">TOOLS<span className="text-primary">&</span>GAMES<small>BANGLADESH</small></span></Link>
+        <Link href="/" className="brand" aria-label={t("a11y.home")}><span className="brand-mark" aria-hidden="true" /><span aria-hidden="true">TOOLS<span className="text-primary">HUB</span><small>BANGLADESH</small></span></Link>
         <form onSubmit={onSearch} className="header-search" role="search"><Search className="size-4" aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search.placeholder")} aria-label={t("search.aria")} /></form>
         <nav className="nav-links" aria-label={t("a11y.mainNav")}>{navItems.map(({ href, label }) => <Link key={href} href={href} aria-current={isActive(href) ? "page" : undefined}>{t(label)}</Link>)}</nav>
         <div className="header-actions">
@@ -58,7 +58,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <main id="main-content">{children}</main>
     <footer className="site-footer">
       <div className="site-frame footer-grid">
-        <div className="footer-brand"><div className="brand"><span className="brand-mark" aria-hidden="true" /><span aria-hidden="true">TOOLS<span className="text-primary">&</span>GAMES<small>BD</small></span></div><p>{t("footer.privacy")}</p><p>{t("footer.open")}</p></div>
+        <div className="footer-brand"><div className="brand"><span className="brand-mark" aria-hidden="true" /><span aria-hidden="true">TOOLS<span className="text-primary">HUB</span><small>BD</small></span></div><p>{t("footer.privacy")}</p><p>{t("footer.open")}</p></div>
         {/* The footer columns are top-level sections of the footer landmark, so their
             headings are h2. They were h3, which skipped a level on every page whose
             main content has no h2 of its own — an info page or a tool page goes

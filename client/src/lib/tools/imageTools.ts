@@ -798,7 +798,7 @@ export const runImageTools: ToolRunner = async (slug, input, _option, _t, extra)
       drawLine(F("bottom", "PASSES FIRST TRY").toUpperCase().slice(0, 60), pix.height - size * 0.5, size);
     } else {
       const size = Math.max(10, Math.round((pix.width * num("size", 6, 2, 30)) / 100));
-      const text = F("text", "© Tools & Games BD").slice(0, 120);
+      const text = F("text", "© ToolsHub").slice(0, 120);
       const mode = F("mode", "bottom-right");
       const x = mode.includes("left") ? 12 : mode === "center" ? pix.width / 2 : pix.width - 12;
       const y = mode.startsWith("top") ? size * 1.2 : mode === "center" ? pix.height / 2 : pix.height - 12;

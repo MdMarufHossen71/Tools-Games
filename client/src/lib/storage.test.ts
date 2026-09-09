@@ -137,7 +137,7 @@ describe("namespacing / export filtering", () => {
   });
 
   it("bundleFileName is date-prefixed", () => {
-    expect(bundleFileName(new Date("2026-01-02T00:00:00Z"))).toBe("tools-games-bd-data-2026-01-02.json");
+    expect(bundleFileName(new Date("2026-01-02T00:00:00Z"))).toBe("toolshub-data-2026-01-02.json");
   });
 });
 
@@ -153,6 +153,13 @@ describe("parseDataBundle validation", () => {
   it("accepts a valid bundle", () => {
     const parsed = parseDataBundle(good());
     expect(parsed.ok).toBe(true);
+  });
+
+  it("accepts pre-rename backups but stamps new exports canonically", () => {
+    const legacy = JSON.stringify({ version: 2, source: "Tools & Games BD", localStorage: { "tgb:settings:a": "1" } });
+    const parsed = parseDataBundle(legacy);
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect(parsed.value.source).toBe(BUNDLE_SOURCE);
   });
 
   it("rejects oversize text", () => {

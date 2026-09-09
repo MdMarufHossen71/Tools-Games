@@ -1542,7 +1542,7 @@ const schemas: Record<string, ToolSchema> = {
   },
   "text-watermark-image": {
     fields: [
-      { key: "text", type: "text", label: t("Text", "লেখা"), default: "© Tools & Games BD" },
+      { key: "text", type: "text", label: t("Text", "লেখা"), default: "© ToolsHub" },
       { key: "size", type: "number", label: t("Size % of width", "সাইজ %"), default: "6", min: "2", max: "30" },
       { key: "opacity", type: "number", label: t("Opacity %", "অস্বচ্ছতা %"), default: "60", min: "5", max: "100" },
       MODE_FIELD(

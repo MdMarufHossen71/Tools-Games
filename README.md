@@ -1,6 +1,6 @@
-# Tools & Games BD
+# ToolsHub
 
-**Tools & Games BD** is a privacy-first browser workbench for everyday utilities, developer helpers, image and file tasks, and quick local games. It is built as a static React and TypeScript application: ordinary inputs, preferences, saved game states, and themes remain in the visitor's browser.
+**ToolsHub** is a privacy-first browser workbench for everyday utilities, developer helpers, image and file tasks, and quick local games. It is built as a static React and TypeScript application: ordinary inputs, preferences, saved game states, and themes remain in the visitor's browser.
 
 ## Highlights
 
@@ -22,7 +22,7 @@ definitions, supported tool drafts, game saves, and notes. Foreign keys from
 other sites on the same origin are never exported, cleared, or overwritten.
 
 - **Export:** downloads only `tgb:` keys (oversize values skipped).
-- **Import:** validates size (≤2 MB), JSON, source (`Tools & Games BD`), version
+- **Import:** validates size (≤2 MB), JSON, source (`ToolsHub`), version
   (1–2), shape, namespace, and per-value limits *before* writing anything.
   Choose **Merge** (backup wins on conflict, rest kept) or **Replace** (app data
   cleared first, then restore). Nothing applies until you confirm; failures leave

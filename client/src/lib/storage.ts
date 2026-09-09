@@ -142,11 +142,13 @@ export function listAppKeys(): string[] {
 export type DataBundle = {
   version: number;
   createdAt: string;
-  source: "Tools & Games BD";
+  source: typeof BUNDLE_SOURCE | typeof LEGACY_BUNDLE_SOURCE;
   localStorage: Record<string, string>;
 };
 
-export const BUNDLE_SOURCE = "Tools & Games BD" as const;
+export const BUNDLE_SOURCE = "ToolsHub" as const;
+/** Pre-rename backups stay importable; new exports always stamp `BUNDLE_SOURCE`. */
+export const LEGACY_BUNDLE_SOURCE = "Tools & Games BD" as const;
 
 /** Exports only app-namespaced keys. Foreign keys on this origin are never read. */
 export function exportLocalData(): DataBundle {
@@ -164,7 +166,7 @@ export function exportLocalData(): DataBundle {
 }
 
 export function bundleFileName(now = new Date()) {
-  return `tools-games-bd-data-${now.toISOString().slice(0, 10)}.json`;
+  return `toolshub-data-${now.toISOString().slice(0, 10)}.json`;
 }
 
 /**
@@ -212,7 +214,7 @@ export function parseDataBundle(text: string): StorageResult<DataBundle> {
   if (!data || typeof data !== "object" || Array.isArray(data)) return { ok: false, error: "shape" };
 
   const candidate = data as Partial<DataBundle>;
-  if (candidate.source !== BUNDLE_SOURCE) return { ok: false, error: "source" };
+  if (candidate.source !== BUNDLE_SOURCE && candidate.source !== LEGACY_BUNDLE_SOURCE) return { ok: false, error: "source" };
   if (typeof candidate.version !== "number" || !Number.isInteger(candidate.version)) return { ok: false, error: "version" };
   if (candidate.version < 1 || candidate.version > SCHEMA_VERSION) return { ok: false, error: "version" };
 
